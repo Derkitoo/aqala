@@ -95,6 +95,51 @@ export const KNOWLEDGE_CATEGORIES: Record<KnowledgeCategory, { label: string; ic
   estikhlaf:   { label: 'Savoir de l\'Estikhlaf',   icon: '💼', bonusPoints: 0 },
 };
 
+export interface KnowledgeSuggestion {
+  title: string;
+  description: string;
+}
+
+export const KNOWLEDGE_GUIDE_INTRO: Record<KnowledgeCategory, string> = {
+  revelation:
+    "Le Savoir de la Révélation nourrit le cœur : Coran, Sunna, Fiqh, croyance. Choisis une piste ci-dessous ou suis la tienne — l'essentiel est d'en ressortir avec une leçon claire.",
+  estikhlaf:
+    "Le Savoir de l'Estikhlaf te rend utile sur terre : métier, santé, gestion, compétences. Choisis une piste ci-dessous ou suis la tienne — l'important est d'apprendre quelque chose d'actionnable.",
+};
+
+export const KNOWLEDGE_SUGGESTIONS: Record<KnowledgeCategory, KnowledgeSuggestion[]> = {
+  revelation: [
+    { title: 'Tafsir d\'un verset', description: 'Choisis un verset court et lis son explication (tafsir) dans un recueil ou une application fiable.' },
+    { title: 'Un hadith à fond', description: 'Mémorise un hadith authentique et son sens précis, pas seulement sa traduction littérale.' },
+    { title: 'Fiqh du quotidien', description: 'Étudie une règle pratique : purification, prière, jeûne — quelque chose que tu appliques déjà.' },
+    { title: 'Sîra du Prophète ﷺ', description: 'Lis un épisode de sa vie et demande-toi ce qu\'il t\'enseigne concrètement aujourd\'hui.' },
+    { title: 'Révision de mémorisation', description: 'Repasse une sourate ou un passage déjà mémorisé, à voix haute si possible.' },
+    { title: 'Les Noms d\'Allah', description: 'Étudie un des 99 Noms : son sens, et comment il devrait transformer ton comportement.' },
+    { title: 'Aqida de base', description: 'Reprends un pilier de la croyance (tawhid, anges, prédestination...) à partir des fondamentaux.' },
+    { title: 'Histoire d\'un Sahabi', description: 'Lis un récit de la vie d\'un compagnon et note la qualité qui t\'a le plus marqué.' },
+  ],
+  estikhlaf: [
+    { title: 'Approfondis ton métier', description: 'Lis un article, un chapitre ou une documentation directement utile à ton travail actuel.' },
+    { title: 'Compétence pratique', description: 'Apprends une notion concrète : premiers secours, bricolage, cuisine, informatique de base.' },
+    { title: 'Finance personnelle', description: 'Étudie une notion de gestion d\'argent ou d\'épargne conforme à tes principes.' },
+    { title: 'Tutoriel ciblé', description: 'Suis un tutoriel court sur un outil ou logiciel que tu utilises déjà, pour mieux le maîtriser.' },
+    { title: 'Veille de ton secteur', description: 'Lis une actualité sérieuse (économie, science, technique) liée à ton domaine.' },
+    { title: 'Langue étrangère', description: 'Apprends 5 mots ou une règle de grammaire dans une langue que tu étudies.' },
+    { title: 'Gestion du temps', description: 'Lis une méthode de productivité et identifie une chose à appliquer dès demain.' },
+    { title: 'Santé & corps', description: 'Renseigne-toi sur la nutrition, le sommeil ou l\'exercice — une chose factuelle et vérifiable.' },
+  ],
+};
+
+export function pickKnowledgeSuggestions(category: KnowledgeCategory, count = 3): KnowledgeSuggestion[] {
+  const pool = [...KNOWLEDGE_SUGGESTIONS[category]];
+  const picked: KnowledgeSuggestion[] = [];
+  while (picked.length < count && pool.length > 0) {
+    const i = Math.floor(Math.random() * pool.length);
+    picked.push(pool.splice(i, 1)[0]);
+  }
+  return picked;
+}
+
 export const ACTIVITY_TYPES: Record<ActivityType, { label: string; icon: string }> = {
   walk:       { label: 'Marche',      icon: '🚶' },
   sport:      { label: 'Sport',       icon: '💪' },

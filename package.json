@@ -44,7 +44,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "build:web": "expo export --platform web",
+    "build:web": "expo export --platform web && node scripts/cache-bust.js",
     "postinstall": "node patch-zustand.js"
   },
   "private": true

@@ -5,12 +5,15 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
-import { KNOWLEDGE_CATEGORIES, type KnowledgeCategory } from '../constants/pillars';
+import {
+  KNOWLEDGE_CATEGORIES, KNOWLEDGE_GUIDE_INTRO, pickKnowledgeSuggestions,
+  type KnowledgeCategory, type KnowledgeSuggestion,
+} from '../constants/pillars';
 import { FocusTimer } from '../components/FocusTimer';
 import { useDayStore } from '../store/useDayStore';
-import { BookOpen, CheckCircle, ChevronRight, Info } from 'lucide-react-native';
+import { BookOpen, CheckCircle, ChevronRight, Info, Shuffle, Lightbulb } from 'lucide-react-native';
 
-type Phase = 'select' | 'focus' | 'note' | 'done';
+type Phase = 'select' | 'guide' | 'focus' | 'note' | 'done';
 
 export function PillarKnowledgeScreen() {
   const { today, startKnowledgeSession, completeKnowledgeSession } = useDayStore();
@@ -37,7 +40,12 @@ export function PillarKnowledgeScreen() {
 
   const handleCategorySelect = (cat: KnowledgeCategory) => {
     setSelectedCategory(cat);
-    startKnowledgeSession(cat);
+    setPhase('guide');
+  };
+
+  const handleStartFocus = () => {
+    if (!selectedCategory) return;
+    startKnowledgeSession(selectedCategory);
     setPhase('focus');
   };
 
@@ -83,6 +91,16 @@ export function PillarKnowledgeScreen() {
                 <Info size={14} color={Colors.text.muted} style={{marginRight: 4}} /> Minimum : 15 minutes • Une ligne de résumé obligatoire
               </Text>
             </View>
+          )}
+
+          {/* PHASE: Guide — suggestions before starting the timer */}
+          {phase === 'guide' && selectedCategory && (
+            <KnowledgeGuide
+              category={selectedCategory}
+              onStart={handleStartFocus}
+              onBack={() => setPhase('select')}
+              Colors={Colors}
+            />
           )}
 
           {/* PHASE: Focus timer */}
@@ -168,6 +186,53 @@ function CategoryCard({ icon, label, bonus, onPress, Colors }: {
   );
 }
 
+function KnowledgeGuide({ category, onStart, onBack, Colors }: {
+  category: KnowledgeCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const [suggestions, setSuggestions] = useState<KnowledgeSuggestion[]>(() => pickKnowledgeSuggestions(category));
+
+  return (
+    <View>
+      <View style={styles.categoryBadge}>
+        <BookOpen size={16} color={Colors.pillar.knowledge} />
+        <Text style={styles.categoryBadgeText}>{KNOWLEDGE_CATEGORIES[category].label}</Text>
+      </View>
+
+      <Text style={styles.guideIntro}>{KNOWLEDGE_GUIDE_INTRO[category]}</Text>
+
+      <View style={styles.guideHeaderRow}>
+        <Text style={styles.phaseLabel}>Quelques pistes</Text>
+        <Pressable style={styles.shuffleBtn} onPress={() => setSuggestions(pickKnowledgeSuggestions(category))}>
+          <Shuffle size={14} color={Colors.pillar.knowledge} />
+          <Text style={styles.shuffleBtnText}>Autres pistes</Text>
+        </Pressable>
+      </View>
+
+      {suggestions.map((s, i) => (
+        <View key={i} style={styles.suggestionCard}>
+          <Lightbulb size={20} color={Colors.gold} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.suggestionTitle}>{s.title}</Text>
+            <Text style={styles.suggestionDesc}>{s.description}</Text>
+          </View>
+        </View>
+      ))}
+
+      <Text style={styles.rule}>
+        Libre à toi de suivre ton propre sujet — ces pistes sont là pour t'aider à démarrer.
+      </Text>
+
+      <View style={styles.guideActions}>
+        <Pressable style={styles.backBtn} onPress={onBack}>
+          <Text style={styles.backText}>← Retour</Text>
+        </Pressable>
+        <CategoryButton label="C'est parti — Lancer le chronomètre" onPress={onStart} styles={styles} />
+      </View>
+    </View>
+  );
+}
+
 function CategoryButton({ label, onPress, disabled, styles }: {
   label: string; onPress: () => void; disabled?: boolean; styles: any;
 }) {
@@ -246,6 +311,57 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     color: Colors.pillar.knowledge,
     fontWeight: Typography.weights.semibold,
   },
+
+  guideIntro: {
+    fontSize: Typography.sizes.sm,
+    color: Colors.text.secondary,
+    lineHeight: 20,
+    marginBottom: Spacing.md,
+  },
+  guideHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  shuffleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  shuffleBtnText: {
+    fontSize: Typography.sizes.xs,
+    color: Colors.pillar.knowledge,
+    fontWeight: Typography.weights.semibold,
+  },
+  suggestionCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.sm,
+  },
+  suggestionTitle: {
+    fontSize: Typography.sizes.md,
+    fontWeight: Typography.weights.semibold,
+    color: Colors.text.primary,
+  },
+  suggestionDesc: {
+    fontSize: Typography.sizes.xs,
+    color: Colors.text.secondary,
+    marginTop: 2,
+    lineHeight: 17,
+  },
+  guideActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: Spacing.md,
+  },
+  backBtn: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.xs },
+  backText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
 
   notePhase: { marginTop: Spacing.md },
   noteInstruction: {

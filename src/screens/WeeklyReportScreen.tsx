@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Modal } from 'react-native';
 import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
 import { useStreakStore } from '../store/useStreakStore';
+import { useDayStore } from '../store/useDayStore';
 import { getStreakLabel } from '../engine/streakManager';
-import { BarChart2, Star, Target } from 'lucide-react-native';
+import { computeTrends } from '../engine/trends';
+import { BarChart2, Star, Target, TrendingDown } from 'lucide-react-native';
 
 const GUIDE_DETAILS: Record<string, string> = {
   'Présentation des 5 piliers':
@@ -37,6 +39,9 @@ export function WeeklyReportScreen() {
     progressToNext,
     calendarDots,
   } = useStreakStore();
+
+  const { today, history } = useDayStore();
+  const trends = useMemo(() => computeTrends(today, history), [today, history]);
 
   // Last 7 days calendar
   const last7 = Array.from({ length: 7 }, (_, i) => {
@@ -99,6 +104,50 @@ export function WeeklyReportScreen() {
           <LegendItem color={Colors.pillar.knowledge} label="Partiel" Colors={Colors} />
           <LegendItem color={Colors.border} label="Non validé" Colors={Colors} />
         </View>
+
+        {/* Trends — built from history already collected day-to-day */}
+        <Text style={styles.sectionTitle}>Tendances par pilier</Text>
+        {trends.sampleSize < 3 ? (
+          <View style={styles.trendsEmptyBox}>
+            <Text style={styles.trendsEmptyText}>
+              Reviens dans quelques jours — les tendances se construisent à partir de ton historique.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <Text style={styles.trendsSubtitle}>Moyenne sur {trends.sampleSize} jour{trends.sampleSize > 1 ? 's' : ''}</Text>
+            {trends.pillars.map(p => (
+              <View key={p.id} style={styles.pillarRow}>
+                <Text style={styles.pillarName}>{p.nameFr}</Text>
+                <View style={styles.weightBar}>
+                  <View style={[styles.weightFill, { width: `${p.avgPct}%` as any, backgroundColor: p.color }]} />
+                </View>
+                <Text style={[styles.weightPct, { color: p.color }]}>{p.avgPct}%</Text>
+              </View>
+            ))}
+
+            {trends.weakestPillar && (
+              <View style={styles.insightBox}>
+                <TrendingDown color={Colors.warning} size={18} />
+                <Text style={styles.insightText}>
+                  Ton pilier le plus fragile en ce moment : <Text style={{ fontWeight: 'bold', color: Colors.warning }}>{trends.weakestPillar.nameFr}</Text> ({trends.weakestPillar.avgPct}%)
+                </Text>
+              </View>
+            )}
+
+            {trends.bestWeekday && (
+              <View style={styles.insightBox}>
+                <Star color={Colors.gold} size={18} />
+                <Text style={styles.insightText}>
+                  Ton meilleur jour de la semaine : <Text style={{ fontWeight: 'bold', color: Colors.gold }}>{trends.bestWeekday.label}</Text> ({trends.bestWeekday.avgPct}% en moyenne)
+                  {trends.worstWeekday && (
+                    <> — le plus dur : <Text style={{ fontWeight: 'bold' }}>{trends.worstWeekday.label}</Text> ({trends.worstWeekday.avgPct}%)</>
+                  )}
+                </Text>
+              </View>
+            )}
+          </>
+        )}
 
         {/* Next Maqam progress */}
         {nextMaqam && (
@@ -253,6 +302,19 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
   legendText: { fontSize: Typography.sizes.xs, color: Colors.text.secondary },
+
+  trendsEmptyBox: {
+    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
+    padding: Spacing.md, marginBottom: Spacing.lg,
+  },
+  trendsEmptyText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20, fontStyle: 'italic' },
+  trendsSubtitle: { fontSize: Typography.sizes.xs, color: Colors.text.muted, marginBottom: Spacing.sm },
+  insightBox: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
+    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
+    padding: Spacing.md, marginTop: Spacing.sm,
+  },
+  insightText: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20 },
 
   nextMaqamCard: {
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
