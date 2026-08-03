@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useTheme, type ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
@@ -6,7 +6,8 @@ import { useDayStore } from '../store/useDayStore';
 import { PRAYERS } from '../constants/pillars';
 import type { PrayerName, PrayerStatus } from '../store/useDayStore';
 import type { RootStackParamList } from '../navigation/RootNavigator';
-import { Check, Moon, Sun, Sparkles } from 'lucide-react-native';
+import { computeSpiritualBalance } from '../engine/trends';
+import { Check, Moon, Sun, Sparkles, CalendarRange, AlertTriangle } from 'lucide-react-native';
 
 const getStatusLabels = (Colors: ThemeColors): Record<PrayerStatus, { label: string; color: string }> => ({
   pending: { label: 'En attente',  color: Colors.text.muted },
@@ -17,12 +18,13 @@ const getStatusLabels = (Colors: ThemeColors): Record<PrayerStatus, { label: str
 
 export function PillarSpiritualScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { today, validatePrayer, setRawatibFajr, setDuha, setWitr } = useDayStore();
+  const { today, history, validatePrayer, setRawatibFajr, setDuha, setWitr } = useDayStore();
   const s = today.spiritual;
 
   const Colors = useTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
   const STATUS_LABELS = React.useMemo(() => getStatusLabels(Colors), [Colors]);
+  const balance = useMemo(() => computeSpiritualBalance(today, history), [today, history]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -30,6 +32,8 @@ export function PillarSpiritualScreen() {
 
         <Text style={styles.title}>Pilier Spirituel</Text>
         <Text style={styles.subtitle}>الصلاة نور — La Routine de la Baraka</Text>
+
+        <SpiritualBalanceCard balance={balance} Colors={Colors} />
 
         {/* Prayers */}
         <SectionHeader title="Prières obligatoires" styles={styles} />
@@ -131,6 +135,42 @@ export function PillarSpiritualScreen() {
   );
 }
 
+function SpiritualBalanceCard({ balance, Colors }: { balance: ReturnType<typeof computeSpiritualBalance>; Colors: ThemeColors }) {
+  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  if (balance.sampleSize < 3) return null;
+
+  return (
+    <View style={styles.balanceCard}>
+      <View style={styles.balanceHeaderRow}>
+        <CalendarRange size={16} color={Colors.text.secondary} />
+        <Text style={styles.balanceTitle}>Cette semaine</Text>
+      </View>
+      <View style={styles.balanceRow}>
+        <View style={styles.balanceItem}>
+          <Text style={styles.balanceCount}>{balance.prayersOnTimePct}%</Text>
+          <Text style={styles.balanceLabel}>Prières à l'heure</Text>
+        </View>
+        <View style={styles.balanceItem}>
+          <Text style={styles.balanceCount}>{balance.goldenMomentDays}/{balance.windowDays}</Text>
+          <Text style={styles.balanceLabel}>Moment d'Or</Text>
+        </View>
+        <View style={styles.balanceItem}>
+          <Text style={styles.balanceCount}>{balance.adhkarEveningDays}/{balance.windowDays}</Text>
+          <Text style={styles.balanceLabel}>Adhkâr soir</Text>
+        </View>
+      </View>
+      {balance.mostMissedPrayer && (
+        <View style={styles.balanceNudgeRow}>
+          <AlertTriangle size={14} color={Colors.warning} />
+          <Text style={styles.balanceNudge}>
+            <Text style={{ fontWeight: 'bold' }}>{balance.mostMissedPrayer.nameFr}</Text> est la prière la plus souvent en retard ou manquée cette semaine.
+          </Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
 function SectionHeader({ title, styles }: { title: string; styles: any }) {
   return <Text style={styles.sectionHeader}>{title}</Text>;
 }
@@ -192,16 +232,38 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     marginVertical: Spacing.md,
   },
 
+  balanceCard: {
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
+  balanceTitle: {
+    fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold,
+    color: Colors.text.secondary, textTransform: 'uppercase', letterSpacing: 1,
+  },
+  balanceRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  balanceItem: { alignItems: 'center' },
+  balanceCount: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy, color: Colors.pillar.spiritual },
+  balanceLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, textAlign: 'center' },
+  balanceNudgeRow: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 6,
+    marginTop: Spacing.sm, paddingTop: Spacing.sm,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+  },
+  balanceNudge: { flex: 1, fontSize: Typography.sizes.xs, color: Colors.text.secondary, lineHeight: 16 },
+
   prayerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderRadius: Radius.md,
+    backgroundColor: Colors.pillar.spiritual + '0d',
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.pillar.spiritual + '22',
   },
   prayerIcon: { fontSize: 22 },
   prayerInfo: { flex: 1, marginLeft: Spacing.sm },
@@ -226,13 +288,13 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
   toggleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderRadius: Radius.md,
+    backgroundColor: Colors.pillar.spiritual + '0d',
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.pillar.spiritual + '22',
   },
   toggleLabel: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.primary, marginLeft: Spacing.sm },
   toggleRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },

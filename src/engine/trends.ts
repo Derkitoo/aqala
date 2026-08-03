@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
-import type { DayRecord } from '../store/useDayStore';
+import type { DayRecord, PrayerName } from '../store/useDayStore';
 import {
-  PILLARS, SOCIAL_CATEGORIES, ACTIVITY_TYPES,
+  PILLARS, SOCIAL_CATEGORIES, ACTIVITY_TYPES, PRAYERS,
   type PillarId, type SocialCategory, type ActivityType,
 } from '../constants/pillars';
 import {
@@ -247,4 +247,62 @@ export function computeSleepBalance(
   }
 
   return { windowDays, sampleSize, tarwihCompletedDays, bedtimeBefore23Days };
+}
+
+// ─── Spiritual balance ────────────────────────────────────────────────────────
+
+export interface SpiritualBalance {
+  windowDays: number;
+  sampleSize: number;
+  prayersOnTimePct: number; // % of all prayer slots marked on-time across the window
+  goldenMomentDays: number;
+  adhkarEveningDays: number;
+  mostMissedPrayer: { id: PrayerName; nameFr: string; count: number } | null;
+}
+
+/**
+ * Tracks prayer punctuality and adhkar consistency over a sliding window —
+ * a single day's status doesn't show whether Fajr keeps slipping, only the
+ * week does.
+ */
+export function computeSpiritualBalance(
+  today: DayRecord,
+  history: Record<string, DayRecord>,
+  windowDays = 7,
+): SpiritualBalance {
+  let sampleSize = 0;
+  let onTimeCount = 0;
+  let goldenMomentDays = 0;
+  let adhkarEveningDays = 0;
+  const missedOrLateCounts: Record<PrayerName, number> = { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 };
+
+  for (let i = 0; i < windowDays; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = format(date, 'yyyy-MM-dd');
+    const record = key === today.date ? today : history[key];
+    if (!record) continue;
+
+    sampleSize += 1;
+    const { prayers, goldenMomentCompleted, adhkarEveningDone } = record.spiritual;
+    for (const p of PRAYERS) {
+      const status = prayers[p.id];
+      if (status === 'onTime') onTimeCount += 1;
+      if (status === 'late' || status === 'missed') missedOrLateCounts[p.id] += 1;
+    }
+    if (goldenMomentCompleted) goldenMomentDays += 1;
+    if (adhkarEveningDone) adhkarEveningDays += 1;
+  }
+
+  const prayersOnTimePct = sampleSize > 0 ? Math.round((onTimeCount / (sampleSize * PRAYERS.length)) * 100) : 0;
+
+  let mostMissedPrayer: SpiritualBalance['mostMissedPrayer'] = null;
+  for (const p of PRAYERS) {
+    const count = missedOrLateCounts[p.id];
+    if (count > 0 && (!mostMissedPrayer || count > mostMissedPrayer.count)) {
+      mostMissedPrayer = { id: p.id, nameFr: p.nameFr, count };
+    }
+  }
+
+  return { windowDays, sampleSize, prayersOnTimePct, goldenMomentDays, adhkarEveningDays, mostMissedPrayer };
 }
