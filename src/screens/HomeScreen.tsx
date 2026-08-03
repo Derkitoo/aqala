@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Pressable,
   SafeAreaView, RefreshControl,
@@ -8,7 +8,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Flame, Settings, Clock } from 'lucide-react-native';
+import { Flame, Settings, Clock, TrendingDown, ChevronRight } from 'lucide-react-native';
 import { useTheme, Typography, Spacing, Radius, ThemeColors } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
 import { BarakaScoreRing } from '../components/BarakaScoreRing';
@@ -17,6 +17,7 @@ import { useDayStore } from '../store/useDayStore';
 import { useStreakStore } from '../store/useStreakStore';
 import { useAppStore } from '../store/useAppStore';
 import { isDayComplete, isStrictMinimumMet } from '../engine/barakaScoring';
+import { computeTrends } from '../engine/trends';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -24,11 +25,13 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
-  const { today, currentScore, refreshDay, recomputeScore } = useDayStore();
+  const { today, history, currentScore, refreshDay, recomputeScore } = useDayStore();
   const { currentStreak, currentMaqam } = useStreakStore();
   const { isGoldenMomentActive, goldenMomentType } = useAppStore();
   const Colors = useTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+
+  const trends = useMemo(() => computeTrends(today, history), [today, history]);
 
   useEffect(() => {
     refreshDay();
@@ -104,6 +107,26 @@ export function HomeScreen() {
             <Text style={styles.minMetText}>✓ Strict minimum accompli</Text>
           )}
         </View>
+
+        {/* Trend insight — built from history already collected */}
+        {trends.sampleSize >= 3 && trends.weakestPillar && (
+          <Pressable
+            style={[styles.trendCard, { borderColor: trends.weakestPillar.color + '44' }]}
+            onPress={() => navigation.navigate('WeeklyReport')}
+          >
+            <TrendingDown color={trends.weakestPillar.color} size={20} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.trendLabel}>Pilier à surveiller cette semaine</Text>
+              <Text style={styles.trendText}>
+                <Text style={{ fontWeight: 'bold', color: trends.weakestPillar.color }}>
+                  {trends.weakestPillar.nameFr}
+                </Text>
+                {' '}— {trends.weakestPillar.avgPct}% en moyenne
+              </Text>
+            </View>
+            <ChevronRight color={Colors.text.muted} size={18} />
+          </Pressable>
+        )}
 
         {/* Pillar cards */}
         <Text style={styles.sectionTitle}>Mes 5 Piliers</Text>
@@ -247,6 +270,30 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     color: Colors.success,
     fontSize: Typography.sizes.sm,
     fontFamily: Typography.fonts.medium,
+  },
+
+  trendCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  trendLabel: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.medium,
+    color: Colors.text.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  trendText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 2,
   },
 
   sectionTitle: {
