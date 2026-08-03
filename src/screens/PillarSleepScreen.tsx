@@ -96,16 +96,16 @@ export function PillarSleepScreen() {
               <Text style={styles.guideTitle}>🌙 Architecture du Sommeil Prophétique</Text>
               {nightMode === 'standard' ? (
                 <>
-                  <GuideRow time="22h30" label="Coucher" />
-                  <GuideRow time="04h00" label="Réveil pré-Fajr" />
-                  <GuideRow time="04h45" label="Fajr" />
+                  <GuideRow time="22h30" label="Coucher" Colors={Colors} />
+                  <GuideRow time="04h00" label="Réveil pré-Fajr" Colors={Colors} />
+                  <GuideRow time="04h45" label="Fajr" Colors={Colors} />
                 </>
               ) : (
                 <>
-                  <GuideRow time="22h00" label="Phase 1 — Sommeil" />
-                  <GuideRow time="02h00" label="Réveil Qiyam (2–4 rak'ât)" />
-                  <GuideRow time="02h30" label="Retour au sommeil" />
-                  <GuideRow time="04h30" label="Réveil pré-Fajr" />
+                  <GuideRow time="22h00" label="Phase 1 — Sommeil" Colors={Colors} />
+                  <GuideRow time="02h00" label="Réveil Qiyam (2–4 rak'ât)" Colors={Colors} />
+                  <GuideRow time="02h30" label="Retour au sommeil" Colors={Colors} />
+                  <GuideRow time="04h30" label="Réveil pré-Fajr" Colors={Colors} />
                 </>
               )}
             </View>
@@ -212,6 +212,7 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     borderWidth: 1, borderColor: Colors.border,
   },
   sasCardActive: { borderColor: Colors.pillar.sleep },
+  sasIcon: { fontSize: 22 },
   sasTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
   sasSub: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
   toggle: {
@@ -241,10 +242,12 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     borderWidth: 1, borderColor: Colors.gold + '44',
   },
   qiyamCardDone: { borderColor: Colors.success },
+  qiyamIcon: { fontSize: 22 },
   qiyamTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.gold },
   qiyamSub: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
   checkbox: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
   checkboxDone: { backgroundColor: Colors.success, borderColor: Colors.success },
+  checkTick: { fontSize: 14, color: Colors.bg.primary, fontWeight: Typography.weights.bold as any },
 
   guideBox: { backgroundColor: 'transparent', borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.md, marginTop: Spacing.md },
   guideTitle: { fontSize: Typography.sizes.sm, fontWeight: Typography.weights.bold, color: Colors.text.primary, marginBottom: Spacing.md },

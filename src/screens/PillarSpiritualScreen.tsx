@@ -35,10 +35,9 @@ export function PillarSpiritualScreen() {
         {PRAYERS.map(p => {
           const status = s.prayers[p.id as PrayerName];
           const { label, color } = STATUS_LABELS[status];
-          const IconComponent = p.IconComponent;
           return (
             <View key={p.id} style={styles.prayerRow}>
-              <IconComponent size={24} color={status === 'onTime' ? Colors.success : Colors.text.primary} />
+              <Text style={styles.prayerIcon}>{p.icon}</Text>
               <View style={styles.prayerInfo}>
                 <Text style={styles.prayerName}>{p.nameFr}</Text>
                 <Text style={[styles.prayerStatus, { color }]}>{label}</Text>
@@ -196,6 +195,7 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  prayerIcon: { fontSize: 22 },
   prayerInfo: { flex: 1, marginLeft: Spacing.sm },
   prayerName: {
     fontSize: Typography.sizes.md,
