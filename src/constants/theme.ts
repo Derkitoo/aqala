@@ -29,7 +29,7 @@ export const PremiumColors = {
     card: 'rgba(255, 255, 255, 0.03)',
     cardBorder: 'rgba(255, 255, 255, 0.08)',
     overlay: 'rgba(0,0,0,0.85)',
-    gradient: ['#000000', '#050505'], 
+    gradient: ['#000000', '#050505'] as [string, string],
   },
   white: '#FFFFFF', // pure white used occasionally
   text: {
@@ -49,7 +49,7 @@ export const LightColors = {
     card: '#FFFFFF',
     cardBorder: 'rgba(0, 0, 0, 0.06)',
     overlay: 'rgba(0,0,0,0.4)',
-    gradient: ['#F9FAFB', '#F3F4F6'], 
+    gradient: ['#F9FAFB', '#F3F4F6'] as [string, string],
   },
   white: '#FFFFFF',
   text: {

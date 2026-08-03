@@ -29,6 +29,7 @@ interface AppState {
 
   // UI state
   isGoldenMomentActive: boolean;
+  goldenMomentType: 'morning' | 'evening';
   theme: ThemeType;
 
   // Actions
@@ -39,7 +40,7 @@ interface AppState {
   setPermissions: (location: boolean, notifications: boolean) => void;
   setCalculationMethod: (method: string) => void;
   setMadhab: (madhab: MadhabType) => void;
-  setGoldenMomentActive: (active: boolean) => void;
+  setGoldenMomentActive: (active: boolean, type?: 'morning' | 'evening') => void;
   setTheme: (theme: ThemeType) => void;
   resetOnboarding: () => void;
 }
@@ -60,6 +61,7 @@ export const useAppStore = create<AppState>()(
       calculationMethod: 'MuslimWorldLeague',
       madhab: 'shafi',
       isGoldenMomentActive: false,
+      goldenMomentType: 'morning',
       theme: 'premium',
 
       completeOnboarding: mode =>
@@ -77,7 +79,8 @@ export const useAppStore = create<AppState>()(
       setCalculationMethod: method => set({ calculationMethod: method }),
       setMadhab: madhab => set({ madhab }),
 
-      setGoldenMomentActive: active => set({ isGoldenMomentActive: active }),
+      setGoldenMomentActive: (active, type) =>
+        set(s => ({ isGoldenMomentActive: active, goldenMomentType: type ?? s.goldenMomentType })),
       setTheme: theme => set({ theme }),
       resetOnboarding: () => set({ onboardingComplete: false }),
     }),

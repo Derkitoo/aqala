@@ -6,7 +6,7 @@ import { TARWIH_CATEGORIES, type TarwihCategory } from '../constants/pillars';
 import { useDayStore } from '../store/useDayStore';
 import { useAppStore } from '../store/useAppStore';
 import { FocusTimer } from '../components/FocusTimer';
-import { Book, CloudMoon, Zap, Users, Play, ChevronRight } from 'lucide-react-native';
+import { Book, Footprints, MessageCircle, Palette, Music, Play, ChevronRight } from 'lucide-react-native';
 
 type Phase = 'overview' | 'tarwih_select' | 'tarwih_timer' | 'done';
 
@@ -122,9 +122,10 @@ export function PillarSleepScreen() {
               // mapping legacy emoji constants to Lucide just for this selector (since they are in constants)
               let TypeIcon = Play;
               if (cat === 'reading') TypeIcon = Book;
-              if (cat === 'meditation') TypeIcon = CloudMoon;
-              if (cat === 'creative') TypeIcon = Zap;
-              if (cat === 'family') TypeIcon = Users;
+              if (cat === 'walk') TypeIcon = Footprints;
+              if (cat === 'conversation') TypeIcon = MessageCircle;
+              if (cat === 'art') TypeIcon = Palette;
+              if (cat === 'nasheed') TypeIcon = Music;
 
               return (
                 <Pressable

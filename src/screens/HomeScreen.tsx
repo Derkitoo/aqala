@@ -26,7 +26,7 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const { today, currentScore, refreshDay, recomputeScore } = useDayStore();
   const { currentStreak, currentMaqam } = useStreakStore();
-  const { isGoldenMomentActive } = useAppStore();
+  const { isGoldenMomentActive, goldenMomentType } = useAppStore();
   const Colors = useTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
 
@@ -38,7 +38,7 @@ export function HomeScreen() {
   // Redirect to Golden Moment screen if it's active
   useEffect(() => {
     if (isGoldenMomentActive) {
-      navigation.navigate('GoldenMoment');
+      navigation.navigate('GoldenMoment', { type: goldenMomentType });
     }
   }, [isGoldenMomentActive]);
 

@@ -290,7 +290,7 @@ export function GoldenMomentScreen() {
   // Start tracking on mount
   React.useEffect(() => {
     if (!isEvening) startGoldenMoment();
-    setGoldenMomentActive(true);
+    setGoldenMomentActive(true, isEvening ? 'evening' : 'morning');
   }, []);
 
   const handleComplete = useCallback(() => {

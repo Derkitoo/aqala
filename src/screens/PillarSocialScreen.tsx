@@ -7,7 +7,7 @@ import { useTheme, type ThemeColors, Typography, Spacing, Radius } from '../cons
 import { SOCIAL_CATEGORIES, type SocialCategory } from '../constants/pillars';
 import { FocusTimer } from '../components/FocusTimer';
 import { useDayStore } from '../store/useDayStore';
-import { Users, Heart, UsersRound, MessageCircle, ChevronRight, CheckCircle, Handshake } from 'lucide-react-native';
+import { Users, Heart, MessageCircle, ChevronRight, CheckCircle, Handshake } from 'lucide-react-native';
 
 type Phase = 'overview' | 'select' | 'timer' | 'note' | 'done';
 
@@ -71,7 +71,7 @@ export function PillarSocialScreen() {
                 const { label, description } = SOCIAL_CATEGORIES[cat];
                 let TypeIcon = Users;
                 if (cat === 'family') TypeIcon = Heart;
-                if (cat === 'friends') TypeIcon = UsersRound;
+                if (cat === 'service') TypeIcon = Handshake;
                 if (cat === 'community') TypeIcon = MessageCircle;
 
                 return (

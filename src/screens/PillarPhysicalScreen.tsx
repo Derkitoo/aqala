@@ -85,9 +85,9 @@ export function PillarPhysicalScreen() {
               const { label } = ACTIVITY_TYPES[type];
               // mapping legacy emoji constants to Lucide just for this selector (since they are in constants)
               let TypeIcon = Activity;
-              if (type === 'cardio') TypeIcon = Zap;
-              if (type === 'strength') TypeIcon = Dumbbell;
-              if (type === 'flexibility') TypeIcon = Footprints;
+              if (type === 'walk') TypeIcon = Footprints;
+              if (type === 'sport') TypeIcon = Dumbbell;
+              if (type === 'stretching') TypeIcon = Zap;
 
               return (
                 <Pressable
