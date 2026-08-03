@@ -125,6 +125,7 @@ interface DayState {
 
   // Knowledge actions
   startKnowledgeSession: (category: KnowledgeCategory) => void;
+  cancelKnowledgeSession: () => void;
   completeKnowledgeSession: (durationSeconds: number, note: string) => void;
 
   // Physical actions
@@ -223,6 +224,15 @@ export const useDayStore = create<DayState>()(
           today: {
             ...s.today,
             knowledge: { ...s.today.knowledge, category, sessionStartedAt: new Date().toISOString() },
+          },
+        }));
+      },
+
+      cancelKnowledgeSession: () => {
+        set(s => ({
+          today: {
+            ...s.today,
+            knowledge: { ...s.today.knowledge, category: null, sessionStartedAt: null },
           },
         }));
       },

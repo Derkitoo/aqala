@@ -16,7 +16,7 @@ import { BookOpen, CheckCircle, ChevronRight, Info, Shuffle, Lightbulb } from 'l
 type Phase = 'select' | 'guide' | 'focus' | 'note' | 'done';
 
 export function PillarKnowledgeScreen() {
-  const { today, startKnowledgeSession, completeKnowledgeSession } = useDayStore();
+  const { today, startKnowledgeSession, cancelKnowledgeSession, completeKnowledgeSession } = useDayStore();
   const k = today.knowledge;
 
   const [phase, setPhase] = useState<Phase>(
@@ -113,7 +113,7 @@ export function PillarKnowledgeScreen() {
               <FocusTimer
                 mode="focus"
                 onComplete={handleSessionComplete}
-                onCancel={() => setPhase('select')}
+                onCancel={() => { cancelKnowledgeSession(); setSelectedCategory(null); setPhase('select'); }}
               />
             </View>
           )}
