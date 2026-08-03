@@ -43,6 +43,7 @@ export interface DayRecord {
 
   social: {
     category: SocialCategory | null;
+    interactionStartedAt: string | null;
     interactionDurationSeconds: number;
     isDigital: boolean;
     noteText: string;
@@ -89,6 +90,7 @@ function createEmptyDay(date: string): DayRecord {
     },
     social: {
       category: null,
+      interactionStartedAt: null,
       interactionDurationSeconds: 0,
       isDigital: false,
       noteText: '',
@@ -133,6 +135,8 @@ interface DayState {
   completeQaylulah: (durationSeconds: number, dhuhrTime?: Date) => void;
 
   // Social actions
+  startSocialInteraction: (category: SocialCategory) => void;
+  cancelSocialInteraction: () => void;
   completeSocialInteraction: (
     category: SocialCategory,
     durationSeconds: number,
@@ -290,12 +294,31 @@ export const useDayStore = create<DayState>()(
 
       // ── Social ──────────────────────────────────────────────────────────
 
+      startSocialInteraction: category => {
+        set(s => ({
+          today: {
+            ...s.today,
+            social: { ...s.today.social, category, interactionStartedAt: new Date().toISOString() },
+          },
+        }));
+      },
+
+      cancelSocialInteraction: () => {
+        set(s => ({
+          today: {
+            ...s.today,
+            social: { ...s.today.social, category: null, interactionStartedAt: null },
+          },
+        }));
+      },
+
       completeSocialInteraction: (category, durationSeconds, note) => {
         set(s => ({
           today: {
             ...s.today,
             social: {
               category,
+              interactionStartedAt: null,
               interactionDurationSeconds: durationSeconds,
               isDigital: false, // Always false — digital cannot be validated
               noteText: note,

@@ -64,17 +64,18 @@ interface Props {
   onComplete: (durationSeconds: number) => void;
   onCancel?: () => void;
   autoStart?: boolean;
+  initialElapsedSeconds?: number;
 }
 
 type TimerState = 'idle' | 'running' | 'paused' | 'min_reached' | 'max_reached';
 
-export function FocusTimer({ mode, onComplete, onCancel, autoStart = false }: Props) {
+export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, initialElapsedSeconds = 0 }: Props) {
   const Colors = useTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
   const TIMER_CONFIGS = React.useMemo(() => getTimerConfigs(Colors), [Colors]);
   const config = TIMER_CONFIGS[mode];
-  const [elapsed, setElapsed] = useState(0);
-  const [timerState, setTimerState] = useState<TimerState>(autoStart ? 'running' : 'idle');
+  const [elapsed, setElapsed] = useState(initialElapsedSeconds);
+  const [timerState, setTimerState] = useState<TimerState>(autoStart || initialElapsedSeconds > 0 ? 'running' : 'idle');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const minReached = elapsed >= config.minSeconds;

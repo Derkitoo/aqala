@@ -152,6 +152,55 @@ export const SOCIAL_CATEGORIES: Record<SocialCategory, { label: string; icon: st
   community: { label: 'Communauté',  icon: '🕌', description: 'Action associative ou locale' },
 };
 
+export interface SocialSuggestion {
+  title: string;
+  description: string;
+}
+
+export const SOCIAL_GUIDE_INTRO: Record<SocialCategory, string> = {
+  family:
+    "Ta présence physique, sans écran, est la seule unité de mesure valable. Choisis une piste ou invente la tienne — l'important est d'être vraiment là.",
+  service:
+    "Le service rendu sans qu'on le demande (Mihnat ahlihi) est l'une des actions les plus aimées. Choisis une piste ou repère un besoin réel autour de toi.",
+  community:
+    "Ta présence utile au-delà du foyer construit le tissu social. Choisis une piste ou rejoins une action déjà en cours près de chez toi.",
+};
+
+export const SOCIAL_SUGGESTIONS: Record<SocialCategory, SocialSuggestion[]> = {
+  family: [
+    { title: 'Repas préparé ensemble', description: 'Cuisine avec un proche, sans écran, en discutant simplement de la journée.' },
+    { title: 'Jeu de société', description: 'Un jeu de cartes ou de plateau en famille — la légèreté crée du lien.' },
+    { title: 'Promenade à deux', description: 'Marche avec ton conjoint, un parent ou un enfant, dehors si possible.' },
+    { title: 'Écoute pleine', description: 'Assieds-toi avec quelqu\'un et écoute-le sans interrompre ni regarder ton téléphone.' },
+    { title: 'Aide aux devoirs', description: 'Accompagne un enfant dans son travail scolaire, avec patience.' },
+    { title: 'Histoire du soir', description: 'Raconte ou lis une histoire — un moment simple qui marque durablement.' },
+  ],
+  service: [
+    { title: 'Rendre service sans qu\'on demande', description: 'Repère une tâche que quelqu\'un chez toi n\'a pas eu le temps de faire, et fais-la.' },
+    { title: 'Ranger un espace commun', description: 'Nettoie ou range un lieu partagé — cuisine, salon, voiture familiale.' },
+    { title: 'Un repas pour quelqu\'un', description: 'Prépare ou apporte un repas à un proche, un voisin, ou une personne dans le besoin.' },
+    { title: 'Réparer ou dépanner', description: 'Aide un proche sur quelque chose de concret : un objet, une démarche, un trajet.' },
+    { title: 'Prendre des nouvelles', description: 'Appelle ou rends visite à quelqu\'un que tu as délaissé ces derniers temps.' },
+  ],
+  community: [
+    { title: 'Action associative', description: 'Rejoins ou propose ton aide à une association locale, même pour une heure.' },
+    { title: 'Visite à un isolé', description: 'Rends visite à une personne malade, âgée ou isolée près de chez toi.' },
+    { title: 'Aide au lieu de culte', description: 'Propose ton aide pour l\'organisation ou l\'entretien de la mosquée/du centre communautaire.' },
+    { title: 'Coup de main ponctuel', description: 'Aide à un événement local : collecte, déménagement, organisation.' },
+    { title: 'Partage de compétence', description: 'Transmets gratuitement une compétence que tu maîtrises à quelqu\'un qui en a besoin.' },
+  ],
+};
+
+export function pickSocialSuggestions(category: SocialCategory, count = 3): SocialSuggestion[] {
+  const pool = [...SOCIAL_SUGGESTIONS[category]];
+  const picked: SocialSuggestion[] = [];
+  while (picked.length < count && pool.length > 0) {
+    const i = Math.floor(Math.random() * pool.length);
+    picked.push(pool.splice(i, 1)[0]);
+  }
+  return picked;
+}
+
 export const TARWIH_CATEGORIES: Record<TarwihCategory, { label: string; icon: string }> = {
   reading:      { label: 'Lecture',      icon: '📚' },
   walk:         { label: 'Promenade',    icon: '🌿' },

@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import type { DayRecord } from '../store/useDayStore';
-import { PILLARS, type PillarId } from '../constants/pillars';
+import { PILLARS, SOCIAL_CATEGORIES, type PillarId, type SocialCategory } from '../constants/pillars';
 import {
   scoreSpiritualPillar,
   scoreKnowledgePillar,
@@ -105,4 +105,55 @@ export function computeTrends(
   }
 
   return { sampleSize: n, pillars, weakestPillar, bestWeekday, worstWeekday };
+}
+
+// ─── Social balance ───────────────────────────────────────────────────────────
+
+export interface SocialBalanceEntry {
+  category: SocialCategory;
+  label: string;
+  count: number;
+}
+
+export interface SocialBalance {
+  windowDays: number;
+  entries: SocialBalanceEntry[];
+  neglectedCategory: SocialBalanceEntry | null; // 0 interactions in the window, while others have some
+}
+
+/**
+ * Counts completed social interactions per category over a sliding window,
+ * to surface which relationship area (family / service / community) has
+ * been neglected — not just whether "social" as a whole was done.
+ */
+export function computeSocialBalance(
+  today: DayRecord,
+  history: Record<string, DayRecord>,
+  windowDays = 7,
+): SocialBalance {
+  const counts: Record<SocialCategory, number> = { family: 0, service: 0, community: 0 };
+
+  for (let i = 0; i < windowDays; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = format(date, 'yyyy-MM-dd');
+    const record = key === today.date ? today : history[key];
+    if (!record) continue;
+
+    const { category, completedAt } = record.social;
+    if (category && completedAt) counts[category] += 1;
+  }
+
+  const categoryIds = Object.keys(SOCIAL_CATEGORIES) as SocialCategory[];
+  const entries: SocialBalanceEntry[] = categoryIds.map(category => ({
+    category,
+    label: SOCIAL_CATEGORIES[category].label,
+    count: counts[category],
+  }));
+
+  const totalInteractions = entries.reduce((sum, e) => sum + e.count, 0);
+  const neglectedCategory =
+    totalInteractions > 0 ? entries.find(e => e.count === 0) ?? null : null;
+
+  return { windowDays, entries, neglectedCategory };
 }
