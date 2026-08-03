@@ -34,8 +34,10 @@ export interface DayRecord {
 
   physical: {
     activityType: ActivityType | null;
+    activityStartedAt: string | null;
     activityDurationSeconds: number;
     activityCompletedAt: string | null;
+    qaylulahStartedAt: string | null;
     qaylulahDurationSeconds: number;
     qaylulahBeforeAfternoon: boolean;
     qaylulahCompletedAt: string | null;
@@ -82,8 +84,10 @@ function createEmptyDay(date: string): DayRecord {
     },
     physical: {
       activityType: null,
+      activityStartedAt: null,
       activityDurationSeconds: 0,
       activityCompletedAt: null,
+      qaylulahStartedAt: null,
       qaylulahDurationSeconds: 0,
       qaylulahBeforeAfternoon: false,
       qaylulahCompletedAt: null,
@@ -131,7 +135,11 @@ interface DayState {
   completeKnowledgeSession: (durationSeconds: number, note: string) => void;
 
   // Physical actions
+  startActivity: (type: ActivityType) => void;
+  cancelActivity: () => void;
   completeActivity: (type: ActivityType, durationSeconds: number) => void;
+  startQaylulah: () => void;
+  cancelQaylulah: () => void;
   completeQaylulah: (durationSeconds: number, dhuhrTime?: Date) => void;
 
   // Social actions
@@ -258,6 +266,24 @@ export const useDayStore = create<DayState>()(
 
       // ── Physical ────────────────────────────────────────────────────────
 
+      startActivity: type => {
+        set(s => ({
+          today: {
+            ...s.today,
+            physical: { ...s.today.physical, activityType: type, activityStartedAt: new Date().toISOString() },
+          },
+        }));
+      },
+
+      cancelActivity: () => {
+        set(s => ({
+          today: {
+            ...s.today,
+            physical: { ...s.today.physical, activityType: null, activityStartedAt: null },
+          },
+        }));
+      },
+
       completeActivity: (type, durationSeconds) => {
         set(s => ({
           today: {
@@ -265,12 +291,31 @@ export const useDayStore = create<DayState>()(
             physical: {
               ...s.today.physical,
               activityType: type,
+              activityStartedAt: null,
               activityDurationSeconds: durationSeconds,
               activityCompletedAt: new Date().toISOString(),
             },
           },
         }));
         get().recomputeScore();
+      },
+
+      startQaylulah: () => {
+        set(s => ({
+          today: {
+            ...s.today,
+            physical: { ...s.today.physical, qaylulahStartedAt: new Date().toISOString() },
+          },
+        }));
+      },
+
+      cancelQaylulah: () => {
+        set(s => ({
+          today: {
+            ...s.today,
+            physical: { ...s.today.physical, qaylulahStartedAt: null },
+          },
+        }));
       },
 
       completeQaylulah: (durationSeconds, dhuhrTime) => {
@@ -283,6 +328,7 @@ export const useDayStore = create<DayState>()(
             ...s.today,
             physical: {
               ...s.today.physical,
+              qaylulahStartedAt: null,
               qaylulahDurationSeconds: durationSeconds,
               qaylulahBeforeAfternoon: isBeforeAfternoon,
               qaylulahCompletedAt: now.toISOString(),

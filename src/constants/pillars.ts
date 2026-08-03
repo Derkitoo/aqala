@@ -146,6 +146,57 @@ export const ACTIVITY_TYPES: Record<ActivityType, { label: string; icon: string 
   stretching: { label: 'Étirements', icon: '🧘' },
 };
 
+export interface ActivitySuggestion {
+  title: string;
+  description: string;
+}
+
+export const ACTIVITY_GUIDE_INTRO: Record<ActivityType, string> = {
+  walk: "La marche est l'activité la plus accessible et la plus soutenue par la Sunna. Choisis une piste ou marche simplement, dehors si possible.",
+  sport: "20 minutes suffisent pour respecter le droit de ton corps sur toi. Choisis une piste adaptée à ton niveau — la régularité prime sur l'intensité.",
+  stretching: "Les étirements relâchent les tensions accumulées et préparent le corps à la prière. Prends ton temps, respire, ne force pas.",
+};
+
+export const ACTIVITY_SUGGESTIONS: Record<ActivityType, ActivitySuggestion[]> = {
+  walk: [
+    { title: 'Marche rapide dehors', description: 'Profite de la lumière naturelle si possible — avant Maghrib est idéal.' },
+    { title: 'Marche + rappel audio', description: 'Écoute un rappel ou une récitation pendant que tu marches.' },
+    { title: 'Marche accompagnée', description: 'Invite un proche à marcher avec toi — ça compte double : physique et social.' },
+    { title: 'Trajet à pied', description: 'Remplace un trajet court en voiture par la marche aujourd\'hui.' },
+    { title: 'Marche digestive', description: 'Une marche tranquille après un repas, pour la santé et la légèreté.' },
+  ],
+  sport: [
+    { title: 'Circuit rapide à la maison', description: 'Squats, pompes, gainage — 20 minutes sans matériel.' },
+    { title: 'Cardio simple', description: 'Corde à sauter, jumping jacks, montées de genoux.' },
+    { title: 'Course ou vélo', description: 'Une sortie à ton rythme, dehors ou sur machine.' },
+    { title: 'Musculation ciblée', description: 'Travaille un groupe musculaire précis avec ou sans matériel.' },
+    { title: 'Sport collectif', description: 'Rejoins une activité avec d\'autres — utile pour le corps et le lien social.' },
+  ],
+  stretching: [
+    { title: 'Étirements complets', description: 'Une routine du haut vers le bas du corps, 20 minutes sans précipitation.' },
+    { title: 'Mobilité articulaire', description: 'Fais tourner et mobiliser chaque articulation en douceur.' },
+    { title: 'Zone tendue ciblée', description: 'Concentre-toi sur la zone la plus raide : dos, épaules, nuque.' },
+    { title: 'Respiration + étirement', description: 'Associe respiration profonde et étirements doux façon relaxation.' },
+  ],
+};
+
+export function pickActivitySuggestions(type: ActivityType, count = 3): ActivitySuggestion[] {
+  const pool = [...ACTIVITY_SUGGESTIONS[type]];
+  const picked: ActivitySuggestion[] = [];
+  while (picked.length < count && pool.length > 0) {
+    const i = Math.floor(Math.random() * pool.length);
+    picked.push(pool.splice(i, 1)[0]);
+  }
+  return picked;
+}
+
+export const QAYLULAH_TIPS: string[] = [
+  'Position semi-allongée, pas totalement couché — pour éviter le sommeil profond.',
+  'Coupe les notifications et pose une alarme douce (déjà prévue par le chronomètre).',
+  'Fenêtre idéale : juste après Dhouhr, avant 14h — bonus Baraka inclus.',
+  'Même 10-15 min suffisent à couper la fatigue de l\'après-midi.',
+];
+
 export const SOCIAL_CATEGORIES: Record<SocialCategory, { label: string; icon: string; description: string }> = {
   family:    { label: 'Famille',      icon: '🏠', description: 'Parents, conjoint, enfants — sans écran' },
   service:   { label: 'Service',      icon: '🤝', description: 'Rangement, aide, Mihnat ahlihi' },

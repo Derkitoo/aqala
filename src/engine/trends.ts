@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import type { DayRecord } from '../store/useDayStore';
-import { PILLARS, SOCIAL_CATEGORIES, type PillarId, type SocialCategory } from '../constants/pillars';
+import { PILLARS, SOCIAL_CATEGORIES, ACTIVITY_TYPES, type PillarId, type SocialCategory, type ActivityType } from '../constants/pillars';
 import {
   scoreSpiritualPillar,
   scoreKnowledgePillar,
@@ -156,4 +156,55 @@ export function computeSocialBalance(
     totalInteractions > 0 ? entries.find(e => e.count === 0) ?? null : null;
 
   return { windowDays, entries, neglectedCategory };
+}
+
+// ─── Physical balance ─────────────────────────────────────────────────────────
+
+export interface ActivityBalanceEntry {
+  type: ActivityType;
+  label: string;
+  count: number;
+}
+
+export interface PhysicalBalance {
+  windowDays: number;
+  sampleSize: number;
+  activityEntries: ActivityBalanceEntry[];
+  qaylulahCompletedDays: number;
+}
+
+/**
+ * Counts completed activities per type and Qaylulah completions over a
+ * sliding window, to surface variety (or lack of it) in physical effort.
+ */
+export function computePhysicalBalance(
+  today: DayRecord,
+  history: Record<string, DayRecord>,
+  windowDays = 7,
+): PhysicalBalance {
+  const counts: Record<ActivityType, number> = { walk: 0, sport: 0, stretching: 0 };
+  let qaylulahCompletedDays = 0;
+  let sampleSize = 0;
+
+  for (let i = 0; i < windowDays; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = format(date, 'yyyy-MM-dd');
+    const record = key === today.date ? today : history[key];
+    if (!record) continue;
+
+    sampleSize += 1;
+    const { activityType, activityCompletedAt, qaylulahCompletedAt } = record.physical;
+    if (activityType && activityCompletedAt) counts[activityType] += 1;
+    if (qaylulahCompletedAt) qaylulahCompletedDays += 1;
+  }
+
+  const typeIds = Object.keys(ACTIVITY_TYPES) as ActivityType[];
+  const activityEntries: ActivityBalanceEntry[] = typeIds.map(type => ({
+    type,
+    label: ACTIVITY_TYPES[type].label,
+    count: counts[type],
+  }));
+
+  return { windowDays, sampleSize, activityEntries, qaylulahCompletedDays };
 }
