@@ -81,21 +81,22 @@ export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, init
   const minReached = elapsed >= config.minSeconds;
   const maxReached = config.maxSeconds !== null && elapsed >= config.maxSeconds;
 
+  // Note: reaching the minimum no longer force-stops the timer — it just
+  // unlocks the "Valider" button while the timer keeps running, so sessions
+  // that go past the minimum (e.g. a 45-min social interaction bonus) are
+  // still tracked accurately instead of freezing at the minimum.
   const tick = useCallback(() => {
     setElapsed(prev => {
       const next = prev + 1;
       if (config.maxSeconds && next >= config.maxSeconds) {
-        // Auto-stop at max (Qaylulah)
+        // Hard auto-stop at max (Qaylulah)
         clearInterval(intervalRef.current!);
         setTimerState('max_reached');
         if (Platform.OS !== 'web') {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         }
-      } else if (next === config.minSeconds) {
-        if (Platform.OS !== 'web') {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        }
-        setTimerState('min_reached');
+      } else if (next === config.minSeconds && Platform.OS !== 'web') {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       return next;
     });
@@ -120,9 +121,12 @@ export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, init
     onComplete(elapsed);
   };
 
-  const displayTime = mode === 'qaylulah' && config.maxSeconds
-    ? config.maxSeconds - elapsed  // countdown for Qaylulah
-    : elapsed;                     // count-up for everything else
+  // Qaylulah counts down to the 20-min target, then counts up as overtime
+  // (still capped at 30 min by the hard auto-stop above).
+  const qaylulahOvertime = mode === 'qaylulah' && elapsed >= config.minSeconds;
+  const displayTime = mode === 'qaylulah'
+    ? (qaylulahOvertime ? elapsed - config.minSeconds : config.minSeconds - elapsed)
+    : elapsed;
 
   return (
     <View style={styles.container}>
@@ -130,6 +134,9 @@ export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, init
       <Text style={[styles.label, { color: config.color }]}>{config.label}</Text>
 
       <Text style={styles.time}>{formatCountdown(displayTime)}</Text>
+      {qaylulahOvertime && (
+        <Text style={styles.countdownLabel}>temps supplémentaire</Text>
+      )}
 
       {/* Progress bar */}
       <View style={styles.track}>
@@ -174,7 +181,7 @@ export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, init
         )}
       </View>
 
-      {onCancel && timerState === 'idle' && (
+      {onCancel && (
         <Pressable onPress={onCancel} style={styles.cancelBtn}>
           <Text style={styles.cancelText}>Annuler</Text>
         </Pressable>
@@ -221,6 +228,13 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
     color: Colors.white,
     letterSpacing: -1,
     fontVariant: ['tabular-nums'],
+  },
+  countdownLabel: {
+    fontSize: Typography.sizes.xs,
+    color: Colors.success,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: -Spacing.sm,
   },
   track: {
     width: '80%',

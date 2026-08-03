@@ -1,12 +1,13 @@
 import React from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView, Alert,
+  View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
 import { useAppStore, type AppMode, type NightMode, type MadhabType } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
+import { showConfirm, showAlert } from '../utils/confirm';
 import { Settings, RefreshCw, Sun, Moon } from 'lucide-react-native';
 
 const CALCULATION_METHODS = [
@@ -60,14 +61,14 @@ export function SettingsScreen() {
       }
       setPermissions(locGranted, notifGranted);
 
-      Alert.alert('Succès', 'Localisation et permissions mises à jour.');
+      showAlert('Succès', 'Localisation et permissions mises à jour.');
     } catch (e) {
-      Alert.alert('Erreur', 'Impossible de récupérer la géolocalisation.');
+      showAlert('Erreur', 'Impossible de récupérer la géolocalisation.');
     }
   };
 
   const handleResetOnboarding = () => {
-    Alert.alert(
+    showConfirm(
       'Réinitialiser l\'onboarding',
       'Souhaitez-vous reconfigurer votre profil et vos objectifs d\'onboarding ?',
       [
