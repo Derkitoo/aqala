@@ -4,7 +4,7 @@ import {
   SafeAreaView, Animated,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useTheme, Colors as StaticColors, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
 import { useAppStore, type AppMode } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { Moon, Leaf, Shield, Sparkles, MapPin, Bell, Zap } from 'lucide-react-native';
@@ -33,7 +33,7 @@ const MODES: ModeOption[] = [
       '1 interaction sociale réelle',
       'Coucher avant 23h30',
     ],
-    color: Colors.pillar.knowledge,
+    color: StaticColors.pillar.knowledge,
   },
   {
     id: 'intermediate',
@@ -47,7 +47,7 @@ const MODES: ModeOption[] = [
       'Savoir + Social + Sommeil',
       'Witr et Adhkâr du soir',
     ],
-    color: Colors.pillar.spiritual,
+    color: StaticColors.pillar.spiritual,
   },
   {
     id: 'advanced',
