@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useTheme, type ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
 import { useDayStore } from '../store/useDayStore';
 import { PRAYERS } from '../constants/pillars';
 import type { PrayerName, PrayerStatus } from '../store/useDayStore';
+import type { RootStackParamList } from '../navigation/RootNavigator';
 import { Check, Moon, Sun, Sparkles } from 'lucide-react-native';
 
 const getStatusLabels = (Colors: ThemeColors): Record<PrayerStatus, { label: string; color: string }> => ({
@@ -15,8 +16,8 @@ const getStatusLabels = (Colors: ThemeColors): Record<PrayerStatus, { label: str
 });
 
 export function PillarSpiritualScreen() {
-  const navigation = useNavigation();
-  const { today, validatePrayer, setRawatibFajr, setDuha, setWitr, setAdhkarEvening } = useDayStore();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { today, validatePrayer, setRawatibFajr, setDuha, setWitr } = useDayStore();
   const s = today.spiritual;
 
   const Colors = useTheme();
@@ -94,20 +95,11 @@ export function PillarSpiritualScreen() {
           points="+2 pts"
           Colors={Colors}
         />
-        <ToggleRow
-          label="Adhkâr du soir"
-          IconComponent={Moon}
-          value={s.adhkarEveningDone}
-          onToggle={v => setAdhkarEvening(v)}
-          points=""
-          Colors={Colors}
-        />
-
         {/* Golden Moment shortcut */}
         {!s.goldenMomentCompleted && (
           <Pressable
             style={styles.goldenBtn}
-            onPress={() => navigation.navigate('GoldenMoment' as never)}
+            onPress={() => navigation.navigate('GoldenMoment', { type: 'morning' })}
           >
             <Text style={styles.goldenBtnText}>✨ Lancer le Moment d'Or</Text>
             <Text style={styles.goldenBtnSub}>Adhkâr du matin — 15 min verrouillé (+6 pts)</Text>
@@ -116,6 +108,22 @@ export function PillarSpiritualScreen() {
         {s.goldenMomentCompleted && (
           <View style={styles.goldenDone}>
             <Text style={styles.goldenDoneText}>✓ Moment d'Or accompli</Text>
+          </View>
+        )}
+
+        {/* Evening Adhkar shortcut */}
+        {!s.adhkarEveningDone && (
+          <Pressable
+            style={[styles.goldenBtn, { borderColor: Colors.pillar.spiritual, marginTop: Spacing.sm }]}
+            onPress={() => navigation.navigate('GoldenMoment', { type: 'evening' })}
+          >
+            <Text style={[styles.goldenBtnText, { color: Colors.pillar.spiritual }]}>🌙 Lancer les Adhkâr du Soir</Text>
+            <Text style={styles.goldenBtnSub}>Récitation complète — 15 min verrouillé</Text>
+          </Pressable>
+        )}
+        {s.adhkarEveningDone && (
+          <View style={[styles.goldenDone, { marginTop: Spacing.sm }]}>
+            <Text style={styles.goldenDoneText}>✓ Adhkâr du soir accomplis</Text>
           </View>
         )}
       </ScrollView>

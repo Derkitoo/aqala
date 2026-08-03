@@ -31,7 +31,7 @@ import { SettingsScreen }          from '../screens/SettingsScreen';
 export type RootStackParamList = {
   Onboarding:      undefined;
   Tabs:            undefined;
-  GoldenMoment:    undefined;
+  GoldenMoment:    { type?: 'morning' | 'evening' } | undefined;
   PillarSpiritual: undefined;
   PillarKnowledge: undefined;
   PillarPhysical:  undefined;

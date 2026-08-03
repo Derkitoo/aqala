@@ -15,6 +15,8 @@ interface Props {
   onComplete: () => void;
   onCancel?: () => void; // optional — should be hard to trigger
   content?: React.ReactNode; // Adhkar content to display
+  title?: string;
+  subtitle?: string;
 }
 
 export function LockTimer({
@@ -22,6 +24,8 @@ export function LockTimer({
   onComplete,
   onCancel,
   content,
+  title = "Moment d'Or",
+  subtitle = 'Le téléphone attend. Toi, tu restes là.',
 }: Props) {
   const Colors = useTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
@@ -79,8 +83,8 @@ export function LockTimer({
 
       <View style={styles.header}>
         <Lock color={Colors.gold} size={40} strokeWidth={1.5} />
-        <Text style={styles.title}>Moment d'Or</Text>
-        <Text style={styles.subtitle}>Le téléphone attend. Toi, tu restes là.</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
 
       {/* Circular countdown */}
