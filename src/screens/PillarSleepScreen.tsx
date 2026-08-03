@@ -1,24 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
-import { TARWIH_CATEGORIES, type TarwihCategory } from '../constants/pillars';
+import {
+  TARWIH_CATEGORIES, TARWIH_GUIDE_INTRO, pickTarwihSuggestions,
+  type TarwihCategory, type TarwihSuggestion,
+} from '../constants/pillars';
+import { computeSleepBalance } from '../engine/trends';
 import { useDayStore } from '../store/useDayStore';
 import { useAppStore } from '../store/useAppStore';
 import { FocusTimer } from '../components/FocusTimer';
-import { Book, Footprints, MessageCircle, Palette, Music, Play, ChevronRight } from 'lucide-react-native';
+import {
+  Book, Footprints, MessageCircle, Palette, Music, Play, ChevronRight,
+  Shuffle, Lightbulb, CalendarRange,
+} from 'lucide-react-native';
 
-type Phase = 'overview' | 'tarwih_select' | 'tarwih_timer' | 'done';
+type Phase = 'overview' | 'tarwih_select' | 'tarwih_guide' | 'tarwih_timer' | 'done';
+
+const TARWIH_ICONS: Record<TarwihCategory, any> = {
+  reading: Book,
+  walk: Footprints,
+  conversation: MessageCircle,
+  art: Palette,
+  nasheed: Music,
+};
+
+function computeInitialElapsed(startedAt: string | null): number {
+  if (!startedAt) return 0;
+  return Math.max(0, Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000));
+}
 
 export function PillarSleepScreen() {
-  const { today, completeTarwih, setBedtime, setNightSas, setQiyam } = useDayStore();
+  const { today, history, startTarwih, cancelTarwih, completeTarwih, setBedtime, setNightSas, setQiyam } = useDayStore();
   const { nightMode } = useAppStore();
   const sl = today.sleep;
   const Colors = useTheme();
   const styles = React.useMemo(() => createStyles(Colors), [Colors]);
 
-  const [phase, setPhase] = useState<Phase>(sl.tarwihCompleted ? 'done' : 'overview');
+  const [phase, setPhase] = useState<Phase>(
+    sl.tarwihCompleted ? 'done' :
+    sl.tarwihStartedAt ? 'tarwih_timer' :
+    'overview',
+  );
   const [selectedTarwih, setSelectedTarwih] = useState<TarwihCategory | null>(sl.tarwihCategory);
+
+  const balance = useMemo(() => computeSleepBalance(today, history), [today, history]);
+
+  const handleTarwihSelect = (cat: TarwihCategory) => {
+    setSelectedTarwih(cat);
+    setPhase('tarwih_guide');
+  };
+
+  const handleStartTarwih = () => {
+    if (!selectedTarwih) return;
+    startTarwih(selectedTarwih);
+    setPhase('tarwih_timer');
+  };
+
+  const handleCancelTarwih = () => {
+    cancelTarwih();
+    setSelectedTarwih(null);
+    setPhase('tarwih_select');
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -29,6 +71,8 @@ export function PillarSleepScreen() {
         {/* Overview */}
         {(phase === 'overview' || phase === 'done') && (
           <>
+            <SleepBalanceCard balance={balance} Colors={Colors} />
+
             {/* Night Sas */}
             <Pressable
               style={[styles.sasCard, sl.nightSasActivated && styles.sasCardActive]}
@@ -119,21 +163,17 @@ export function PillarSleepScreen() {
             <Text style={styles.phaseSub}>Hors réseaux sociaux et séries passives</Text>
             {(Object.keys(TARWIH_CATEGORIES) as TarwihCategory[]).map(cat => {
               const { label } = TARWIH_CATEGORIES[cat];
-              // mapping legacy emoji constants to Lucide just for this selector (since they are in constants)
-              let TypeIcon = Play;
-              if (cat === 'reading') TypeIcon = Book;
-              if (cat === 'walk') TypeIcon = Footprints;
-              if (cat === 'conversation') TypeIcon = MessageCircle;
-              if (cat === 'art') TypeIcon = Palette;
-              if (cat === 'nasheed') TypeIcon = Music;
+              const TypeIcon = TARWIH_ICONS[cat];
 
               return (
                 <Pressable
                   key={cat}
                   style={styles.tarwihCard}
-                  onPress={() => { setSelectedTarwih(cat); setPhase('tarwih_timer'); }}
+                  onPress={() => handleTarwihSelect(cat)}
                 >
-                  <TypeIcon size={24} color={Colors.text.primary} />
+                  <View style={styles.tarwihIconBadge}>
+                    <TypeIcon size={22} color={Colors.pillar.sleep} />
+                  </View>
                   <Text style={styles.tarwihLabel}>{label}</Text>
                   <ChevronRight size={20} color={Colors.text.muted} />
                 </Pressable>
@@ -145,6 +185,16 @@ export function PillarSleepScreen() {
           </>
         )}
 
+        {/* Tarwih guide — suggestions before starting the timer */}
+        {phase === 'tarwih_guide' && selectedTarwih && (
+          <TarwihGuide
+            category={selectedTarwih}
+            onStart={handleStartTarwih}
+            onBack={() => setPhase('tarwih_select')}
+            Colors={Colors}
+          />
+        )}
+
         {/* Tarwih timer */}
         {phase === 'tarwih_timer' && selectedTarwih && (
           <>
@@ -154,16 +204,89 @@ export function PillarSleepScreen() {
             </View>
             <FocusTimer
               mode="tarwih"
+              initialElapsedSeconds={computeInitialElapsed(sl.tarwihStartedAt)}
               onComplete={dur => {
                 completeTarwih(selectedTarwih, dur);
                 setPhase('done');
               }}
-              onCancel={() => setPhase('tarwih_select')}
+              onCancel={handleCancelTarwih}
             />
           </>
         )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function SleepBalanceCard({ balance, Colors }: { balance: ReturnType<typeof computeSleepBalance>; Colors: ThemeColors }) {
+  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  return (
+    <View style={styles.balanceCard}>
+      <View style={styles.balanceHeaderRow}>
+        <CalendarRange size={16} color={Colors.text.secondary} />
+        <Text style={styles.balanceTitle}>Cette semaine</Text>
+      </View>
+      <View style={styles.balanceRow}>
+        <View style={styles.balanceItem}>
+          <Text style={styles.balanceCount}>{balance.tarwihCompletedDays}/{balance.windowDays}</Text>
+          <Text style={styles.balanceLabel}>Tarwih</Text>
+        </View>
+        <View style={styles.balanceItem}>
+          <Text style={styles.balanceCount}>{balance.bedtimeBefore23Days}/{balance.windowDays}</Text>
+          <Text style={styles.balanceLabel}>Coucher {'<'} 23h</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function TarwihGuide({ category, onStart, onBack, Colors }: {
+  category: TarwihCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const [suggestions, setSuggestions] = useState<TarwihSuggestion[]>(() => pickTarwihSuggestions(category));
+  const TypeIcon = TARWIH_ICONS[category];
+
+  return (
+    <View>
+      <View style={styles.tarwihBadge}>
+        <TypeIcon size={16} color={Colors.pillar.sleep} />
+        <Text style={styles.tarwihBadgeText}>{TARWIH_CATEGORIES[category].label}</Text>
+      </View>
+
+      <Text style={styles.guideIntro}>{TARWIH_GUIDE_INTRO[category]}</Text>
+
+      <View style={styles.guideHeaderRow}>
+        <Text style={styles.phaseLabel}>Quelques pistes</Text>
+        <Pressable style={styles.shuffleBtn} onPress={() => setSuggestions(pickTarwihSuggestions(category))}>
+          <Shuffle size={14} color={Colors.pillar.sleep} />
+          <Text style={styles.shuffleBtnText}>Autres pistes</Text>
+        </Pressable>
+      </View>
+
+      {suggestions.map((sug, i) => (
+        <View key={i} style={styles.suggestionCard}>
+          <Lightbulb size={20} color={Colors.gold} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.suggestionTitle}>{sug.title}</Text>
+            <Text style={styles.suggestionDesc}>{sug.description}</Text>
+          </View>
+        </View>
+      ))}
+
+      <Text style={styles.rule}>
+        Libre à toi de suivre ton propre sujet — ces pistes sont là pour t'aider à démarrer.
+      </Text>
+
+      <View style={styles.guideActions}>
+        <Pressable style={styles.backBtn} onPress={onBack}>
+          <Text style={styles.backText}>← Retour</Text>
+        </Pressable>
+        <Pressable style={styles.guideStartBtn} onPress={onStart}>
+          <Text style={styles.guideStartBtnText}>C'est parti — Lancer le chronomètre</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -206,11 +329,27 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
   title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.pillar.sleep, marginBottom: 4 },
   subtitle: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginBottom: Spacing.lg },
 
+  balanceCard: {
+    backgroundColor: Colors.bg.card,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
+  balanceTitle: {
+    fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold,
+    color: Colors.text.secondary, textTransform: 'uppercase', letterSpacing: 1,
+  },
+  balanceRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  balanceItem: { alignItems: 'center' },
+  balanceCount: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy, color: Colors.pillar.sleep },
+  balanceLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
+
   sasCard: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: 'transparent', borderRadius: Radius.md,
+    backgroundColor: Colors.pillar.sleep + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1, borderColor: Colors.pillar.sleep + '22',
   },
   sasCardActive: { borderColor: Colors.pillar.sleep },
   sasIcon: { fontSize: 22 },
@@ -226,11 +365,11 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
 
   sleepBlock: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: 'transparent', borderRadius: Radius.md,
+    backgroundColor: Colors.pillar.sleep + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1, borderColor: Colors.pillar.sleep + '22',
   },
-  sleepBlockDone: { borderColor: Colors.success },
+  sleepBlockDone: { borderColor: Colors.success, backgroundColor: Colors.success + '0d' },
   sleepBlockTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
   sleepBlockSub: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
   pointsBadge: { fontSize: Typography.sizes.xs, color: Colors.gold },
@@ -260,10 +399,16 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
   phaseLabel: { fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold, color: Colors.text.primary, marginBottom: 4 },
   phaseSub: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginBottom: Spacing.md },
   tarwihCard: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: 'transparent', borderRadius: Radius.md,
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: Colors.pillar.sleep + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1, borderColor: Colors.pillar.sleep + '22',
+  },
+  tarwihIconBadge: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: Colors.pillar.sleep + '22',
+    alignItems: 'center', justifyContent: 'center',
+    marginRight: Spacing.sm,
   },
   tarwihLabel: { flex: 1, fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
   tarwihBadge: {
@@ -274,6 +419,42 @@ const createStyles = (Colors: ThemeColors) => StyleSheet.create({
   },
   tarwihBadgeIcon: { fontSize: 16 },
   tarwihBadgeText: { fontSize: Typography.sizes.sm, color: Colors.pillar.sleep, fontWeight: Typography.weights.semibold },
-  backBtn: { marginTop: Spacing.md },
+  backBtn: { alignSelf: 'center', paddingVertical: Spacing.sm },
   backText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
+
+  guideIntro: {
+    fontSize: Typography.sizes.sm,
+    color: Colors.text.secondary,
+    lineHeight: 20,
+    marginBottom: Spacing.md,
+  },
+  guideHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  shuffleBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  shuffleBtnText: { fontSize: Typography.sizes.xs, color: Colors.pillar.sleep, fontWeight: Typography.weights.semibold },
+  suggestionCard: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
+    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
+    padding: Spacing.md, marginBottom: Spacing.sm,
+  },
+  suggestionTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
+  suggestionDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 17 },
+  guideActions: { gap: Spacing.sm, marginTop: Spacing.md },
+  guideStartBtn: {
+    backgroundColor: Colors.pillar.sleep, borderRadius: Radius.md,
+    paddingVertical: Spacing.md, alignItems: 'center',
+  },
+  guideStartBtnText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.white },
+
+  rule: {
+    fontSize: Typography.sizes.xs,
+    color: Colors.text.muted,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+    fontStyle: 'italic',
+  },
 });

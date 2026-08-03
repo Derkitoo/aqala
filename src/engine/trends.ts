@@ -1,6 +1,9 @@
 import { format } from 'date-fns';
 import type { DayRecord } from '../store/useDayStore';
-import { PILLARS, SOCIAL_CATEGORIES, ACTIVITY_TYPES, type PillarId, type SocialCategory, type ActivityType } from '../constants/pillars';
+import {
+  PILLARS, SOCIAL_CATEGORIES, ACTIVITY_TYPES,
+  type PillarId, type SocialCategory, type ActivityType,
+} from '../constants/pillars';
 import {
   scoreSpiritualPillar,
   scoreKnowledgePillar,
@@ -207,4 +210,41 @@ export function computePhysicalBalance(
   }));
 
   return { windowDays, sampleSize, activityEntries, qaylulahCompletedDays };
+}
+
+// ─── Sleep balance ────────────────────────────────────────────────────────────
+
+export interface SleepBalance {
+  windowDays: number;
+  sampleSize: number;
+  tarwihCompletedDays: number;
+  bedtimeBefore23Days: number;
+}
+
+/**
+ * Counts Tarwih completions and on-time bedtimes over a sliding window, to
+ * surface consistency rather than just "did it today".
+ */
+export function computeSleepBalance(
+  today: DayRecord,
+  history: Record<string, DayRecord>,
+  windowDays = 7,
+): SleepBalance {
+  let sampleSize = 0;
+  let tarwihCompletedDays = 0;
+  let bedtimeBefore23Days = 0;
+
+  for (let i = 0; i < windowDays; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    const key = format(date, 'yyyy-MM-dd');
+    const record = key === today.date ? today : history[key];
+    if (!record) continue;
+
+    sampleSize += 1;
+    if (record.sleep.tarwihCompleted) tarwihCompletedDays += 1;
+    if (record.sleep.bedtimeHour !== null && record.sleep.bedtimeHour < 23) bedtimeBefore23Days += 1;
+  }
+
+  return { windowDays, sampleSize, tarwihCompletedDays, bedtimeBefore23Days };
 }

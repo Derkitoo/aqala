@@ -54,6 +54,7 @@ export interface DayRecord {
 
   sleep: {
     tarwihCategory: TarwihCategory | null;
+    tarwihStartedAt: string | null;
     tarwihCompleted: boolean;
     tarwihDurationSeconds: number;
     bedtimeHour: number | null;
@@ -102,6 +103,7 @@ function createEmptyDay(date: string): DayRecord {
     },
     sleep: {
       tarwihCategory: null,
+      tarwihStartedAt: null,
       tarwihCompleted: false,
       tarwihDurationSeconds: 0,
       bedtimeHour: null,
@@ -152,6 +154,8 @@ interface DayState {
   ) => void;
 
   // Sleep actions
+  startTarwih: (category: TarwihCategory) => void;
+  cancelTarwih: () => void;
   completeTarwih: (category: TarwihCategory, durationSeconds: number) => void;
   setBedtime: () => void;
   setNightSas: (active: boolean) => void;
@@ -377,6 +381,24 @@ export const useDayStore = create<DayState>()(
 
       // ── Sleep ───────────────────────────────────────────────────────────
 
+      startTarwih: category => {
+        set(s => ({
+          today: {
+            ...s.today,
+            sleep: { ...s.today.sleep, tarwihCategory: category, tarwihStartedAt: new Date().toISOString() },
+          },
+        }));
+      },
+
+      cancelTarwih: () => {
+        set(s => ({
+          today: {
+            ...s.today,
+            sleep: { ...s.today.sleep, tarwihCategory: null, tarwihStartedAt: null },
+          },
+        }));
+      },
+
       completeTarwih: (category, durationSeconds) => {
         set(s => ({
           today: {
@@ -384,6 +406,7 @@ export const useDayStore = create<DayState>()(
             sleep: {
               ...s.today.sleep,
               tarwihCategory: category,
+              tarwihStartedAt: null,
               tarwihCompleted: true,
               tarwihDurationSeconds: durationSeconds,
             },

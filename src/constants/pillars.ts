@@ -260,6 +260,57 @@ export const TARWIH_CATEGORIES: Record<TarwihCategory, { label: string; icon: st
   nasheed:      { label: 'Nasheeds',     icon: '🎵' },
 };
 
+export interface TarwihSuggestion {
+  title: string;
+  description: string;
+}
+
+export const TARWIH_GUIDE_INTRO: Record<TarwihCategory, string> = {
+  reading: "La lecture détend l'esprit sans le vider — choisis quelque chose de léger, loin des écrans qui excitent l'attention.",
+  walk: "Une promenade en soirée calme le corps et l'esprit avant le sommeil. Sors si possible, même quelques minutes.",
+  conversation: "Un vrai échange, en face-à-face, nourrit l'âme bien plus qu'un fil de discussion sans fin.",
+  art: "Créer sans objectif de performance — juste pour le plaisir — est un vrai repos mental.",
+  nasheed: "La bonne musique nourrit l'âme sans l'agiter. Privilégie des nasheeds calmes plutôt qu'entraînants avant de dormir.",
+};
+
+export const TARWIH_SUGGESTIONS: Record<TarwihCategory, TarwihSuggestion[]> = {
+  reading: [
+    { title: 'Roman ou récit léger', description: 'Une fiction qui te change les idées, sans lien avec le travail ou les études.' },
+    { title: 'Biographie inspirante', description: 'La vie d\'une personnalité qui te motive, en dehors du cadre religieux du Savoir.' },
+    { title: 'Magazine ou revue', description: 'Quelques pages sur un sujet qui te passionne, sans pression de tout finir.' },
+  ],
+  walk: [
+    { title: 'Promenade sans but', description: 'Marche sans destination précise, juste pour observer et respirer.' },
+    { title: 'Balade en famille', description: 'Une sortie tranquille avec un proche, sans écran.' },
+    { title: 'Nature ou parc', description: 'Privilégie un espace vert si tu en as un à proximité.' },
+  ],
+  conversation: [
+    { title: 'Appel à un proche éloigné', description: 'Prends des nouvelles de quelqu\'un que tu n\'as pas appelé depuis longtemps.' },
+    { title: 'Discussion en famille', description: 'Un moment d\'échange sans écran, autour d\'un thé par exemple.' },
+    { title: 'Retrouvailles avec un ami', description: 'Un café ou une visite, en présentiel de préférence.' },
+  ],
+  art: [
+    { title: 'Dessin ou peinture libre', description: 'Sans objectif de résultat — juste pour le plaisir du geste.' },
+    { title: 'Écriture personnelle', description: 'Un journal, un poème, ou simplement mettre des mots sur ta journée.' },
+    { title: 'Musique ou calligraphie', description: 'Pratique un instrument ou essaie la calligraphie arabe.' },
+  ],
+  nasheed: [
+    { title: 'Nasheeds calmes', description: 'Une sélection de nasheeds apaisants, sans instruments percutants.' },
+    { title: 'Récitation coranique douce', description: 'Écoute une récitation apaisante avant le sommeil.' },
+    { title: 'Playlist de fin de journée', description: 'Prépare une sélection dédiée à ce moment précis de la soirée.' },
+  ],
+};
+
+export function pickTarwihSuggestions(category: TarwihCategory, count = 3): TarwihSuggestion[] {
+  const pool = [...TARWIH_SUGGESTIONS[category]];
+  const picked: TarwihSuggestion[] = [];
+  while (picked.length < count && pool.length > 0) {
+    const i = Math.floor(Math.random() * pool.length);
+    picked.push(pool.splice(i, 1)[0]);
+  }
+  return picked;
+}
+
 export const GOLDEN_MOMENT_DURATION_SECONDS = 15 * 60; // 15 minutes
 export const QAYLULAH_MAX_SECONDS = 30 * 60;           // 30 minutes max
 export const QAYLULAH_DEFAULT_SECONDS = 20 * 60;       // 20 minutes default
