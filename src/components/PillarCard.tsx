@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { ChevronRight, CheckCircle } from 'lucide-react-native';
 import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import type { PillarDefinition } from '../constants/pillars';
 
@@ -49,8 +50,8 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
     >
       {/* Header row */}
       <View style={styles.headerRow}>
-        <View style={styles.iconContainer}>
-          <Icon color={pillar.color} size={24} strokeWidth={2.5} />
+        <View style={[styles.iconBadge, { backgroundColor: pillar.color + '22' }]}>
+          <Icon color={pillar.color} size={22} strokeWidth={2.5} />
         </View>
         <View style={styles.headerText}>
           <Text style={[styles.nameFr, { color: pillar.color }]}>{pillar.nameFr}</Text>
@@ -64,7 +65,8 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
           </Text>
           <Text style={styles.scoreMax}>/{pillar.maxPoints}</Text>
         </View>
-        {completed && <Text style={styles.checkmark}>✓</Text>}
+        {completed && <CheckCircle color={Colors.success} size={18} style={{ marginLeft: Spacing.xs }} />}
+        {onPress && !completed && <ChevronRight color={Colors.text.muted} size={20} style={{ marginLeft: Spacing.xs }} />}
       </View>
 
       {/* Progress bar */}
@@ -81,11 +83,6 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
           />
         </View>
       )}
-
-      {/* Arrow indicator */}
-      {onPress && (
-        <Text style={styles.arrow}>›</Text>
-      )}
     </AnimatedPressable>
   );
 }
@@ -93,12 +90,11 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
 const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   card: {
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.bg.cardBorder,
     marginBottom: Spacing.sm,
-    position: 'relative',
   },
   cardCompact: {
     padding: Spacing.sm,
@@ -109,10 +105,12 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  iconContainer: {
-    padding: Spacing.xs,
-    backgroundColor: 'transparent',
-    borderRadius: Radius.sm,
+  iconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerText: {
     flex: 1,
@@ -142,11 +140,6 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     fontFamily: Typography.fonts.medium,
     color: Colors.text.muted,
   },
-  checkmark: {
-    fontSize: Typography.sizes.lg,
-    color: Colors.success,
-    marginLeft: Spacing.xs,
-  },
   progressTrack: {
     marginTop: Spacing.sm,
     height: 4,
@@ -157,12 +150,5 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   progressFill: {
     height: '100%',
     borderRadius: 2,
-  },
-  arrow: {
-    position: 'absolute',
-    right: Spacing.md,
-    top: '50%',
-    fontSize: Typography.sizes.xl,
-    color: Colors.text.muted,
   },
 });

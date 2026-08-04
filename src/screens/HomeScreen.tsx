@@ -108,26 +108,6 @@ export function HomeScreen() {
           )}
         </View>
 
-        {/* Trend insight — built from history already collected */}
-        {trends.sampleSize >= 3 && trends.weakestPillar && (
-          <Pressable
-            style={[styles.trendCard, { borderColor: trends.weakestPillar.color + '44' }]}
-            onPress={() => navigation.navigate('WeeklyReport')}
-          >
-            <TrendingDown color={trends.weakestPillar.color} size={20} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.trendLabel}>Pilier à surveiller cette semaine</Text>
-              <Text style={styles.trendText}>
-                <Text style={{ fontWeight: 'bold', color: trends.weakestPillar.color }}>
-                  {trends.weakestPillar.nameFr}
-                </Text>
-                {' '}— {trends.weakestPillar.avgPct}% en moyenne
-              </Text>
-            </View>
-            <ChevronRight color={Colors.text.muted} size={18} />
-          </Pressable>
-        )}
-
         {/* Pillar cards */}
         <Text style={styles.sectionTitle}>Mes 5 Piliers</Text>
 
@@ -161,6 +141,26 @@ export function HomeScreen() {
           completed={(currentScore?.sleep ?? 0) >= PILLARS.sleep.maxPoints * 0.8}
           onPress={() => navigation.navigate('PillarSleep')}
         />
+
+        {/* Trend insight — built from history already collected */}
+        {trends.sampleSize >= 3 && trends.weakestPillar && (
+          <Pressable
+            style={[styles.trendCard, { borderColor: trends.weakestPillar.color + '44' }]}
+            onPress={() => navigation.navigate('WeeklyReport')}
+          >
+            <TrendingDown color={trends.weakestPillar.color} size={20} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.trendLabel}>Pilier à surveiller cette semaine</Text>
+              <Text style={styles.trendText}>
+                <Text style={{ fontWeight: 'bold', color: trends.weakestPillar.color }}>
+                  {trends.weakestPillar.nameFr}
+                </Text>
+                {' '}— {trends.weakestPillar.avgPct}% en moyenne
+              </Text>
+            </View>
+            <ChevronRight color={Colors.text.muted} size={18} />
+          </Pressable>
+        )}
 
         {/* Quick CTA if Golden Moment not done */}
         {!today.spiritual.goldenMomentCompleted && (
