@@ -1,0 +1,16 @@
+{
+  "name": "Aqal al-Qalil",
+  "short_name": "Aqal al-Qalil",
+  "description": "La productivité du croyant — 5 piliers, 24 heures, une constance.",
+  "start_url": "/aqala/",
+  "scope": "/aqala/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "fr",
+  "icons": [
+    { "src": "/aqala/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/aqala/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
