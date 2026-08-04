@@ -4,6 +4,7 @@ import 'react-native-gesture-handler';
 import React, { Component, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
@@ -249,9 +250,11 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={styles.root}>
-      <ErrorBoundary>
-        <AppContent />
-      </ErrorBoundary>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          <AppContent />
+        </ErrorBoundary>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text, Platform, View } from 'react-native';
 import { enableScreens } from 'react-native-screens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Home, BarChart2 } from 'lucide-react-native';
 import { useTheme, Typography, ThemeColors } from '../constants/theme';
@@ -69,6 +70,11 @@ function TabIcon({ Icon, focused, Colors }: { Icon: any; focused: boolean; Color
 
 function TabNavigator() {
   const Colors = useTheme();
+  const insets = useSafeAreaInsets();
+  // Floats above the home indicator / gesture bar instead of a fixed offset
+  // that only happened to look right without one (e.g. standalone PWA on
+  // a notched phone, where env(safe-area-inset-bottom) is no longer 0).
+  const bottomOffset = Math.max(25, insets.bottom + 10);
 
   return (
     <Tab.Navigator
@@ -76,7 +82,7 @@ function TabNavigator() {
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 25,
+          bottom: bottomOffset,
           left: 20,
           right: 20,
           backgroundColor: Colors.bg.card,
