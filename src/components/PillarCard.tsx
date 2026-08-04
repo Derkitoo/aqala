@@ -54,7 +54,7 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
           <Icon color={pillar.color} size={22} strokeWidth={2.5} />
         </View>
         <View style={styles.headerText}>
-          <Text style={[styles.nameFr, { color: pillar.color }]}>{pillar.nameFr}</Text>
+          <Text style={styles.nameFr}>{pillar.nameFr}</Text>
           {!compact && (
             <Text style={styles.nameAr}>{pillar.nameAr}</Text>
           )}
@@ -92,9 +92,12 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.lg,
     padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.bg.cardBorder,
     marginBottom: Spacing.sm,
+    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   cardCompact: {
     padding: Spacing.sm,

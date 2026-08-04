@@ -79,24 +79,23 @@ export function HomeScreen() {
               <Text style={styles.maqamName}>{currentMaqam.nameFr}</Text>
             </Pressable>
             <Pressable onPress={() => navigation.navigate('Settings')} style={styles.settingsBtn}>
-              <Settings color={Colors.text.primary} size={20} />
+              <Settings color={Colors.text.secondary} size={20} />
             </Pressable>
           </View>
         </Animated.View>
 
-        {/* Streak banner */}
-        {currentStreak > 0 && (
-          <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.streakBanner}>
-            <Flame color={Colors.gold} size={18} />
-            <Text style={styles.streakText}>
-              {currentStreak} jour{currentStreak > 1 ? 's' : ''} de constance
-            </Text>
-          </Animated.View>
-        )}
-
         {/* Baraka Score Ring */}
         <View style={styles.ringSection}>
           <BarakaScoreRing breakdown={currentScore ?? emptyScore} size={200} />
+
+          {currentStreak > 0 && (
+            <Animated.View entering={FadeInDown.delay(200).springify()} style={styles.streakRow}>
+              <Flame color={Colors.gold} size={16} />
+              <Text style={styles.streakText}>
+                {currentStreak} jour{currentStreak > 1 ? 's' : ''} de constance
+              </Text>
+            </Animated.View>
+          )}
 
           {dayComplete && (
             <View style={styles.completeBadge}>
@@ -145,7 +144,7 @@ export function HomeScreen() {
         {/* Trend insight — built from history already collected */}
         {trends.sampleSize >= 3 && trends.weakestPillar && (
           <Pressable
-            style={[styles.trendCard, { borderColor: trends.weakestPillar.color + '44' }]}
+            style={[styles.trendCard, { borderLeftWidth: 3, borderLeftColor: trends.weakestPillar.color }]}
             onPress={() => navigation.navigate('WeeklyReport')}
           >
             <TrendingDown color={trends.weakestPillar.color} size={20} />
@@ -191,7 +190,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   greeting: {
     fontSize: Typography.sizes.xl,
@@ -212,12 +211,8 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   },
   maqamBadge: {
     alignItems: 'center',
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
     paddingVertical: Spacing.xs,
     paddingHorizontal: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.bg.cardBorder,
   },
   maqamIcon: { fontSize: 20 },
   maqamName: {
@@ -227,24 +222,16 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     marginTop: 2,
   },
   settingsBtn: {
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
     padding: Spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.bg.cardBorder,
   },
 
-  streakBanner: {
+  streakRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    marginBottom: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.bg.cardBorder,
+    marginTop: Spacing.md,
   },
   streakText: {
     fontSize: Typography.sizes.sm,
@@ -252,7 +239,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     color: Colors.gold,
   },
 
-  ringSection: { alignItems: 'center', marginVertical: Spacing.lg },
+  ringSection: { alignItems: 'center', marginVertical: Spacing.xl },
   completeBadge: {
     marginTop: Spacing.sm,
     backgroundColor: Colors.gold + '22',
@@ -277,10 +264,14 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     alignItems: 'center',
     gap: Spacing.sm,
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    borderWidth: 1,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   trendLabel: {
     fontSize: Typography.sizes.xs,
@@ -300,8 +291,8 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     fontSize: Typography.sizes.lg,
     fontFamily: Typography.fonts.bold,
     color: Colors.text.primary,
-    marginBottom: Spacing.sm,
-    marginTop: Spacing.sm,
+    marginBottom: Spacing.md,
+    marginTop: Spacing.xs,
   },
 
   goldenCTA: {
@@ -309,11 +300,14 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     alignItems: 'center',
     gap: Spacing.md,
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     marginTop: Spacing.md,
+    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   goldenCTAIcon: { 
     padding: Spacing.xs,
