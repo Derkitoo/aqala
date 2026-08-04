@@ -111,6 +111,11 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    // headerRow centers against the full nameFr+nameAr block, which pulls
+    // the badge below the pillar name specifically (it only has one line).
+    // Anchoring the badge to the top instead lines its center up with
+    // nameFr's line, not the midpoint between both lines.
+    alignSelf: 'flex-start',
   },
   headerText: {
     flex: 1,
