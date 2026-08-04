@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView,
+  View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView, useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
@@ -44,8 +44,9 @@ export function SettingsScreen() {
     resetOnboarding,
   } = useAppStore();
 
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const { Colors, Typography, Spacing, Radius, scale } = useScaledTheme();
   const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { width, height } = useWindowDimensions();
 
   const handleRefreshLocation = async () => {
     try {
@@ -255,6 +256,9 @@ export function SettingsScreen() {
         </Pressable>
 
         <Text style={styles.versionText}>Aqal Al-Qalil • Version 1.0.0</Text>
+        <Text style={styles.versionText}>
+          Écran : {Math.round(width)}×{Math.round(height)}px • Échelle texte : ×{scale.toFixed(2)}
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

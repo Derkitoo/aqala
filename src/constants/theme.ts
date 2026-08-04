@@ -126,16 +126,21 @@ export const Typography = {
 // pixel-identical to before; only outlier widths are adjusted, and only
 // moderately (capped) so nothing balloons on a tablet.
 
-const BASELINE_WIDTH = 390; // iPhone 12/13/14 — a common, unremarkable phone width
 const STANDARD_MIN = 360;   // narrowest mainstream phone (e.g. older compact Android)
 const STANDARD_MAX = 430;   // widest mainstream "plus/max" phone
 const MIN_SCALE = 0.92;
-const MAX_SCALE = 1.35;
+const MAX_SCALE = 1.8;
+// How fast the scale ramps up past STANDARD_MAX — every this-many px of extra
+// width adds +1.0x scale. Smaller = more aggressive. 200 reaches the 1.8x cap
+// by ~600px wide, which is generous enough for outlier widths (a folded
+// foldable's cover screen, a tablet) without needing to know the exact number.
+const RAMP_PX_PER_SCALE_UNIT = 200;
 
 function computeScale(width: number): number {
   if (width >= STANDARD_MIN && width <= STANDARD_MAX) return 1;
-  const raw = width / BASELINE_WIDTH;
-  return Math.min(Math.max(raw, MIN_SCALE), MAX_SCALE);
+  if (width < STANDARD_MIN) return Math.max(width / STANDARD_MIN, MIN_SCALE);
+  const raw = 1 + (width - STANDARD_MAX) / RAMP_PX_PER_SCALE_UNIT;
+  return Math.min(raw, MAX_SCALE);
 }
 
 function scaleRecord<T extends Record<string, number>>(obj: T, scale: number): T {
