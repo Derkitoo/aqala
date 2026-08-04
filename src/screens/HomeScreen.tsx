@@ -196,7 +196,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   greeting: {
     fontSize: Typography.sizes.xl,
     fontFamily: Typography.fonts.heavy,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   dateLabel: {
     fontSize: Typography.sizes.sm,
@@ -299,7 +299,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   sectionTitle: {
     fontSize: Typography.sizes.lg,
     fontFamily: Typography.fonts.bold,
-    color: Colors.white,
+    color: Colors.text.primary,
     marginBottom: Spacing.sm,
     marginTop: Spacing.sm,
   },

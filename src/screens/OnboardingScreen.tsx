@@ -305,7 +305,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   heroTitle: {
     fontSize: 40, fontWeight: Typography.weights.heavy,
-    color: Colors.white, textAlign: 'center',
+    color: Colors.text.primary, textAlign: 'center',
   },
   heroAr: {
     fontSize: Typography.sizes.xxl, color: Colors.gold,
@@ -338,7 +338,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   stepTitle: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.heavy,
-    color: Colors.white,
+    color: Colors.text.primary,
     marginTop: Spacing.lg,
   },
   stepSubtitle: {
@@ -358,7 +358,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   modeHeader: { flexDirection: 'row', alignItems: 'center' },
   modeTitle: {
     fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   modeSubtitle: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
   radioOuter: {

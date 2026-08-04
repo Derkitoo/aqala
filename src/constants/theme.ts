@@ -44,6 +44,12 @@ export const PremiumColors = {
 
 export const LightColors = {
   ...commonColors,
+  // Bright gold reads well on black but fails contrast on a white/light
+  // background — darkened specifically for this theme (same hue family,
+  // still reads as "gold"). Backgrounds/tints using Colors.gold + alpha
+  // (badges, progress bars) are unaffected in spirit, just a shade deeper.
+  gold: '#A87B0A',
+  goldDim: '#7A5A08',
   isDark: false,
   bg: {
     primary: '#F9FAFB', // Très doux

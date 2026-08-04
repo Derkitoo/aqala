@@ -130,7 +130,7 @@ export function PillarPhysicalScreen() {
             {/* Tips */}
             <View style={styles.tipsBox}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm }}>
-                <AlertCircle size={16} color={Colors.white} />
+                <AlertCircle size={16} color={Colors.text.primary} />
                 <Text style={styles.tipsTitle}>Rappels</Text>
               </View>
               <Text style={styles.tip}>• Fenêtre idéale : avant Maghrib (lumière naturelle)</Text>
@@ -204,7 +204,7 @@ export function PillarPhysicalScreen() {
         {phase === 'qaylulah_guide' && (
           <View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: Spacing.md }}>
-              <Moon size={24} color={Colors.white} />
+              <Moon size={24} color={Colors.text.primary} />
               <Text style={styles.phaseLabel}>Qaylulah</Text>
             </View>
             {QAYLULAH_TIPS.map((tip, i) => (
@@ -228,7 +228,7 @@ export function PillarPhysicalScreen() {
         {phase === 'qaylulah_timer' && (
           <>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: Spacing.sm }}>
-              <Moon size={24} color={Colors.white} />
+              <Moon size={24} color={Colors.text.primary} />
               <Text style={styles.phaseLabel}>Qaylulah</Text>
             </View>
             <Text style={styles.phaseSubLabel}>
@@ -373,7 +373,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   },
   hadithText: {
     fontSize: Typography.sizes.md,
-    color: Colors.white,
+    color: Colors.text.primary,
     fontStyle: 'italic',
     lineHeight: 22,
   },

@@ -120,7 +120,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   nameFr: {
     fontSize: Typography.sizes.md,
     fontFamily: Typography.fonts.bold,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   nameAr: {
     fontSize: Typography.sizes.xs,
@@ -135,7 +135,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   score: {
     fontSize: Typography.sizes.xl,
     fontFamily: Typography.fonts.heavy,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   scoreMax: {
     fontSize: Typography.sizes.sm,

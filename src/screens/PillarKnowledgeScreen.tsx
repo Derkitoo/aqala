@@ -79,7 +79,7 @@ export function PillarKnowledgeScreen() {
                 return (
                   <CategoryCard
                     key={cat}
-                    icon={<BookOpen size={28} color={Colors.white} />}
+                    icon={<BookOpen size={28} color={Colors.text.primary} />}
                     label={label}
                     bonus={bonusPoints > 0 ? `+${bonusPoints} pts bonus` : undefined}
                     onPress={() => handleCategorySelect(cat)}

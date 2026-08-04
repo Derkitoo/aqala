@@ -302,7 +302,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   title: {
     fontSize: Typography.sizes.xxl,
     fontWeight: Typography.weights.heavy,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   subtitle: {
     fontSize: Typography.sizes.sm,
@@ -329,7 +329,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   cardLabel: {
     fontSize: Typography.sizes.sm,
     fontWeight: Typography.weights.semibold,
-    color: Colors.white,
+    color: Colors.text.primary,
     marginBottom: Spacing.xs,
   },
 
@@ -402,7 +402,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     marginBottom: Spacing.xs,
   },
   infoLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary },
-  infoValue: { fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold, color: Colors.white },
+  infoValue: { fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold, color: Colors.text.primary },
 
   refreshBtn: {
     flexDirection: 'row',
@@ -430,7 +430,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   modeTitle: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   modeSub: {
     fontSize: Typography.sizes.xs,
@@ -463,7 +463,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   toggleTitle: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
-    color: Colors.white,
+    color: Colors.text.primary,
   },
   toggleDesc: {
     fontSize: Typography.sizes.xs,

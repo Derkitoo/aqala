@@ -132,7 +132,7 @@ export function RootNavigator() {
 
   const screenOptions = {
     headerStyle:     { backgroundColor: Colors.bg.primary },
-    headerTintColor: Colors.white,
+    headerTintColor: Colors.text.primary,
     headerTitleStyle: { fontWeight: Typography.weights.bold as any },
     contentStyle:    { backgroundColor: Colors.bg.primary },
   };

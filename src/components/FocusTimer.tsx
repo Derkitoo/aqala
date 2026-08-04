@@ -225,7 +225,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   time: {
     fontSize: 64,
     fontWeight: Typography.weights.heavy,
-    color: Colors.white,
+    color: Colors.text.primary,
     letterSpacing: -1,
     fontVariant: ['tabular-nums'],
   },

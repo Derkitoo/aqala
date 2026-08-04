@@ -265,7 +265,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     gap: Spacing.sm,
     marginBottom: Spacing.lg,
   },
-  title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.white },
+  title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.text.primary },
 
   maqamCard: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
@@ -326,7 +326,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.lg, gap: Spacing.sm,
   },
-  nextMaqamTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.white },
+  nextMaqamTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
   progressTrack: { height: 8, backgroundColor: Colors.border, borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
   nextMaqamPct: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
