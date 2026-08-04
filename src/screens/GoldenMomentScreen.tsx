@@ -16,32 +16,12 @@ interface Dhikr {
   count: number;
 }
 
-// Adhkar du matin — Hisn al-Muslim (rite complet)
+// Adhkar du matin — Hisn al-Muslim (rite complet). Les formules propres au
+// matin ("Asbahna...") sont volontairement placées en tête du carrousel :
+// les récitations communes au matin ET au soir (Ayat al-Kursi, les Quls...)
+// arrivaient sinon en premier, donnant l'impression trompeuse que les
+// adhkar du matin et du soir étaient identiques.
 const MORNING_ADHKAR: Dhikr[] = [
-  {
-    text: 'اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ ۚ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ...',
-    transliteration: 'Ayat al-Kursi (Al-Baqara, 2:255)',
-    translation: 'Allah — il n\'y a de divinité que Lui, le Vivant, Celui qui subsiste par Lui-même. Ni somnolence ni sommeil ne Le saisissent...',
-    count: 1,
-  },
-  {
-    text: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
-    transliteration: 'Sourate Al-Ikhlas (112)',
-    translation: 'Dis : "Il est Allah, Unique. Allah, Le Seul à être imploré pour ce que nous désirons. Il n\'a jamais engendré, n\'a pas été engendré non plus. Et nul n\'est égal à Lui."',
-    count: 3,
-  },
-  {
-    text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
-    transliteration: 'Sourate Al-Falaq (113)',
-    translation: 'Dis : "Je cherche protection auprès du Seigneur de l\'aube naissante, contre le mal des êtres qu\'Il a créés, contre le mal de l\'obscurité quand elle s\'approfondit, contre le mal des souffleuses sur les nœuds, et contre le mal de l\'envieux quand il envie."',
-    count: 3,
-  },
-  {
-    text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',
-    transliteration: 'Sourate An-Nas (114)',
-    translation: 'Dis : "Je cherche protection auprès du Seigneur des hommes, Roi des hommes, Dieu des hommes, contre le mal du mauvais conseiller, furtif, qui souffle le mal dans les poitrines des hommes, qu\'il soit djinn ou homme."',
-    count: 3,
-  },
   {
     text: 'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ',
     transliteration: 'Asbahna wa asbahal mulku lillahi walhamdu lillah, la ilaha illallahu wahdahu la sharika lah',
@@ -71,6 +51,30 @@ const MORNING_ADHKAR: Dhikr[] = [
     transliteration: 'Allahumma inni asbahtu ush-hiduka wa ush-hidu hamalata \'arshik, wa mala\'ikatak, wa jami\'a khalqik, annaka antallahu la ilaha illa anta wahdaka la sharika lak, wa anna Muhammadan \'abduka wa rasuluk',
     translation: 'Ô Allah ! Je Te prends à témoin, ainsi que les porteurs de Ton Trône, Tes anges et toute Ta création, que Tu es Allah, qu\'il n\'y a de divinité que Toi, l\'Unique sans associé, et que Muhammad est Ton serviteur et Ton messager.',
     count: 4,
+  },
+  {
+    text: 'اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ ۚ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ...',
+    transliteration: 'Ayat al-Kursi (Al-Baqara, 2:255)',
+    translation: 'Allah — il n\'y a de divinité que Lui, le Vivant, Celui qui subsiste par Lui-même. Ni somnolence ni sommeil ne Le saisissent...',
+    count: 1,
+  },
+  {
+    text: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+    transliteration: 'Sourate Al-Ikhlas (112)',
+    translation: 'Dis : "Il est Allah, Unique. Allah, Le Seul à être imploré pour ce que nous désirons. Il n\'a jamais engendré, n\'a pas été engendré non plus. Et nul n\'est égal à Lui."',
+    count: 3,
+  },
+  {
+    text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+    transliteration: 'Sourate Al-Falaq (113)',
+    translation: 'Dis : "Je cherche protection auprès du Seigneur de l\'aube naissante, contre le mal des êtres qu\'Il a créés, contre le mal de l\'obscurité quand elle s\'approfondit, contre le mal des souffleuses sur les nœuds, et contre le mal de l\'envieux quand il envie."',
+    count: 3,
+  },
+  {
+    text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',
+    transliteration: 'Sourate An-Nas (114)',
+    translation: 'Dis : "Je cherche protection auprès du Seigneur des hommes, Roi des hommes, Dieu des hommes, contre le mal du mauvais conseiller, furtif, qui souffle le mal dans les poitrines des hommes, qu\'il soit djinn ou homme."',
+    count: 3,
   },
   {
     text: 'حَسْبِيَ اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
@@ -128,32 +132,10 @@ const MORNING_ADHKAR: Dhikr[] = [
   },
 ];
 
-// Adhkar du soir — même socle, formulé au soir (Hisn al-Muslim)
+// Adhkar du soir — même socle, formulé au soir (Hisn al-Muslim). Même
+// réordonnancement que le matin, pour la même raison : les formules
+// propres au soir doivent apparaître avant les récitations partagées.
 const EVENING_ADHKAR: Dhikr[] = [
-  {
-    text: 'اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ ۚ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ...',
-    transliteration: 'Ayat al-Kursi (Al-Baqara, 2:255)',
-    translation: 'Allah — il n\'y a de divinité que Lui, le Vivant, Celui qui subsiste par Lui-même. Ni somnolence ni sommeil ne Le saisissent...',
-    count: 1,
-  },
-  {
-    text: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
-    transliteration: 'Sourate Al-Ikhlas (112)',
-    translation: 'Dis : "Il est Allah, Unique. Allah, Le Seul à être imploré pour ce que nous désirons. Il n\'a jamais engendré, n\'a pas été engendré non plus. Et nul n\'est égal à Lui."',
-    count: 3,
-  },
-  {
-    text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
-    transliteration: 'Sourate Al-Falaq (113)',
-    translation: 'Dis : "Je cherche protection auprès du Seigneur de l\'aube naissante, contre le mal des êtres qu\'Il a créés, contre le mal de l\'obscurité quand elle s\'approfondit, contre le mal des souffleuses sur les nœuds, et contre le mal de l\'envieux quand il envie."',
-    count: 3,
-  },
-  {
-    text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',
-    transliteration: 'Sourate An-Nas (114)',
-    translation: 'Dis : "Je cherche protection auprès du Seigneur des hommes, Roi des hommes, Dieu des hommes, contre le mal du mauvais conseiller, furtif, qui souffle le mal dans les poitrines des hommes, qu\'il soit djinn ou homme."',
-    count: 3,
-  },
   {
     text: 'أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لاَ إِلَهَ إِلاَّ اللَّهُ وَحْدَهُ لاَ شَرِيكَ لَهُ',
     transliteration: 'Amsayna wa amsal mulku lillahi walhamdu lillah, la ilaha illallahu wahdahu la sharika lah',
@@ -183,6 +165,30 @@ const EVENING_ADHKAR: Dhikr[] = [
     transliteration: 'Allahumma inni amsaytu ush-hiduka wa ush-hidu hamalata \'arshik, wa mala\'ikatak, wa jami\'a khalqik, annaka antallahu la ilaha illa anta wahdaka la sharika lak, wa anna Muhammadan \'abduka wa rasuluk',
     translation: 'Ô Allah ! Je Te prends à témoin, ainsi que les porteurs de Ton Trône, Tes anges et toute Ta création, que Tu es Allah, qu\'il n\'y a de divinité que Toi, l\'Unique sans associé, et que Muhammad est Ton serviteur et Ton messager.',
     count: 4,
+  },
+  {
+    text: 'اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ ۚ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ...',
+    transliteration: 'Ayat al-Kursi (Al-Baqara, 2:255)',
+    translation: 'Allah — il n\'y a de divinité que Lui, le Vivant, Celui qui subsiste par Lui-même. Ni somnolence ni sommeil ne Le saisissent...',
+    count: 1,
+  },
+  {
+    text: 'قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ',
+    transliteration: 'Sourate Al-Ikhlas (112)',
+    translation: 'Dis : "Il est Allah, Unique. Allah, Le Seul à être imploré pour ce que nous désirons. Il n\'a jamais engendré, n\'a pas été engendré non plus. Et nul n\'est égal à Lui."',
+    count: 3,
+  },
+  {
+    text: 'قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِن شَرِّ مَا خَلَقَ ۝ وَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِن شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ',
+    transliteration: 'Sourate Al-Falaq (113)',
+    translation: 'Dis : "Je cherche protection auprès du Seigneur de l\'aube naissante, contre le mal des êtres qu\'Il a créés, contre le mal de l\'obscurité quand elle s\'approfondit, contre le mal des souffleuses sur les nœuds, et contre le mal de l\'envieux quand il envie."',
+    count: 3,
+  },
+  {
+    text: 'قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِن شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ',
+    transliteration: 'Sourate An-Nas (114)',
+    translation: 'Dis : "Je cherche protection auprès du Seigneur des hommes, Roi des hommes, Dieu des hommes, contre le mal du mauvais conseiller, furtif, qui souffle le mal dans les poitrines des hommes, qu\'il soit djinn ou homme."',
+    count: 3,
   },
   {
     text: 'حَسْبِيَ اللَّهُ لاَ إِلَهَ إِلاَّ هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',
