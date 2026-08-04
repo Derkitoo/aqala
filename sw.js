@@ -8,7 +8,7 @@
 // offline, so online users never get a stale entry bundle. Only the
 // content-hashed static assets (fonts, images) are cache-first, since
 // their filename already changes whenever their content does.
-const CACHE_VERSION = 'mseivccp';
+const CACHE_VERSION = 'msf9uu3f';
 const CACHE_NAME = `aqala-${CACHE_VERSION}`;
 const SCOPE = self.registration.scope; // e.g. https://derkitoo.github.io/aqala/
 
