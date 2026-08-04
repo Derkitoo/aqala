@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { ChevronRight, CheckCircle } from 'lucide-react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import type { PillarDefinition } from '../constants/pillars';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -93,11 +93,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
-    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    ...cardShadow(Colors),
   },
   cardCompact: {
     padding: Spacing.sm,

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   ACTIVITY_TYPES, ACTIVITY_GUIDE_INTRO, pickActivitySuggestions, QAYLULAH_TIPS,
   type ActivityType, type ActivitySuggestion,
@@ -368,8 +368,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
-    borderWidth: 1,
-    borderColor: Colors.pillar.physical + '33',
+    ...cardShadow(Colors),
   },
   hadithText: {
     fontSize: Typography.sizes.md,
@@ -384,6 +383,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
+    ...cardShadow(Colors),
   },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
   balanceTitle: {
@@ -403,10 +403,9 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.pillar.physical + '22',
+    ...cardShadow(Colors),
   },
-  sectionCardDone: { borderColor: Colors.success, backgroundColor: Colors.success + '0d' },
+  sectionCardDone: { backgroundColor: Colors.success + '0d' },
   sectionTitle2: {
     fontSize: Typography.sizes.md,
     fontWeight: Typography.weights.bold,
@@ -417,12 +416,11 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   arrow: { fontSize: Typography.sizes.xl, color: Colors.text.muted },
 
   tipsBox: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.bg.card,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginTop: Spacing.md,
+    ...cardShadow(Colors),
   },
   tipsTitle: {
     fontSize: Typography.sizes.sm,
@@ -449,8 +447,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.pillar.physical + '22',
+    ...cardShadow(Colors),
   },
   activityIconBadge: {
     width: 44, height: 44, borderRadius: 22,
@@ -493,6 +490,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.sm,
+    ...cardShadow(Colors),
   },
   suggestionTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
   suggestionDesc: { flex: 1, fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 17 },

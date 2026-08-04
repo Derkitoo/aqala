@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   TARWIH_CATEGORIES, TARWIH_GUIDE_INTRO, pickTarwihSuggestions,
   type TarwihCategory, type TarwihSuggestion,
@@ -351,6 +351,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
+    ...cardShadow(Colors),
   },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
   balanceTitle: {
@@ -366,9 +367,9 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.pillar.sleep + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.pillar.sleep + '22',
+    ...cardShadow(Colors),
   },
-  sasCardActive: { borderColor: Colors.pillar.sleep },
+  sasCardActive: { borderLeftWidth: 3, borderLeftColor: Colors.pillar.sleep },
   sasIcon: { fontSize: 22 },
   sasTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
   sasSub: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
@@ -384,9 +385,9 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.pillar.sleep + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.pillar.sleep + '22',
+    ...cardShadow(Colors),
   },
-  sleepBlockDone: { borderColor: Colors.success, backgroundColor: Colors.success + '0d' },
+  sleepBlockDone: { backgroundColor: Colors.success + '0d' },
   sleepBlockTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
   sleepBlockSub: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
   pointsBadge: { fontSize: Typography.sizes.xs, color: Colors.gold },
@@ -394,11 +395,11 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   qiyamCard: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: 'transparent', borderRadius: Radius.md,
+    backgroundColor: Colors.goldDim + '11', borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.gold + '44',
+    ...cardShadow(Colors),
   },
-  qiyamCardDone: { borderColor: Colors.success },
+  qiyamCardDone: { borderLeftWidth: 3, borderLeftColor: Colors.success },
   qiyamIcon: { fontSize: 22 },
   qiyamTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.gold },
   qiyamSub: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
@@ -406,7 +407,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   checkboxDone: { backgroundColor: Colors.success, borderColor: Colors.success },
   checkTick: { fontSize: 14, color: Colors.bg.primary, fontWeight: Typography.weights.bold as any },
 
-  guideBox: { backgroundColor: 'transparent', borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, padding: Spacing.md, marginTop: Spacing.md },
+  guideBox: { backgroundColor: Colors.bg.card, borderRadius: Radius.md, padding: Spacing.md, marginTop: Spacing.md, ...cardShadow(Colors) },
   guideTitle: { fontSize: Typography.sizes.sm, fontWeight: Typography.weights.bold, color: Colors.text.primary, marginBottom: Spacing.md },
   guideRow: { flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.sm, gap: Spacing.sm },
   guideTime: { fontSize: Typography.sizes.sm, color: Colors.gold, fontWeight: Typography.weights.bold, width: 48 },
@@ -419,7 +420,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.pillar.sleep + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.pillar.sleep + '22',
+    ...cardShadow(Colors),
   },
   tarwihIconBadge: {
     width: 44, height: 44, borderRadius: 22,
@@ -457,6 +458,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.sm,
+    ...cardShadow(Colors),
   },
   suggestionTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
   suggestionDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 17 },

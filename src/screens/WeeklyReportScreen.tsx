@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Modal } from 'react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
 import { useStreakStore } from '../store/useStreakStore';
 import { useDayStore } from '../store/useDayStore';
@@ -64,7 +64,7 @@ export function WeeklyReportScreen() {
         </View>
 
         {/* Maqam card */}
-        <View style={[styles.maqamCard, { borderColor: currentMaqam.color }]}>
+        <View style={[styles.maqamCard, { borderLeftWidth: 3, borderLeftColor: currentMaqam.color }]}>
           <Text style={styles.maqamIcon}>{currentMaqam.icon}</Text>
           <View style={{ flex: 1 }}>
             <Text style={[styles.maqamName, { color: currentMaqam.color }]}>
@@ -271,7 +271,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.bg.card, borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.lg,
-    borderWidth: 1.5,
+    ...cardShadow(Colors),
   },
   maqamIcon: { fontSize: 40 },
   maqamName: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy },
@@ -282,6 +282,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   statBox: {
     flex: 1, backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, alignItems: 'center',
+    ...cardShadow(Colors),
   },
   statValue: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy },
   statLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, textAlign: 'center' },
@@ -312,6 +313,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   trendsEmptyBox: {
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.lg,
+    ...cardShadow(Colors),
   },
   trendsEmptyText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20, fontStyle: 'italic' },
   trendsSubtitle: { fontSize: Typography.sizes.xs, color: Colors.text.muted, marginBottom: Spacing.sm },
@@ -319,12 +321,14 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginTop: Spacing.sm,
+    ...cardShadow(Colors),
   },
   insightText: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20 },
 
   nextMaqamCard: {
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.lg, gap: Spacing.sm,
+    ...cardShadow(Colors),
   },
   nextMaqamTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
   progressTrack: { height: 8, backgroundColor: Colors.border, borderRadius: 4, overflow: 'hidden' },
@@ -334,9 +338,9 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   contentItem: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    backgroundColor: 'transparent', borderRadius: Radius.md,
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.xs,
+    ...cardShadow(Colors),
   },
   contentText: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.primary, fontWeight: Typography.weights.semibold },
 
@@ -347,7 +351,8 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   modalContent: {
     backgroundColor: Colors.bg.card, borderRadius: Radius.lg,
     padding: Spacing.lg, width: '100%', maxHeight: '80%',
-    borderWidth: 1, borderColor: Colors.gold,
+    borderTopWidth: 3, borderTopColor: Colors.gold,
+    ...cardShadow(Colors),
   },
   modalTitle: {
     fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold,

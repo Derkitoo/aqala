@@ -9,6 +9,7 @@ import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated'
 import { Home, BarChart2 } from 'lucide-react-native';
 import { useScaledTheme, ThemeColors } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
+import { BackButton } from '../components/BackButton';
 
 // Required for React Navigation performance & stability (native only)
 if (Platform.OS !== 'web') {
@@ -131,10 +132,15 @@ export function RootNavigator() {
   const { Colors, Typography } = useScaledTheme();
 
   const screenOptions = {
-    headerStyle:     { backgroundColor: Colors.bg.primary },
-    headerTintColor: Colors.text.primary,
+    headerStyle:      { backgroundColor: Colors.bg.primary },
+    headerShadowVisible: false,
+    headerTintColor:  Colors.text.primary,
+    headerTitleAlign: 'center' as const,
     headerTitleStyle: { fontWeight: Typography.weights.bold as any },
-    contentStyle:    { backgroundColor: Colors.bg.primary },
+    headerBackVisible: false,
+    headerLeft:       ({ canGoBack }: { canGoBack?: boolean }) =>
+      canGoBack ? <BackButton /> : null,
+    contentStyle:     { backgroundColor: Colors.bg.primary },
   };
 
   return (

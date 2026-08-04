@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import { useScaledTheme, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { useDayStore } from '../store/useDayStore';
 import { PRAYERS } from '../constants/pillars';
 import type { PrayerName, PrayerStatus } from '../store/useDayStore';
@@ -127,7 +127,7 @@ export function PillarSpiritualScreen() {
         {/* Evening Adhkar shortcut */}
         {!s.adhkarEveningDone && (
           <Pressable
-            style={[styles.goldenBtn, { borderColor: Colors.pillar.spiritual, marginTop: Spacing.sm }]}
+            style={[styles.goldenBtn, { borderLeftWidth: 3, borderLeftColor: Colors.pillar.spiritual, marginTop: Spacing.sm }]}
             onPress={() => navigation.navigate('GoldenMoment', { type: 'evening' })}
           >
             <Text style={[styles.goldenBtnText, { color: Colors.pillar.spiritual }]}>🌙 Lancer les Adhkâr du Soir</Text>
@@ -250,6 +250,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
+    ...cardShadow(Colors),
   },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
   balanceTitle: {
@@ -275,8 +276,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.pillar.spiritual + '22',
+    ...cardShadow(Colors),
   },
   prayerIcon: { fontSize: 22 },
   prayerInfo: { flex: 1, marginLeft: Spacing.sm },
@@ -306,8 +306,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.pillar.spiritual + '22',
+    ...cardShadow(Colors),
   },
   toggleLabel: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.primary, marginLeft: Spacing.sm },
   toggleRight: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
@@ -321,12 +320,11 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   goldenBtn: {
     backgroundColor: Colors.goldDim + '22',
-    borderWidth: 1.5,
-    borderColor: Colors.gold,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginTop: Spacing.md,
     alignItems: 'center',
+    ...cardShadow(Colors),
   },
   goldenBtnText: {
     fontSize: Typography.sizes.lg,
@@ -344,6 +342,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     padding: Spacing.md,
     marginTop: Spacing.md,
     alignItems: 'center',
+    ...cardShadow(Colors),
   },
   goldenDoneText: {
     fontSize: Typography.sizes.md,

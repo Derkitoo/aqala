@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable,
   TextInput, SafeAreaView, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useScaledTheme, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   SOCIAL_CATEGORIES, SOCIAL_GUIDE_INTRO, pickSocialSuggestions,
   type SocialCategory, type SocialSuggestion,
@@ -304,10 +304,9 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   ruleBox: {
     backgroundColor: Colors.pillar.social + '12',
     borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: Colors.pillar.social + '33',
     padding: Spacing.md,
     marginBottom: Spacing.lg,
+    ...cardShadow(Colors),
   },
   ruleTitleText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary, marginBottom: Spacing.sm },
   ruleBody: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20 },
@@ -317,6 +316,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.lg,
+    ...cardShadow(Colors),
   },
   balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
   balanceTitle: {
@@ -347,7 +347,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.pillar.social + '0d', borderRadius: Radius.lg,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.pillar.social + '22',
+    ...cardShadow(Colors),
   },
   catIconBadge: {
     width: 44, height: 44, borderRadius: 22,
@@ -385,6 +385,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.sm,
+    ...cardShadow(Colors),
   },
   suggestionTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
   suggestionDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 17 },
@@ -420,7 +421,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   },
   submitBtnText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.bg.primary },
 
-  doneCard: { alignItems: 'center', gap: Spacing.sm, backgroundColor: Colors.bg.card, borderRadius: Radius.lg, padding: Spacing.xl },
+  doneCard: { alignItems: 'center', gap: Spacing.sm, backgroundColor: Colors.bg.card, borderRadius: Radius.lg, padding: Spacing.xl, ...cardShadow(Colors) },
   doneTitle: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy, color: Colors.success },
   doneSub: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
   doneNoteBox: { backgroundColor: Colors.border, borderRadius: Radius.md, padding: Spacing.md, width: '100%' },

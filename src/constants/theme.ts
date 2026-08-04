@@ -78,6 +78,20 @@ export function useTheme(): ThemeColors {
 // Fallback for non-React contexts if needed (default to Premium)
 export const Colors = PremiumColors;
 
+// Shared elevation used for every "floating" card across the app, replacing
+// the old 1px border look. Shadow opacity is tuned per theme: a visible dark
+// shadow reads on the near-black dark background, but the same opacity would
+// look muddy on a white card, hence the lighter value for light theme.
+export function cardShadow(Colors: ThemeColors) {
+  return {
+    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  } as const;
+}
+
 export const Spacing = {
   xs: 4,
   sm: 8,

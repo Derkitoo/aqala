@@ -4,7 +4,7 @@ import {
   SafeAreaView, KeyboardAvoidingView, Platform, Pressable
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   KNOWLEDGE_CATEGORIES, KNOWLEDGE_GUIDE_INTRO, pickKnowledgeSuggestions,
   type KnowledgeCategory, type KnowledgeSuggestion,
@@ -281,12 +281,11 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
-    backgroundColor: 'transparent',
+    backgroundColor: Colors.bg.card,
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.border,
+    ...cardShadow(Colors),
   },
   catLabel: {
     fontSize: Typography.sizes.md,
@@ -350,6 +349,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
+    ...cardShadow(Colors),
   },
   suggestionTitle: {
     fontSize: Typography.sizes.md,
@@ -415,13 +415,12 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   doneCard: {
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.border,
+    backgroundColor: Colors.bg.card,
     borderRadius: Radius.lg,
     padding: Spacing.xl,
     gap: Spacing.sm,
     marginTop: Spacing.lg,
+    ...cardShadow(Colors),
   },
   doneTitle: {
     fontSize: Typography.sizes.xl,

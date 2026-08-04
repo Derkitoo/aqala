@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Flame, Settings, Clock, TrendingDown, ChevronRight } from 'lucide-react-native';
-import { useScaledTheme, type TypographyShape, type SpacingShape, type RadiusShape, ThemeColors } from '../constants/theme';
+import { useScaledTheme, cardShadow, type TypographyShape, type SpacingShape, type RadiusShape, ThemeColors } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
 import { BarakaScoreRing } from '../components/BarakaScoreRing';
 import { PillarCard } from '../components/PillarCard';
@@ -267,11 +267,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.md,
-    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    ...cardShadow(Colors),
   },
   trendLabel: {
     fontSize: Typography.sizes.xs,
@@ -303,13 +299,9 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginTop: Spacing.md,
-    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    ...cardShadow(Colors),
   },
-  goldenCTAIcon: { 
+  goldenCTAIcon: {
     padding: Spacing.xs,
   },
   goldenCTATitle: {

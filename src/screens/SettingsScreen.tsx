@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { useAppStore, type AppMode, type NightMode, type MadhabType } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { showConfirm, showAlert } from '../utils/confirm';
@@ -325,6 +325,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderRadius: Radius.md,
     padding: Spacing.md,
     marginBottom: Spacing.md,
+    ...cardShadow(Colors),
   },
   cardLabel: {
     fontSize: Typography.sizes.sm,
