@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Modal } from 'react-native';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
 import { useStreakStore } from '../store/useStreakStore';
 import { useDayStore } from '../store/useDayStore';
@@ -52,8 +52,8 @@ export function WeeklyReportScreen() {
     return { key, day, status: calendarDots[key] ?? 'missed' };
   });
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -77,9 +77,9 @@ export function WeeklyReportScreen() {
 
         {/* Stats row */}
         <View style={styles.statsRow}>
-          <StatBox label="Streak actuel" value={`${currentStreak}j`} color={Colors.gold} Colors={Colors} />
-          <StatBox label="Plus long streak" value={`${longestStreak}j`} color={Colors.pillar.spiritual} Colors={Colors} />
-          <StatBox label="Moyenne 7j" value={`${sevenDayAverage}/100`} color={Colors.pillar.knowledge} Colors={Colors} />
+          <StatBox label="Streak actuel" value={`${currentStreak}j`} color={Colors.gold} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+          <StatBox label="Plus long streak" value={`${longestStreak}j`} color={Colors.pillar.spiritual} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+          <StatBox label="Moyenne 7j" value={`${sevenDayAverage}/100`} color={Colors.pillar.knowledge} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         </View>
 
         <Text style={styles.streakLabel}>{getStreakLabel(currentStreak)}</Text>
@@ -100,9 +100,9 @@ export function WeeklyReportScreen() {
           ))}
         </View>
         <View style={styles.calLegend}>
-          <LegendItem color={Colors.gold} label="Baraka Complète" Colors={Colors} />
-          <LegendItem color={Colors.pillar.knowledge} label="Partiel" Colors={Colors} />
-          <LegendItem color={Colors.border} label="Non validé" Colors={Colors} />
+          <LegendItem color={Colors.gold} label="Baraka Complète" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+          <LegendItem color={Colors.pillar.knowledge} label="Partiel" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+          <LegendItem color={Colors.border} label="Non validé" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         </View>
 
         {/* Trends — built from history already collected day-to-day */}
@@ -230,8 +230,11 @@ export function WeeklyReportScreen() {
   );
 }
 
-function StatBox({ label, value, color, Colors }: { label: string; value: string; color: string; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function StatBox({ label, value, color, Colors, Typography, Spacing, Radius }: {
+  label: string; value: string; color: string; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.statBox}>
       <Text style={[styles.statValue, { color }]}>{value}</Text>
@@ -240,8 +243,11 @@ function StatBox({ label, value, color, Colors }: { label: string; value: string
   );
 }
 
-function LegendItem({ color, label, Colors }: { color: string; label: string; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function LegendItem({ color, label, Colors, Typography, Spacing, Radius }: {
+  color: string; label: string; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.legendItem}>
       <View style={[styles.legendDot, { backgroundColor: color }]} />
@@ -250,7 +256,7 @@ function LegendItem({ color, label, Colors }: { color: string; label: string; Co
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
   headerRow: {

@@ -6,7 +6,7 @@ import {
 import { useKeepAwake } from 'expo-keep-awake';
 import * as Haptics from 'expo-haptics';
 import { Lock } from 'lucide-react-native';
-import { useTheme, ThemeColors, Typography, Spacing } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import { GOLDEN_MOMENT_DURATION_SECONDS } from '../constants/pillars';
 import { formatCountdown } from '../services/prayerTimes';
 
@@ -27,8 +27,8 @@ export function LockTimer({
   title = "Moment d'Or",
   subtitle = 'Le téléphone attend. Toi, tu restes là.',
 }: Props) {
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   // prevent screen sleep during Golden Moment (native only)
   if (Platform.OS !== 'web') {
@@ -116,16 +116,16 @@ export function LockTimer({
 
       {/* Emergency cancel (hidden, requires 3-second hold) */}
       {!completed && onCancel && (
-        <EmergencyCancel onCancel={onCancel} Colors={Colors} />
+        <EmergencyCancel onCancel={onCancel} Colors={Colors} Typography={Typography} Spacing={Spacing} />
       )}
     </View>
   );
 }
 
-function EmergencyCancel({ onCancel, Colors }: { onCancel: () => void; Colors: ThemeColors }) {
+function EmergencyCancel({ onCancel, Colors, Typography, Spacing }: { onCancel: () => void; Colors: ThemeColors; Typography: TypographyShape; Spacing: SpacingShape }) {
   const [holdProgress, setHoldProgress] = useState(0);
   const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   const startHold = useCallback(() => {
     holdInterval.current = setInterval(() => {
@@ -159,7 +159,7 @@ function EmergencyCancel({ onCancel, Colors }: { onCancel: () => void; Colors: T
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: Colors.bg.primary,

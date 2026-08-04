@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut, Easing } from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { LockTimer } from '../components/LockTimer';
-import { useTheme, ThemeColors, Typography, Spacing } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import { useDayStore } from '../store/useDayStore';
 import { useAppStore } from '../store/useAppStore';
 import { GOLDEN_MOMENT_DURATION_SECONDS } from '../constants/pillars';
@@ -248,8 +248,8 @@ const EVENING_ADHKAR: Dhikr[] = [
 
 function FadingDhikrCarousel({ items }: { items: Dhikr[] }) {
   const [index, setIndex] = useState(0);
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   useEffect(() => {
     setIndex(0);
@@ -328,7 +328,7 @@ export function GoldenMomentScreen() {
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   carouselContainer: {
     flex: 1,
     justifyContent: 'center',

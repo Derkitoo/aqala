@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable,
   TextInput, SafeAreaView, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useTheme, type ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   SOCIAL_CATEGORIES, SOCIAL_GUIDE_INTRO, pickSocialSuggestions,
   type SocialCategory, type SocialSuggestion,
@@ -42,8 +42,8 @@ export function PillarSocialScreen() {
   const [duration, setDuration] = useState(0);
   const [note, setNote] = useState(s.noteText ?? '');
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const balance = useMemo(() => computeSocialBalance(today, history), [today, history]);
 
@@ -99,7 +99,7 @@ export function PillarSocialScreen() {
           {/* Overview */}
           {phase === 'overview' && (
             <>
-              <SocialBalanceCard balance={balance} Colors={Colors} />
+              <SocialBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
               <Pressable style={styles.startBtn} onPress={() => setPhase('select')}>
                 <Text style={styles.startBtnText}>Commencer l'interaction réelle</Text>
                 <Text style={styles.startBtnSub}>20 minutes minimum • Face-à-face uniquement</Text>
@@ -142,6 +142,9 @@ export function PillarSocialScreen() {
               onStart={handleStartTimer}
               onBack={() => setPhase('select')}
               Colors={Colors}
+              Typography={Typography}
+              Spacing={Spacing}
+              Radius={Radius}
             />
           )}
 
@@ -213,8 +216,11 @@ export function PillarSocialScreen() {
   );
 }
 
-function SocialBalanceCard({ balance, Colors }: { balance: ReturnType<typeof computeSocialBalance>; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function SocialBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
+  balance: ReturnType<typeof computeSocialBalance>; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.balanceCard}>
       <View style={styles.balanceHeaderRow}>
@@ -238,10 +244,11 @@ function SocialBalanceCard({ balance, Colors }: { balance: ReturnType<typeof com
   );
 }
 
-function SocialGuide({ category, onStart, onBack, Colors }: {
+function SocialGuide({ category, onStart, onBack, Colors, Typography, Spacing, Radius }: {
   category: SocialCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   const [suggestions, setSuggestions] = useState<SocialSuggestion[]>(() => pickSocialSuggestions(category));
   const TypeIcon = CATEGORY_ICONS[category];
 
@@ -288,7 +295,7 @@ function SocialGuide({ category, onStart, onBack, Colors }: {
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
   title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.pillar.social, marginBottom: 4 },

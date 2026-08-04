@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
-import { useTheme, type ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { useDayStore } from '../store/useDayStore';
 import { PRAYERS } from '../constants/pillars';
 import type { PrayerName, PrayerStatus } from '../store/useDayStore';
@@ -21,8 +21,8 @@ export function PillarSpiritualScreen() {
   const { today, history, validatePrayer, setRawatibFajr, setDuha, setWitr } = useDayStore();
   const s = today.spiritual;
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   const STATUS_LABELS = React.useMemo(() => getStatusLabels(Colors), [Colors]);
   const balance = useMemo(() => computeSpiritualBalance(today, history), [today, history]);
 
@@ -33,7 +33,7 @@ export function PillarSpiritualScreen() {
         <Text style={styles.title}>Pilier Spirituel</Text>
         <Text style={styles.subtitle}>الصلاة نور — La Routine de la Baraka</Text>
 
-        <SpiritualBalanceCard balance={balance} Colors={Colors} />
+        <SpiritualBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
 
         {/* Prayers */}
         <SectionHeader title="Prières obligatoires" styles={styles} />
@@ -82,6 +82,9 @@ export function PillarSpiritualScreen() {
           onToggle={v => setRawatibFajr(v)}
           points="+4 pts"
           Colors={Colors}
+          Typography={Typography}
+          Spacing={Spacing}
+          Radius={Radius}
         />
         <ToggleRow
           label="Prière du Duha"
@@ -90,6 +93,9 @@ export function PillarSpiritualScreen() {
           onToggle={v => setDuha(v)}
           points="+3 pts"
           Colors={Colors}
+          Typography={Typography}
+          Spacing={Spacing}
+          Radius={Radius}
         />
         <ToggleRow
           label="Witr accompli"
@@ -98,6 +104,9 @@ export function PillarSpiritualScreen() {
           onToggle={v => setWitr(v)}
           points="+2 pts"
           Colors={Colors}
+          Typography={Typography}
+          Spacing={Spacing}
+          Radius={Radius}
         />
         {/* Golden Moment shortcut */}
         {!s.goldenMomentCompleted && (
@@ -135,8 +144,11 @@ export function PillarSpiritualScreen() {
   );
 }
 
-function SpiritualBalanceCard({ balance, Colors }: { balance: ReturnType<typeof computeSpiritualBalance>; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function SpiritualBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
+  balance: ReturnType<typeof computeSpiritualBalance>; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   if (balance.sampleSize < 3) return null;
 
   return (
@@ -176,12 +188,13 @@ function SectionHeader({ title, styles }: { title: string; styles: any }) {
 }
 
 function ToggleRow({
-  label, IconComponent, value, onToggle, points, Colors
+  label, IconComponent, value, onToggle, points, Colors, Typography, Spacing, Radius
 }: {
   label: string; IconComponent: any; value: boolean;
   onToggle: (v: boolean) => void; points: string; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <Pressable style={styles.toggleRow} onPress={() => onToggle(!value)}>
       <IconComponent size={20} color={value ? Colors.success : Colors.text.primary} />
@@ -207,7 +220,7 @@ function ActionChip({ label, color, onPress, styles }: { label: string; color: s
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
 

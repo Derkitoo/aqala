@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   ACTIVITY_TYPES, ACTIVITY_GUIDE_INTRO, pickActivitySuggestions, QAYLULAH_TIPS,
   type ActivityType, type ActivitySuggestion,
@@ -43,8 +43,8 @@ export function PillarPhysicalScreen() {
   const activityDone = p.activityCompletedAt !== null;
   const qaylulahDone = p.qaylulahCompletedAt !== null;
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const balance = useMemo(() => computePhysicalBalance(today, history), [today, history]);
 
@@ -91,7 +91,7 @@ export function PillarPhysicalScreen() {
               <Text style={styles.hadithRef}>— Sahih Bukhari</Text>
             </View>
 
-            <PhysicalBalanceCard balance={balance} Colors={Colors} />
+            <PhysicalBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
 
             {/* Activity block */}
             <SectionCard
@@ -105,6 +105,9 @@ export function PillarPhysicalScreen() {
               points="10 pts"
               onPress={() => setPhase('activity_select')}
               Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
             />
 
             {/* Qaylulah block */}
@@ -119,6 +122,9 @@ export function PillarPhysicalScreen() {
               points="5–7 pts"
               onPress={() => setPhase('qaylulah_guide')}
               Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
             />
 
             {/* Tips */}
@@ -169,6 +175,9 @@ export function PillarPhysicalScreen() {
             onStart={handleStartActivity}
             onBack={() => setPhase('activity_select')}
             Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
           />
         )}
 
@@ -242,8 +251,11 @@ export function PillarPhysicalScreen() {
   );
 }
 
-function PhysicalBalanceCard({ balance, Colors }: { balance: ReturnType<typeof computePhysicalBalance>; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function PhysicalBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
+  balance: ReturnType<typeof computePhysicalBalance>; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.balanceCard}>
       <View style={styles.balanceHeaderRow}>
@@ -266,10 +278,11 @@ function PhysicalBalanceCard({ balance, Colors }: { balance: ReturnType<typeof c
   );
 }
 
-function ActivityGuide({ type, onStart, onBack, Colors }: {
+function ActivityGuide({ type, onStart, onBack, Colors, Typography, Spacing, Radius }: {
   type: ActivityType; onStart: () => void; onBack: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   const [suggestions, setSuggestions] = useState<ActivitySuggestion[]>(() => pickActivitySuggestions(type));
   const TypeIcon = ACTIVITY_ICONS[type];
 
@@ -316,11 +329,12 @@ function ActivityGuide({ type, onStart, onBack, Colors }: {
   );
 }
 
-function SectionCard({ IconComponent, title, subtitle, done, points, onPress, Colors }: {
+function SectionCard({ IconComponent, title, subtitle, done, points, onPress, Colors, Typography, Spacing, Radius }: {
   IconComponent: any; title: string; subtitle: string;
   done: boolean; points: string; onPress: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <Pressable
       style={[styles.sectionCard, done && styles.sectionCardDone]}
@@ -338,7 +352,7 @@ function SectionCard({ IconComponent, title, subtitle, done, points, onPress, Co
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
   title: {

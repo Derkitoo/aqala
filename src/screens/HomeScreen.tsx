@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Flame, Settings, Clock, TrendingDown, ChevronRight } from 'lucide-react-native';
-import { useTheme, Typography, Spacing, Radius, ThemeColors } from '../constants/theme';
+import { useScaledTheme, type TypographyShape, type SpacingShape, type RadiusShape, ThemeColors } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
 import { BarakaScoreRing } from '../components/BarakaScoreRing';
 import { PillarCard } from '../components/PillarCard';
@@ -28,8 +28,8 @@ export function HomeScreen() {
   const { today, history, currentScore, refreshDay, recomputeScore } = useDayStore();
   const { currentStreak, currentMaqam } = useStreakStore();
   const { isGoldenMomentActive, goldenMomentType } = useAppStore();
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const trends = useMemo(() => computeTrends(today, history), [today, history]);
 
@@ -182,7 +182,7 @@ export function HomeScreen() {
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   scroll: { flex: 1 },
   content: { padding: Spacing.md, paddingBottom: 100 },

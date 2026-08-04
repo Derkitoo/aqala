@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 
 const commonColors = {
@@ -111,3 +113,71 @@ export const Typography = {
     heavy: 'Outfit_800ExtraBold',
   },
 } as const;
+
+// ─── Responsive scaling ─────────────────────────────────────────────────────
+//
+// Typography/Spacing/Radius above are fixed px values tuned for the ~360–430
+// logical-px range that covers virtually every phone in portrait. Unusual
+// form factors (a folded Galaxy Z Fold's cover screen, tablets) can report a
+// logical width well outside that band, making fixed px sizes look tiny or
+// oversized relative to the space actually available. useScaledTheme()
+// derives a scale factor from the live window width — it's a no-op (scale
+// exactly 1) inside the standard phone band, so ordinary phones render
+// pixel-identical to before; only outlier widths are adjusted, and only
+// moderately (capped) so nothing balloons on a tablet.
+
+const BASELINE_WIDTH = 390; // iPhone 12/13/14 — a common, unremarkable phone width
+const STANDARD_MIN = 360;   // narrowest mainstream phone (e.g. older compact Android)
+const STANDARD_MAX = 430;   // widest mainstream "plus/max" phone
+const MIN_SCALE = 0.92;
+const MAX_SCALE = 1.35;
+
+function computeScale(width: number): number {
+  if (width >= STANDARD_MIN && width <= STANDARD_MAX) return 1;
+  const raw = width / BASELINE_WIDTH;
+  return Math.min(Math.max(raw, MIN_SCALE), MAX_SCALE);
+}
+
+function scaleRecord<T extends Record<string, number>>(obj: T, scale: number): T {
+  const out = {} as T;
+  (Object.keys(obj) as (keyof T)[]).forEach(key => {
+    out[key] = Math.round(obj[key] * scale) as T[keyof T];
+  });
+  return out;
+}
+
+export type TypographyShape = typeof Typography;
+export type SpacingShape = typeof Spacing;
+export type RadiusShape = typeof Radius;
+
+export interface ScaledTheme {
+  Colors: ThemeColors;
+  Typography: TypographyShape;
+  Spacing: SpacingShape;
+  Radius: RadiusShape;
+  scale: number;
+}
+
+/**
+ * Combined theme hook: Colors (dark/light) + Typography/Spacing/Radius
+ * scaled to the current window width. Use this instead of the static
+ * Typography/Spacing/Radius exports in any component that renders text or
+ * sized layout, so it adapts on outlier screen widths (and re-adapts live
+ * if a foldable is unfolded mid-session).
+ */
+export function useScaledTheme(): ScaledTheme {
+  const Colors = useTheme();
+  const { width } = useWindowDimensions();
+  const scale = useMemo(() => computeScale(width), [width]);
+
+  return useMemo(
+    () => ({
+      Colors,
+      Typography: scale === 1 ? Typography : { ...Typography, sizes: scaleRecord(Typography.sizes, scale) },
+      Spacing: scale === 1 ? Spacing : scaleRecord(Spacing, scale),
+      Radius: scale === 1 ? Radius : { ...scaleRecord({ sm: Radius.sm, md: Radius.md, lg: Radius.lg }, scale), full: Radius.full },
+      scale,
+    }),
+    [Colors, scale],
+  );
+}

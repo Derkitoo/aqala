@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   TARWIH_CATEGORIES, TARWIH_GUIDE_INTRO, pickTarwihSuggestions,
   type TarwihCategory, type TarwihSuggestion,
@@ -33,8 +33,8 @@ export function PillarSleepScreen() {
   const { today, history, startTarwih, cancelTarwih, completeTarwih, setBedtime, setNightSas, setQiyam } = useDayStore();
   const { nightMode } = useAppStore();
   const sl = today.sleep;
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const [phase, setPhase] = useState<Phase>(
     sl.tarwihCompleted ? 'done' :
@@ -71,7 +71,7 @@ export function PillarSleepScreen() {
         {/* Overview */}
         {(phase === 'overview' || phase === 'done') && (
           <>
-            <SleepBalanceCard balance={balance} Colors={Colors} />
+            <SleepBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
 
             {/* Night Sas */}
             <Pressable
@@ -102,6 +102,9 @@ export function PillarSleepScreen() {
               onPress={() => setPhase('tarwih_select')}
               points="5 pts"
               Colors={Colors}
+              Typography={Typography}
+              Spacing={Spacing}
+              Radius={Radius}
             />
 
             {/* Bedtime */}
@@ -116,6 +119,9 @@ export function PillarSleepScreen() {
               onPress={setBedtime}
               points="5 pts"
               Colors={Colors}
+              Typography={Typography}
+              Spacing={Spacing}
+              Radius={Radius}
             />
 
             {/* Qiyam (Advanced mode only) */}
@@ -140,16 +146,16 @@ export function PillarSleepScreen() {
               <Text style={styles.guideTitle}>🌙 Architecture du Sommeil Prophétique</Text>
               {nightMode === 'standard' ? (
                 <>
-                  <GuideRow time="22h30" label="Coucher" Colors={Colors} />
-                  <GuideRow time="04h00" label="Réveil pré-Fajr" Colors={Colors} />
-                  <GuideRow time="04h45" label="Fajr" Colors={Colors} />
+                  <GuideRow time="22h30" label="Coucher" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+                  <GuideRow time="04h00" label="Réveil pré-Fajr" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+                  <GuideRow time="04h45" label="Fajr" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
                 </>
               ) : (
                 <>
-                  <GuideRow time="22h00" label="Phase 1 — Sommeil" Colors={Colors} />
-                  <GuideRow time="02h00" label="Réveil Qiyam (2–4 rak'ât)" Colors={Colors} />
-                  <GuideRow time="02h30" label="Retour au sommeil" Colors={Colors} />
-                  <GuideRow time="04h30" label="Réveil pré-Fajr" Colors={Colors} />
+                  <GuideRow time="22h00" label="Phase 1 — Sommeil" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+                  <GuideRow time="02h00" label="Réveil Qiyam (2–4 rak'ât)" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+                  <GuideRow time="02h30" label="Retour au sommeil" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+                  <GuideRow time="04h30" label="Réveil pré-Fajr" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
                 </>
               )}
             </View>
@@ -192,6 +198,9 @@ export function PillarSleepScreen() {
             onStart={handleStartTarwih}
             onBack={() => setPhase('tarwih_select')}
             Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
           />
         )}
 
@@ -218,8 +227,11 @@ export function PillarSleepScreen() {
   );
 }
 
-function SleepBalanceCard({ balance, Colors }: { balance: ReturnType<typeof computeSleepBalance>; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function SleepBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
+  balance: ReturnType<typeof computeSleepBalance>; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.balanceCard}>
       <View style={styles.balanceHeaderRow}>
@@ -240,10 +252,11 @@ function SleepBalanceCard({ balance, Colors }: { balance: ReturnType<typeof comp
   );
 }
 
-function TarwihGuide({ category, onStart, onBack, Colors }: {
+function TarwihGuide({ category, onStart, onBack, Colors, Typography, Spacing, Radius }: {
   category: TarwihCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   const [suggestions, setSuggestions] = useState<TarwihSuggestion[]>(() => pickTarwihSuggestions(category));
   const TypeIcon = TARWIH_ICONS[category];
 
@@ -290,11 +303,12 @@ function TarwihGuide({ category, onStart, onBack, Colors }: {
   );
 }
 
-function SleepBlock({ IconComponent, title, subtitle, done, onPress, points, Colors }: {
+function SleepBlock({ IconComponent, title, subtitle, done, onPress, points, Colors, Typography, Spacing, Radius }: {
   IconComponent: any; title: string; subtitle: string;
   done: boolean; onPress: () => void; points: string; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <Pressable
       style={[styles.sleepBlock, done && styles.sleepBlockDone]}
@@ -312,8 +326,11 @@ function SleepBlock({ IconComponent, title, subtitle, done, onPress, points, Col
   );
 }
 
-function GuideRow({ time, label, Colors }: { time: string; label: string; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function GuideRow({ time, label, Colors, Typography, Spacing, Radius }: {
+  time: string; label: string; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.guideRow}>
       <Text style={styles.guideTime}>{time}</Text>
@@ -323,7 +340,7 @@ function GuideRow({ time, label, Colors }: { time: string; label: string; Colors
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
   title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.pillar.sleep, marginBottom: 4 },

@@ -4,7 +4,7 @@ import {
   SafeAreaView, Animated,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { useTheme, Colors as StaticColors, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, Colors as StaticColors, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { useAppStore, type AppMode } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { Moon, Leaf, Shield, Sparkles, MapPin, Bell, Zap } from 'lucide-react-native';
@@ -72,8 +72,8 @@ export function OnboardingScreen() {
   const [locGranted, setLocGranted] = useState(false);
   const [notifGranted, setNotifGranted] = useState(false);
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const handleRequestLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -194,6 +194,9 @@ export function OnboardingScreen() {
               granted={locGranted}
               onRequest={handleRequestLocation}
               Colors={Colors}
+              Typography={Typography}
+              Spacing={Spacing}
+              Radius={Radius}
             />
             <PermissionRow
               IconComponent={Bell}
@@ -202,6 +205,9 @@ export function OnboardingScreen() {
               granted={notifGranted}
               onRequest={handleRequestNotifications}
               Colors={Colors}
+              Typography={Typography}
+              Spacing={Spacing}
+              Radius={Radius}
             />
 
             <View style={styles.skipNote}>
@@ -267,11 +273,12 @@ export function OnboardingScreen() {
 }
 
 
-function PermissionRow({ IconComponent, title, description, granted, onRequest, Colors }: {
+function PermissionRow({ IconComponent, title, description, granted, onRequest, Colors, Typography, Spacing, Radius }: {
   IconComponent: any; title: string; description: string;
   granted: boolean; onRequest: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <View style={styles.permRow}>
       <IconComponent color={Colors.text.primary} size={26} />
@@ -290,7 +297,7 @@ function PermissionRow({ IconComponent, title, description, granted, onRequest, 
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { flexGrow: 1, padding: Spacing.lg, paddingBottom: 80 },
 

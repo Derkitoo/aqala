@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { formatCountdown } from '../services/prayerTimes';
 import { Book, Moon, Activity, Users, Wind } from 'lucide-react-native';
 
@@ -70,8 +70,8 @@ interface Props {
 type TimerState = 'idle' | 'running' | 'paused' | 'min_reached' | 'max_reached';
 
 export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, initialElapsedSeconds = 0 }: Props) {
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   const TIMER_CONFIGS = React.useMemo(() => getTimerConfigs(Colors), [Colors]);
   const config = TIMER_CONFIGS[mode];
   const [elapsed, setElapsed] = useState(initialElapsedSeconds);
@@ -210,7 +210,7 @@ function ActionButton({
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingVertical: Spacing.xl,

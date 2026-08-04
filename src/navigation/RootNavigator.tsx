@@ -7,7 +7,7 @@ import { enableScreens } from 'react-native-screens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Home, BarChart2 } from 'lucide-react-native';
-import { useTheme, Typography, ThemeColors } from '../constants/theme';
+import { useScaledTheme, ThemeColors } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
 
 // Required for React Navigation performance & stability (native only)
@@ -69,7 +69,7 @@ function TabIcon({ Icon, focused, Colors }: { Icon: any; focused: boolean; Color
 }
 
 function TabNavigator() {
-  const Colors = useTheme();
+  const { Colors, Typography } = useScaledTheme();
   const insets = useSafeAreaInsets();
   // Floats above the home indicator / gesture bar instead of a fixed offset
   // that only happened to look right without one (e.g. standalone PWA on
@@ -128,7 +128,7 @@ function TabNavigator() {
 
 export function RootNavigator() {
   const { onboardingComplete } = useAppStore();
-  const Colors = useTheme();
+  const { Colors, Typography } = useScaledTheme();
 
   const screenOptions = {
     headerStyle:     { backgroundColor: Colors.bg.primary },

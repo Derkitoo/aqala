@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { useAppStore, type AppMode, type NightMode, type MadhabType } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { showConfirm, showAlert } from '../utils/confirm';
@@ -44,8 +44,8 @@ export function SettingsScreen() {
     resetOnboarding,
   } = useAppStore();
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const handleRefreshLocation = async () => {
     try {
@@ -95,7 +95,7 @@ export function SettingsScreen() {
         <Text style={styles.subtitle}>Personnalise ton expérience</Text>
 
         {/* Theme Settings */}
-        <SectionHeader title="Apparence" Colors={Colors} />
+        <SectionHeader title="Apparence" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         <View style={styles.card}>
           <View style={styles.rowBtnGroup}>
             <Pressable
@@ -120,7 +120,7 @@ export function SettingsScreen() {
         </View>
 
         {/* Prayer Settings */}
-        <SectionHeader title="Calcul des Prières" Colors={Colors} />
+        <SectionHeader title="Calcul des Prières" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
 
         <View style={styles.card}>
           <Text style={styles.cardLabel}>Méthode de calcul</Text>
@@ -165,7 +165,7 @@ export function SettingsScreen() {
         </View>
 
         {/* Location & Permissions */}
-        <SectionHeader title="Localisation & Notifications" Colors={Colors} />
+        <SectionHeader title="Localisation & Notifications" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         <View style={styles.card}>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>GPS Position :</Text>
@@ -195,7 +195,7 @@ export function SettingsScreen() {
         </View>
 
         {/* App Mode */}
-        <SectionHeader title="Mode d'Accompagnement" Colors={Colors} />
+        <SectionHeader title="Mode d'Accompagnement" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         <View style={styles.card}>
           <ModeOption
             title="Débutant"
@@ -203,6 +203,9 @@ export function SettingsScreen() {
             active={appMode === 'beginner'}
             onSelect={() => setAppMode('beginner')}
             Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
           />
           <View style={styles.divider} />
           <ModeOption
@@ -211,6 +214,9 @@ export function SettingsScreen() {
             active={appMode === 'intermediate'}
             onSelect={() => setAppMode('intermediate')}
             Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
           />
           <View style={styles.divider} />
           <ModeOption
@@ -219,11 +225,14 @@ export function SettingsScreen() {
             active={appMode === 'advanced'}
             onSelect={() => setAppMode('advanced')}
             Colors={Colors}
+            Typography={Typography}
+            Spacing={Spacing}
+            Radius={Radius}
           />
         </View>
 
         {/* Night Mode */}
-        <SectionHeader title="Routine de Nuit" Colors={Colors} />
+        <SectionHeader title="Routine de Nuit" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         <View style={styles.card}>
           <View style={styles.toggleRow}>
             <View style={{ flex: 1 }}>
@@ -240,7 +249,7 @@ export function SettingsScreen() {
         </View>
 
         {/* App Reset */}
-        <SectionHeader title="Application" Colors={Colors} />
+        <SectionHeader title="Application" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
         <Pressable style={styles.resetBtn} onPress={handleResetOnboarding}>
           <Text style={styles.resetBtnText}>Relancer l'Onboarding</Text>
         </Pressable>
@@ -251,15 +260,18 @@ export function SettingsScreen() {
   );
 }
 
-function SectionHeader({ title, Colors }: { title: string; Colors: ThemeColors }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+function SectionHeader({ title, Colors, Typography, Spacing, Radius }: {
+  title: string; Colors: ThemeColors; Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+}) {
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return <Text style={styles.sectionHeader}>{title}</Text>;
 }
 
-function ModeOption({ title, subtitle, active, onSelect, Colors }: {
+function ModeOption({ title, subtitle, active, onSelect, Colors, Typography, Spacing, Radius }: {
   title: string; subtitle: string; active: boolean; onSelect: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <Pressable style={styles.modeOption} onPress={onSelect}>
       <View style={{ flex: 1 }}>
@@ -273,7 +285,7 @@ function ModeOption({ title, subtitle, active, onSelect, Colors }: {
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
 

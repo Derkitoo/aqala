@@ -4,7 +4,7 @@ import {
   SafeAreaView, KeyboardAvoidingView, Platform, Pressable
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import {
   KNOWLEDGE_CATEGORIES, KNOWLEDGE_GUIDE_INTRO, pickKnowledgeSuggestions,
   type KnowledgeCategory, type KnowledgeSuggestion,
@@ -35,8 +35,8 @@ export function PillarKnowledgeScreen() {
     }
   }, [k.sessionCompletedAt, k.noteText]);
 
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const handleCategorySelect = (cat: KnowledgeCategory) => {
     setSelectedCategory(cat);
@@ -84,6 +84,9 @@ export function PillarKnowledgeScreen() {
                     bonus={bonusPoints > 0 ? `+${bonusPoints} pts bonus` : undefined}
                     onPress={() => handleCategorySelect(cat)}
                     Colors={Colors}
+                    Typography={Typography}
+                    Spacing={Spacing}
+                    Radius={Radius}
                   />
                 );
               })}
@@ -100,6 +103,9 @@ export function PillarKnowledgeScreen() {
               onStart={handleStartFocus}
               onBack={() => setPhase('select')}
               Colors={Colors}
+              Typography={Typography}
+              Spacing={Spacing}
+              Radius={Radius}
             />
           )}
 
@@ -170,10 +176,11 @@ export function PillarKnowledgeScreen() {
   );
 }
 
-function CategoryCard({ icon, label, bonus, onPress, Colors }: {
+function CategoryCard({ icon, label, bonus, onPress, Colors, Typography, Spacing, Radius }: {
   icon: React.ReactNode; label: string; bonus?: string; onPress: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   return (
     <Pressable style={styles.catCard} onPress={onPress}>
       {icon}
@@ -186,10 +193,11 @@ function CategoryCard({ icon, label, bonus, onPress, Colors }: {
   );
 }
 
-function KnowledgeGuide({ category, onStart, onBack, Colors }: {
+function KnowledgeGuide({ category, onStart, onBack, Colors, Typography, Spacing, Radius }: {
   category: KnowledgeCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
   const [suggestions, setSuggestions] = useState<KnowledgeSuggestion[]>(() => pickKnowledgeSuggestions(category));
 
   return (
@@ -247,7 +255,7 @@ function CategoryButton({ label, onPress, disabled, styles }: {
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { padding: Spacing.md, paddingBottom: 100 },
 

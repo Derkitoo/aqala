@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import Svg, { Circle, G } from 'react-native-svg';
-import { useTheme, ThemeColors, Typography } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape } from '../constants/theme';
 import type { BarakaScoreBreakdown } from '../engine/barakaScoring';
 
 interface Props {
@@ -18,8 +18,8 @@ export function BarakaScoreRing({ breakdown, size = 180, showLabel = true }: Pro
   const radius = (size - STROKE_WIDTH * 2) / 2;
   const circumference = 2 * Math.PI * radius;
   const center = size / 2;
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography), [Colors, Typography]);
 
   const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -83,25 +83,25 @@ export function BarakaScoreRing({ breakdown, size = 180, showLabel = true }: Pro
 
       {/* Pillar dots row */}
       <View style={styles.pillarsRow}>
-        <PillarDot color={Colors.pillar.spiritual} value={breakdown.spiritual} max={35} Colors={Colors} />
-        <PillarDot color={Colors.pillar.knowledge} value={breakdown.knowledge} max={25} Colors={Colors} />
-        <PillarDot color={Colors.pillar.physical}  value={breakdown.physical}  max={15} Colors={Colors} />
-        <PillarDot color={Colors.pillar.social}    value={breakdown.social}    max={15} Colors={Colors} />
-        <PillarDot color={Colors.pillar.sleep}     value={breakdown.sleep}     max={10} Colors={Colors} />
+        <PillarDot color={Colors.pillar.spiritual} value={breakdown.spiritual} max={35} Colors={Colors} Typography={Typography} />
+        <PillarDot color={Colors.pillar.knowledge} value={breakdown.knowledge} max={25} Colors={Colors} Typography={Typography} />
+        <PillarDot color={Colors.pillar.physical}  value={breakdown.physical}  max={15} Colors={Colors} Typography={Typography} />
+        <PillarDot color={Colors.pillar.social}    value={breakdown.social}    max={15} Colors={Colors} Typography={Typography} />
+        <PillarDot color={Colors.pillar.sleep}     value={breakdown.sleep}     max={10} Colors={Colors} Typography={Typography} />
       </View>
     </View>
   );
 }
 
-function PillarDot({ color, value, max, Colors }: { color: string; value: number; max: number; Colors: ThemeColors }) {
+function PillarDot({ color, value, max, Colors, Typography }: { color: string; value: number; max: number; Colors: ThemeColors; Typography: TypographyShape }) {
   const filled = value >= max * 0.5;
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography), [Colors, Typography]);
   return (
     <View style={[styles.dot, { backgroundColor: filled ? color : Colors.border }]} />
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape) => StyleSheet.create({
   container: {
     alignItems: 'center',
   },

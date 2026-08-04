@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useTheme, ThemeColors, Typography, Spacing, Radius } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import type { PillarDefinition } from '../constants/pillars';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -15,8 +15,8 @@ interface Props {
 }
 
 export function PillarCard({ pillar, pointsEarned, completed, onPress, compact = false }: Props) {
-  const Colors = useTheme();
-  const styles = React.useMemo(() => createStyles(Colors), [Colors]);
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const fillPct = Math.min((pointsEarned / pillar.maxPoints) * 100, 100);
   const isAtMinimum = pointsEarned >= pillar.maxPoints * 0.5;
@@ -90,7 +90,7 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
   );
 }
 
-const createStyles = (Colors: ThemeColors) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
   card: {
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.md,
