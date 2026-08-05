@@ -8,8 +8,16 @@ export interface PillarDefinition {
   nameAr: string;
   nameFr: string;
   icon: any; // Lucide component
+  /** Two-digit ordinal ("01"–"05") — how pillars are told apart, with the icon. */
+  numeral: string;
+  /** Two-letter tag used on the Baraka segment bar. */
+  short: string;
+  /**
+   * Mono-accent system: every pillar resolves to the same accent. The field is
+   * kept (rather than deleted) because `engine/trends.ts` re-exports it, and
+   * the engine is out of scope for this visual pass.
+   */
   color: string;
-  colorLight: string;
   weight: number; // % of total Baraka score
   maxPoints: number;
 }
@@ -20,8 +28,9 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     nameAr: 'الروحانية',
     nameFr: 'Pilier Spirituel',
     icon: Heart,
-    color: Colors.pillar.spiritual,
-    colorLight: Colors.pillar.spiritualLight,
+    numeral: '01',
+    short: 'SP',
+    color: Colors.gold,
     weight: 0.35,
     maxPoints: 35,
   },
@@ -30,8 +39,9 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     nameAr: 'طلب العلم',
     nameFr: 'Pilier du Savoir',
     icon: BookOpen,
-    color: Colors.pillar.knowledge,
-    colorLight: Colors.pillar.knowledgeLight,
+    numeral: '02',
+    short: 'SA',
+    color: Colors.gold,
     weight: 0.25,
     maxPoints: 25,
   },
@@ -40,8 +50,9 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     nameAr: 'الأمانة الجسدية',
     nameFr: 'Pilier Physique',
     icon: Activity,
-    color: Colors.pillar.physical,
-    colorLight: Colors.pillar.physicalLight,
+    numeral: '03',
+    short: 'PH',
+    color: Colors.gold,
     weight: 0.15,
     maxPoints: 15,
   },
@@ -50,8 +61,9 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     nameAr: 'العمل الاجتماعي',
     nameFr: 'Pilier Social',
     icon: Users,
-    color: Colors.pillar.social,
-    colorLight: Colors.pillar.socialLight,
+    numeral: '04',
+    short: 'SO',
+    color: Colors.gold,
     weight: 0.15,
     maxPoints: 15,
   },
@@ -60,8 +72,9 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     nameAr: 'الترويح',
     nameFr: 'Pilier Sommeil',
     icon: Moon,
-    color: Colors.pillar.sleep,
-    colorLight: Colors.pillar.sleepLight,
+    numeral: '05',
+    short: 'SM',
+    color: Colors.gold,
     weight: 0.10,
     maxPoints: 10,
   },

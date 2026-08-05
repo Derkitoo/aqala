@@ -248,7 +248,9 @@ const EVENING_ADHKAR: Dhikr[] = [
 
 function FadingDhikrCarousel({ items }: { items: Dhikr[] }) {
   const [index, setIndex] = useState(0);
-  const { Colors, Typography, Spacing, scale } = useScaledTheme();
+  // forceDark — this carousel only ever renders inside the always-dark
+  // Golden Moment screen, so it must not follow the user's light theme.
+  const { Colors, Typography, Spacing, scale } = useScaledTheme(true);
   const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, scale), [Colors, Typography, Spacing, scale]);
 
   useEffect(() => {
@@ -333,44 +335,41 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: Spacing.xl,
   },
   animatedDhikr: {
     alignItems: 'center',
     width: '100%',
+    gap: 12,
   },
   dhikrTextArabic: {
-    fontSize: Math.round(32 * scale),
+    fontSize: Math.round(22 * scale),
     color: Colors.gold,
     textAlign: 'center',
-    lineHeight: 48,
-    marginBottom: Spacing.md,
+    lineHeight: Math.round(22 * scale * 1.7),
   },
   dhikrTranslitBig: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.sm,
     fontFamily: Typography.fonts.regular,
     color: Colors.text.primary,
     textAlign: 'center',
     fontStyle: 'italic',
-    marginBottom: Spacing.sm,
+    lineHeight: Typography.sizes.sm * 1.4,
   },
   dhikrTranslationBig: {
-    fontSize: Typography.sizes.sm,
+    fontSize: Typography.sizes.xs + 1.5,
     fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: Spacing.md,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
   },
+  // Small solid-accent tag — square, not a pill.
   dhikrCountBadge: {
     fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.medium,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.bg.primary,
     backgroundColor: Colors.gold,
     paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+    paddingHorizontal: 10,
     overflow: 'hidden',
-    marginTop: Spacing.sm,
   },
 });

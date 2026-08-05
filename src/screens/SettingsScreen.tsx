@@ -4,22 +4,23 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
-import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
-import { useAppStore, type AppMode, type NightMode, type MadhabType } from '../store/useAppStore';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
+import { useAppStore } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { showConfirm, showAlert } from '../utils/confirm';
-import { Settings, RefreshCw, Sun, Moon } from 'lucide-react-native';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { RefreshCw, Sun, Moon } from 'lucide-react-native';
 
 const CALCULATION_METHODS = [
-  { id: 'MuslimWorldLeague', name: 'Ligue Islamique Mondiale (MWL)' },
-  { id: 'Egyptian',           name: 'Autorité Égyptienne (ESA)' },
-  { id: 'UmmAlQura',          name: 'Umm Al-Qura (Makkah)' },
-  { id: 'NorthAmerica',       name: 'ISNA (Amérique du Nord)' },
-  { id: 'Dubai',              name: 'Dubaï (EAU)' },
-  { id: 'Karachi',            name: 'Université des Sciences Islamiques, Karachi' },
-  { id: 'MoonsightingCommittee', name: 'Moonsighting Committee' },
-  { id: 'Turkey',             name: 'Diyanet (Turquie)' },
-  { id: 'France',             name: 'France (12° / 15° MWL standard)' },
+  { id: 'MuslimWorldLeague', name: 'MWL' },
+  { id: 'Egyptian',           name: 'Égyptienne' },
+  { id: 'UmmAlQura',          name: 'Umm Al-Qura' },
+  { id: 'NorthAmerica',       name: 'ISNA' },
+  { id: 'Dubai',              name: 'Dubaï' },
+  { id: 'Karachi',            name: 'Karachi' },
+  { id: 'MoonsightingCommittee', name: 'Moonsighting' },
+  { id: 'Turkey',             name: 'Diyanet' },
+  { id: 'France',             name: 'France' },
 ];
 
 export function SettingsScreen() {
@@ -44,8 +45,8 @@ export function SettingsScreen() {
     resetOnboarding,
   } = useAppStore();
 
-  const { Colors, Typography, Spacing, Radius, scale } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing, scale } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   const { width, height } = useWindowDimensions();
 
   const handleRefreshLocation = async () => {
@@ -89,199 +90,159 @@ export function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.headerRow}>
-          <Settings color={Colors.text.primary} size={28} />
-          <Text style={styles.title}>Paramètres</Text>
-        </View>
-        <Text style={styles.subtitle}>Personnalise ton expérience</Text>
+        <ScreenHeader title="Paramètres" subtitle="Personnalise ton expérience" />
 
-        {/* Theme Settings */}
-        <SectionHeader title="Apparence" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-        <View style={styles.card}>
-          <View style={styles.rowBtnGroup}>
-            <Pressable
-              style={[styles.segmentBtn, theme === 'light' && styles.segmentBtnActive]}
-              onPress={() => setTheme('light')}
-            >
-              <Sun color={theme === 'light' ? Colors.gold : Colors.text.secondary} size={18} />
-              <Text style={[styles.segmentText, theme === 'light' && styles.segmentTextActive]}>
-                Clair
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[styles.segmentBtn, theme === 'premium' && styles.segmentBtnActive]}
-              onPress={() => setTheme('premium')}
-            >
-              <Moon color={theme === 'premium' ? Colors.gold : Colors.text.secondary} size={18} />
-              <Text style={[styles.segmentText, theme === 'premium' && styles.segmentTextActive]}>
-                Premium
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Prayer Settings */}
-        <SectionHeader title="Calcul des Prières" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>Méthode de calcul</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.pickerScroll}>
-            {CALCULATION_METHODS.map(m => (
-              <Pressable
-                key={m.id}
-                style={[
-                  styles.chip,
-                  calculationMethod === m.id && styles.chipActive,
-                ]}
-                onPress={() => setCalculationMethod(m.id)}
-              >
-                <Text style={[styles.chipText, calculationMethod === m.id && styles.chipTextActive]}>
-                  {m.name}
-                </Text>
-              </Pressable>
-            ))}
-          </ScrollView>
-
-          <View style={styles.divider} />
-
-          <Text style={styles.cardLabel}>École de Jurisprudence (Asr)</Text>
-          <View style={styles.rowBtnGroup}>
-            <Pressable
-              style={[styles.segmentBtn, madhab === 'shafi' && styles.segmentBtnActive]}
-              onPress={() => setMadhab('shafi')}
-            >
-              <Text style={[styles.segmentText, madhab === 'shafi' && styles.segmentTextActive]}>
-                Standard (Shafi'i, Maliki, Hanbali)
-              </Text>
-            </Pressable>
-            <Pressable
-              style={[styles.segmentBtn, madhab === 'hanafi' && styles.segmentBtnActive]}
-              onPress={() => setMadhab('hanafi')}
-            >
-              <Text style={[styles.segmentText, madhab === 'hanafi' && styles.segmentTextActive]}>
-                Hanafi
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        {/* Location & Permissions */}
-        <SectionHeader title="Localisation & Notifications" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-        <View style={styles.card}>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>GPS Position :</Text>
-            <Text style={styles.infoValue}>
-              {latitude && longitude
-                ? `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°`
-                : 'Non détectée'}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Permission GPS :</Text>
-            <Text style={[styles.infoValue, { color: locationGranted ? Colors.success : Colors.warning }]}>
-              {locationGranted ? 'Accordée ✓' : 'Non accordée'}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Rappels Push :</Text>
-            <Text style={[styles.infoValue, { color: notificationsGranted ? Colors.success : Colors.warning }]}>
-              {notificationsGranted ? 'Activés ✓' : 'Inactifs'}
-            </Text>
-          </View>
-
-          <Pressable style={styles.refreshBtn} onPress={handleRefreshLocation}>
-            <RefreshCw color={Colors.gold} size={16} />
-            <Text style={styles.refreshBtnText}>Actualiser la localisation</Text>
+        {/* Appearance — segmented, solid accent fill on the active option */}
+        <Text style={styles.sectionKicker}>APPARENCE</Text>
+        <View style={styles.hr} />
+        <View style={styles.segRow}>
+          <Pressable
+            style={({ pressed }) => [styles.segFlex, theme === 'light' && styles.segActive, pressed && styles.pressed]}
+            onPress={() => setTheme('light')}
+          >
+            <Sun size={14} strokeWidth={1.8} color={theme === 'light' ? Colors.bg.primary : Colors.text.primary} />
+            <Text style={[styles.segText, theme === 'light' && styles.segTextActive]}>Clair</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.segFlex, theme === 'premium' && styles.segActive, pressed && styles.pressed]}
+            onPress={() => setTheme('premium')}
+          >
+            <Moon size={14} strokeWidth={1.8} color={theme === 'premium' ? Colors.bg.primary : Colors.text.primary} />
+            <Text style={[styles.segText, theme === 'premium' && styles.segTextActive]}>Sombre</Text>
           </Pressable>
         </View>
 
-        {/* App Mode */}
-        <SectionHeader title="Mode d'Accompagnement" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-        <View style={styles.card}>
-          <ModeOption
-            title="Débutant"
-            subtitle="Priorité absolue au Fajr & Moment d'Or"
-            active={appMode === 'beginner'}
-            onSelect={() => setAppMode('beginner')}
-            Colors={Colors}
-            Typography={Typography}
-            Spacing={Spacing}
-            Radius={Radius}
-          />
-          <View style={styles.divider} />
-          <ModeOption
-            title="Intermédiaire"
-            subtitle="Intégration du Savoir et de l'Activité Physique"
-            active={appMode === 'intermediate'}
-            onSelect={() => setAppMode('intermediate')}
-            Colors={Colors}
-            Typography={Typography}
-            Spacing={Spacing}
-            Radius={Radius}
-          />
-          <View style={styles.divider} />
-          <ModeOption
-            title="Avancé"
-            subtitle="5 piliers complets + Qiyam al-Layl"
-            active={appMode === 'advanced'}
-            onSelect={() => setAppMode('advanced')}
-            Colors={Colors}
-            Typography={Typography}
-            Spacing={Spacing}
-            Radius={Radius}
-          />
+        {/* Prayer calculation */}
+        <Text style={styles.sectionKicker}>CALCUL DES PRIÈRES</Text>
+        <View style={styles.hr} />
+        <View style={styles.chipsWrap}>
+          {CALCULATION_METHODS.map(m => {
+            const active = calculationMethod === m.id;
+            return (
+              <Pressable
+                key={m.id}
+                style={({ pressed }) => [styles.chip, active && styles.segActive, pressed && styles.pressed]}
+                onPress={() => setCalculationMethod(m.id)}
+              >
+                <Text style={[styles.chipText, active && styles.segTextActive]}>{m.name}</Text>
+              </Pressable>
+            );
+          })}
         </View>
 
-        {/* Night Mode */}
-        <SectionHeader title="Routine de Nuit" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-        <View style={styles.card}>
-          <View style={styles.toggleRow}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.toggleTitle}>Qiyam al-Layl (Nuit Globale)</Text>
-              <Text style={styles.toggleDesc}>Incorpore l'éveil du dernier tiers de la nuit</Text>
-            </View>
-            <Pressable
-              style={[styles.switchTrack, nightMode === 'global' && styles.switchTrackOn]}
-              onPress={() => setNightMode(nightMode === 'global' ? 'standard' : 'global')}
-            >
-              <View style={[styles.switchThumb, nightMode === 'global' && styles.switchThumbOn]} />
-            </Pressable>
+        <Text style={styles.fieldLabel}>École de Jurisprudence (Asr)</Text>
+        <View style={styles.segRow}>
+          <Pressable
+            style={({ pressed }) => [styles.segFlex, madhab === 'shafi' && styles.segActive, pressed && styles.pressed]}
+            onPress={() => setMadhab('shafi')}
+          >
+            <Text style={[styles.segText, madhab === 'shafi' && styles.segTextActive]}>Standard</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.segFlex, madhab === 'hanafi' && styles.segActive, pressed && styles.pressed]}
+            onPress={() => setMadhab('hanafi')}
+          >
+            <Text style={[styles.segText, madhab === 'hanafi' && styles.segTextActive]}>Hanafi</Text>
+          </Pressable>
+        </View>
+
+        {/* Location & Permissions */}
+        <Text style={styles.sectionKicker}>LOCALISATION & NOTIFICATIONS</Text>
+        <View style={styles.hr} />
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>GPS Position</Text>
+          <Text style={styles.infoValue}>
+            {latitude && longitude
+              ? `${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°`
+              : 'Non détectée'}
+          </Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Permission GPS</Text>
+          <Text style={[styles.infoValue, locationGranted && styles.infoValueGranted]}>
+            {locationGranted ? 'Accordée ✓' : 'Non accordée'}
+          </Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Rappels Push</Text>
+          <Text style={[styles.infoValue, notificationsGranted && styles.infoValueGranted]}>
+            {notificationsGranted ? 'Activés ✓' : 'Inactifs'}
+          </Text>
+        </View>
+        <Pressable style={({ pressed }) => [styles.outlineBtn, pressed && styles.pressed]} onPress={handleRefreshLocation}>
+          <RefreshCw color={Colors.gold} size={14} strokeWidth={1.8} />
+          <Text style={styles.outlineBtnText}>Actualiser la localisation</Text>
+        </Pressable>
+
+        {/* App Mode */}
+        <Text style={styles.sectionKicker}>MODE D'ACCOMPAGNEMENT</Text>
+        <View style={styles.hr} />
+        <ModeOption
+          title="Débutant"
+          subtitle="Priorité absolue au Fajr & Moment d'Or"
+          active={appMode === 'beginner'}
+          onSelect={() => setAppMode('beginner')}
+          Colors={Colors} Typography={Typography} Spacing={Spacing}
+        />
+        <ModeOption
+          title="Intermédiaire"
+          subtitle="Intégration du Savoir et de l'Activité Physique"
+          active={appMode === 'intermediate'}
+          onSelect={() => setAppMode('intermediate')}
+          Colors={Colors} Typography={Typography} Spacing={Spacing}
+        />
+        <ModeOption
+          title="Avancé"
+          subtitle="5 piliers complets + Qiyam al-Layl"
+          active={appMode === 'advanced'}
+          onSelect={() => setAppMode('advanced')}
+          Colors={Colors} Typography={Typography} Spacing={Spacing}
+        />
+
+        {/* Night Mode — square track, square thumb */}
+        <Text style={styles.sectionKicker}>ROUTINE DE NUIT</Text>
+        <View style={styles.hr} />
+        <View style={styles.nightRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.nightTitle}>Qiyam al-Layl (Nuit Globale)</Text>
+            <Text style={styles.nightDesc}>Incorpore l'éveil du dernier tiers de la nuit</Text>
           </View>
+          <Pressable
+            style={[styles.switchTrack, nightMode === 'global' && styles.switchTrackOn]}
+            onPress={() => setNightMode(nightMode === 'global' ? 'standard' : 'global')}
+          >
+            <View style={styles.switchThumb} />
+          </Pressable>
         </View>
 
         {/* App Reset */}
-        <SectionHeader title="Application" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-        <Pressable style={styles.resetBtn} onPress={handleResetOnboarding}>
+        <Text style={styles.sectionKicker}>APPLICATION</Text>
+        <View style={styles.hr} />
+        <Pressable style={({ pressed }) => [styles.resetBtn, pressed && styles.pressed]} onPress={handleResetOnboarding}>
           <Text style={styles.resetBtnText}>Relancer l'Onboarding</Text>
         </Pressable>
 
-        <Text style={styles.versionText}>Aqal Al-Qalil • Version 1.0.0</Text>
+        <Text style={styles.versionText}>Aqal Al-Qalil · Version 1.0.0</Text>
         <Text style={styles.versionText}>
-          Écran : {Math.round(width)}×{Math.round(height)}px • Échelle texte : ×{scale.toFixed(2)}
+          Écran : {Math.round(width)}×{Math.round(height)}px · Échelle texte : ×{scale.toFixed(2)}
         </Text>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function SectionHeader({ title, Colors, Typography, Spacing, Radius }: {
-  title: string; Colors: ThemeColors; Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
-}) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
-  return <Text style={styles.sectionHeader}>{title}</Text>;
-}
-
-function ModeOption({ title, subtitle, active, onSelect, Colors, Typography, Spacing, Radius }: {
+function ModeOption({ title, subtitle, active, onSelect, Colors, Typography, Spacing }: {
   title: string; subtitle: string; active: boolean; onSelect: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
-    <Pressable style={styles.modeOption} onPress={onSelect}>
+    <Pressable style={({ pressed }) => [styles.modeOption, pressed && styles.pressed]} onPress={onSelect}>
       <View style={{ flex: 1 }}>
-        <Text style={[styles.modeTitle, active && { color: Colors.gold }]}>{title}</Text>
+        <Text style={[styles.modeTitle, active && styles.modeTitleActive]}>{title}</Text>
         <Text style={styles.modeSub}>{subtitle}</Text>
       </View>
+      {/* Native-style radio dot — the one shape that stays circular. */}
       <View style={[styles.radio, active && styles.radioActive]}>
         {active && <View style={styles.radioDot} />}
       </View>
@@ -289,227 +250,170 @@ function ModeOption({ title, subtitle, active, onSelect, Colors, Typography, Spa
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
-  content: { padding: Spacing.md, paddingBottom: 100 },
+  content: { paddingHorizontal: Spacing.md + 4, paddingTop: Spacing.sm, paddingBottom: 120 },
 
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: 4,
-  },
-  title: {
-    fontSize: Typography.sizes.xxl,
-    fontWeight: Typography.weights.heavy,
-    color: Colors.text.primary,
-  },
-  subtitle: {
-    fontSize: Typography.sizes.sm,
-    color: Colors.text.secondary,
-    marginBottom: Spacing.lg,
-  },
+  pressed: { opacity: 0.55 },
 
-  sectionHeader: {
+  sectionKicker: {
     fontSize: Typography.sizes.xs,
-    fontWeight: Typography.weights.bold,
-    color: Colors.gold,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
     textTransform: 'uppercase',
-    letterSpacing: 1.5,
-    marginTop: Spacing.md,
-    marginBottom: Spacing.xs,
+    marginTop: 28,
+    marginBottom: 10,
   },
+  hr: { height: 2, backgroundColor: Colors.border, marginBottom: 14 },
 
-  card: {
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-    ...cardShadow(Colors),
-  },
-  cardLabel: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.semibold,
-    color: Colors.text.primary,
-    marginBottom: Spacing.xs,
-  },
-
-  pickerScroll: {
-    marginHorizontal: -Spacing.md,
-    paddingHorizontal: Spacing.md,
-    marginBottom: Spacing.sm,
-  },
-  chip: {
-    backgroundColor: Colors.bg.primary,
-    borderRadius: Radius.full,
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    marginRight: Spacing.xs,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  chipActive: {
-    backgroundColor: Colors.gold + '22',
-    borderColor: Colors.gold,
-  },
-  chipText: {
-    fontSize: Typography.sizes.xs,
-    color: Colors.text.secondary,
-  },
-  chipTextActive: {
-    color: Colors.gold,
-    fontWeight: Typography.weights.bold,
-  },
-
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginVertical: Spacing.md,
-  },
-
-  rowBtnGroup: {
-    gap: Spacing.xs,
-    marginTop: Spacing.xs,
-  },
-  segmentBtn: {
+  // Segmented controls: 1px border, solid accent fill + inverse text active.
+  segRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: 18 },
+  segFlex: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.bg.primary,
-    borderRadius: Radius.sm,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    gap: 6,
     borderWidth: 1,
     borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
   },
-  segmentBtnActive: {
-    borderColor: Colors.gold,
-    backgroundColor: Colors.bg.primary, // minimalist, don't color background
+  segActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
+  segText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
   },
-  segmentText: {
-    fontSize: Typography.sizes.sm, // larger
+  segTextActive: { color: Colors.bg.primary },
+
+  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 18 },
+  chip: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    paddingVertical: 7,
+    paddingHorizontal: 11,
+  },
+  chipText: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.secondary,
   },
-  segmentTextActive: {
-    color: Colors.gold,
-    fontWeight: Typography.weights.bold,
+
+  fieldLabel: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
   },
 
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: Spacing.xs,
-  },
-  infoLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary },
-  infoValue: { fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold, color: Colors.text.primary },
-
-  refreshBtn: {
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    borderRadius: Radius.sm,
     paddingVertical: Spacing.sm,
-    justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  infoLabel: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+  infoValue: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  infoValueGranted: { color: Colors.gold },
+
+  outlineBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.sm,
-    marginTop: Spacing.sm,
     borderWidth: 1,
     borderColor: Colors.gold,
+    backgroundColor: 'transparent',
+    paddingVertical: 12,
+    marginTop: 12,
   },
-  refreshBtnText: {
-    fontSize: Typography.sizes.xs,
-    fontWeight: Typography.weights.bold,
+  outlineBtnText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.gold,
   },
 
   modeOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Spacing.xs,
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 13,
   },
   modeTitle: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.bold,
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
+  modeTitleActive: { color: Colors.gold },
   modeSub: {
-    fontSize: Typography.sizes.xs,
+    fontSize: Typography.sizes.xs + 0.5,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
     marginTop: 2,
   },
   radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 18, height: 18, borderRadius: 999,
+    borderWidth: 2, borderColor: Colors.border,
+    alignItems: 'center', justifyContent: 'center',
   },
-  radioActive: {
-    borderColor: Colors.gold,
-  },
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.gold,
-  },
+  radioActive: { borderColor: Colors.gold },
+  radioDot: { width: 8, height: 8, borderRadius: 999, backgroundColor: Colors.gold },
 
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  toggleTitle: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.bold,
+  nightRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: Spacing.sm },
+  nightTitle: {
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
-  toggleDesc: {
-    fontSize: Typography.sizes.xs,
+  nightDesc: {
+    fontSize: Typography.sizes.xs + 0.5,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
     marginTop: 2,
   },
   switchTrack: {
-    width: 48,
-    height: 26,
-    borderRadius: 13,
+    width: 42, height: 24,
     backgroundColor: Colors.border,
-    padding: 2,
+    padding: 3,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
-  switchTrackOn: {
-    backgroundColor: Colors.gold,
-  },
-  switchThumb: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: Colors.white,
-  },
-  switchThumbOn: {
-    alignSelf: 'flex-end',
-  },
+  switchTrackOn: { backgroundColor: Colors.gold, alignItems: 'flex-end' },
+  switchThumb: { width: 18, height: 18, backgroundColor: Colors.white },
 
   resetBtn: {
-    backgroundColor: Colors.danger + '22',
-    borderColor: Colors.danger,
     borderWidth: 1,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.md,
+    borderColor: Colors.danger,
+    backgroundColor: 'transparent',
+    paddingVertical: 13,
     alignItems: 'center',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   resetBtnText: {
-    color: Colors.danger,
-    fontWeight: Typography.weights.bold,
     fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.danger,
   },
 
   versionText: {
-    fontSize: Typography.sizes.xs,
+    fontSize: Typography.sizes.xs - 0.5,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
     textAlign: 'center',
-    marginBottom: Spacing.xl,
+    marginBottom: 10,
   },
 });

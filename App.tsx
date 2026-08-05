@@ -8,12 +8,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import {
   useFonts,
-  Outfit_400Regular,
-  Outfit_500Medium,
-  Outfit_600SemiBold,
-  Outfit_700Bold,
-  Outfit_800ExtraBold,
-} from '@expo-google-fonts/outfit';
+  Archivo_400Regular,
+  Archivo_500Medium,
+  Archivo_600SemiBold,
+  Archivo_700Bold,
+  Archivo_800ExtraBold,
+} from '@expo-google-fonts/archivo';
 
 import { Colors } from './src/constants/theme';
 
@@ -237,11 +237,11 @@ function HydratedApp({ modules }: { modules: any }) {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    Outfit_400Regular,
-    Outfit_500Medium,
-    Outfit_600SemiBold,
-    Outfit_700Bold,
-    Outfit_800ExtraBold,
+    Archivo_400Regular,
+    Archivo_500Medium,
+    Archivo_600SemiBold,
+    Archivo_700Bold,
+    Archivo_800ExtraBold,
   });
 
   if (!fontsLoaded) {

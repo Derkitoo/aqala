@@ -2,95 +2,89 @@ import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 
-const commonColors = {
-  pillar: {
-    spiritual: '#4A90D9',
-    spiritualLight: '#EEF4FF',
-    knowledge: '#2D6A4F',
-    knowledgeLight: '#E8F5E9',
-    physical: '#E07B39',
-    physicalLight: '#FFF3E0',
-    social: '#C0405A',
-    socialLight: '#FCE4EC',
-    sleep: '#6C3483',
-    sleepLight: '#EDE7F6',
-  },
-  gold: '#F5C842',
-  goldDim: '#A88A1A',
-  success: '#27AE60',
-  warning: '#F39C12',
-  danger: '#E74C3C',
-};
+// ─── Modernist palette ──────────────────────────────────────────────────────
+//
+// Flat, architectural, red-on-paper. Light = ink on paper, dark = paper on ink
+// (a literal inversion — no new hues are invented for the dark pair).
+//
+// There is a SINGLE accent for the whole app. The old per-pillar palette
+// (blue/green/orange/pink/purple) is gone: pillars are told apart by icon +
+// numeral (01–05) + name, never by colour. The `gold` role is kept as the
+// name of that single accent so every existing `Colors.gold` consumer keeps
+// working; `success` collapses onto it too (an affirmative state is accent,
+// not green), and `warning`/`danger` share one "warn" red per theme.
+
+const ACCENT = '#ec3013';
+const ACCENT_HOVER_LIGHT = '#dd2b0f';
+const ACCENT_HOVER_DARK  = '#ff9783';
 
 export const PremiumColors = {
-  ...commonColors,
   isDark: true,
+  gold: ACCENT,              // the single accent
+  goldDim: '#ffc4b8',        // accent-on-tint text
+  accentHover: ACCENT_HOVER_DARK,
+  accentTint: '#4d170e',     // faint accent fill (partial states, tags)
+  success: ACCENT,
+  warning: '#ff9783',
+  danger: '#ff9783',
   bg: {
-    primary: '#000000',
-    secondary: '#0A0A0A',
-    card: 'rgba(255, 255, 255, 0.03)',
-    cardBorder: 'rgba(255, 255, 255, 0.08)',
-    overlay: 'rgba(0,0,0,0.85)',
-    gradient: ['#000000', '#050505'] as [string, string],
-  },
-  white: '#FFFFFF', // pure white used occasionally
-  text: {
-    primary: '#FFFFFF',
-    secondary: 'rgba(255, 255, 255, 0.65)',
-    muted: 'rgba(255, 255, 255, 0.4)',
-  },
-  border: 'rgba(255, 255, 255, 0.12)',
-};
-
-export const LightColors = {
-  ...commonColors,
-  // Bright gold reads well on black but fails contrast on a white/light
-  // background — darkened specifically for this theme (same hue family,
-  // still reads as "gold"). Backgrounds/tints using Colors.gold + alpha
-  // (badges, progress bars) are unaffected in spirit, just a shade deeper.
-  gold: '#A87B0A',
-  goldDim: '#7A5A08',
-  isDark: false,
-  bg: {
-    primary: '#F9FAFB', // Très doux
-    secondary: '#F3F4F6',
-    card: '#FFFFFF',
-    cardBorder: 'rgba(0, 0, 0, 0.06)',
-    overlay: 'rgba(0,0,0,0.4)',
-    gradient: ['#F9FAFB', '#F3F4F6'] as [string, string],
+    primary: '#201e1d',
+    secondary: '#2d2b2b',
+    card: '#2d2b2b',         // flat "surface" fill — never shadowed
+    cardBorder: 'rgba(248, 244, 244, 0.28)',
+    overlay: 'rgba(32, 30, 29, 0.7)',
+    gradient: ['#201e1d', '#201e1d'] as [string, string],
   },
   white: '#FFFFFF',
   text: {
-    primary: '#111827', // Presque noir
-    secondary: '#4B5563', // Gris anthracite
-    muted: '#9CA3AF',
+    primary: '#f8f4f4',
+    secondary: 'rgba(248, 244, 244, 0.60)',
+    muted: 'rgba(248, 244, 244, 0.36)',
   },
-  border: 'rgba(0, 0, 0, 0.1)',
+  border: 'rgba(248, 244, 244, 0.28)', // the 2px "divider" rule colour
+};
+
+export const LightColors: typeof PremiumColors = {
+  isDark: false,
+  gold: ACCENT,
+  goldDim: '#7c1405',
+  accentHover: ACCENT_HOVER_LIGHT,
+  accentTint: '#fff2ef',
+  success: ACCENT,
+  warning: '#ae1800',
+  danger: '#ae1800',
+  bg: {
+    primary: '#f3f2f2',
+    secondary: '#eae9e9',
+    card: '#eae9e9',
+    cardBorder: 'rgba(32, 30, 29, 0.40)',
+    overlay: 'rgba(32, 30, 29, 0.7)',
+    gradient: ['#f3f2f2', '#f3f2f2'] as [string, string],
+  },
+  white: '#FFFFFF',
+  text: {
+    primary: '#201e1d',
+    secondary: 'rgba(32, 30, 29, 0.58)',
+    muted: 'rgba(32, 30, 29, 0.38)',
+  },
+  border: 'rgba(32, 30, 29, 0.40)',
 };
 
 export type ThemeColors = typeof PremiumColors;
 
-export function useTheme(): ThemeColors {
+/**
+ * Pass `forceDark` to pin a screen to the dark pair regardless of the user's
+ * Appearance setting — the Golden Moment is always contemplative/locked and
+ * renders dark even in light mode.
+ */
+export function useTheme(forceDark = false): ThemeColors {
   const theme = useAppStore(state => state.theme);
+  if (forceDark) return PremiumColors;
   return theme === 'light' ? LightColors : PremiumColors;
 }
 
 // Fallback for non-React contexts if needed (default to Premium)
 export const Colors = PremiumColors;
-
-// Shared elevation used for every "floating" card across the app, replacing
-// the old 1px border look. Shadow opacity is tuned per theme: a visible dark
-// shadow reads on the near-black dark background, but the same opacity would
-// look muddy on a white card, hence the lighter value for light theme.
-export function cardShadow(Colors: ThemeColors) {
-  return {
-    shadowColor: Colors.isDark ? '#000000' : '#1F2937',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: Colors.isDark ? 0.25 : 0.06,
-    shadowRadius: 8,
-    elevation: 2,
-  } as const;
-}
 
 export const Spacing = {
   xs: 4,
@@ -101,10 +95,13 @@ export const Spacing = {
   xxl: 48,
 } as const;
 
+// Modernist has no rounding: cards, chips, buttons, checkboxes, avatars and
+// calendar cells are all square. `full` survives only for the native-style
+// radio dots (Settings / Onboarding mode pickers), which stay circular.
 export const Radius = {
-  sm: 6,
-  md: 12,
-  lg: 20,
+  sm: 0,
+  md: 0,
+  lg: 0,
   full: 9999,
 } as const;
 
@@ -126,17 +123,17 @@ export const Typography = {
     heavy: '800' as const,
   },
   fonts: {
-    regular: 'Outfit_400Regular',
-    medium: 'Outfit_500Medium',
-    semibold: 'Outfit_600SemiBold',
-    bold: 'Outfit_700Bold',
-    heavy: 'Outfit_800ExtraBold',
+    regular: 'Archivo_400Regular',
+    medium: 'Archivo_500Medium',
+    semibold: 'Archivo_600SemiBold',
+    bold: 'Archivo_700Bold',
+    heavy: 'Archivo_800ExtraBold', // all headings
   },
 } as const;
 
 // ─── Responsive scaling ─────────────────────────────────────────────────────
 //
-// Typography/Spacing/Radius above are fixed px values tuned for the ~360–430
+// Typography/Spacing above are fixed px values tuned for the ~360–430
 // logical-px range that covers virtually every phone in portrait. Unusual
 // form factors (a folded Galaxy Z Fold's cover screen, tablets) can report a
 // logical width well outside that band, making fixed px sizes look tiny or
@@ -189,9 +186,11 @@ export interface ScaledTheme {
  * Typography/Spacing/Radius exports in any component that renders text or
  * sized layout, so it adapts on outlier screen widths (and re-adapts live
  * if a foldable is unfolded mid-session).
+ *
+ * `forceDark` pins the colour pair to dark — see useTheme().
  */
-export function useScaledTheme(): ScaledTheme {
-  const Colors = useTheme();
+export function useScaledTheme(forceDark = false): ScaledTheme {
+  const Colors = useTheme(forceDark);
   const { width } = useWindowDimensions();
   const scale = useMemo(() => computeScale(width), [width]);
 
@@ -200,7 +199,7 @@ export function useScaledTheme(): ScaledTheme {
       Colors,
       Typography: scale === 1 ? Typography : { ...Typography, sizes: scaleRecord(Typography.sizes, scale) },
       Spacing: scale === 1 ? Spacing : scaleRecord(Spacing, scale),
-      Radius: scale === 1 ? Radius : { ...scaleRecord({ sm: Radius.sm, md: Radius.md, lg: Radius.lg }, scale), full: Radius.full },
+      Radius,
       scale,
     }),
     [Colors, scale],

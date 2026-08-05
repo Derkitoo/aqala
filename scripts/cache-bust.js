@@ -37,7 +37,7 @@ html = html.replace(
 const pwaTags = [
   '<link rel="manifest" href="/aqala/manifest.json" />',
   '<link rel="apple-touch-icon" href="/aqala/icons/apple-touch-icon.png" />',
-  '<meta name="theme-color" content="#000000" />',
+  '<meta name="theme-color" content="#201e1d" />',
   '<meta name="mobile-web-app-capable" content="yes" />',
   '<meta name="apple-mobile-web-app-capable" content="yes" />',
   '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />',

@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Modal } from 'react-native';
-import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import { PILLARS } from '../constants/pillars';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { useStreakStore } from '../store/useStreakStore';
 import { useDayStore } from '../store/useDayStore';
 import { getStreakLabel } from '../engine/streakManager';
 import { computeTrends } from '../engine/trends';
-import { BarChart2, Star, Target, TrendingDown, CalendarRange, BookOpen } from 'lucide-react-native';
+import { Star, TrendingDown } from 'lucide-react-native';
 
 const GUIDE_DETAILS: Record<string, string> = {
   'Présentation des 5 piliers':
@@ -52,143 +53,136 @@ export function WeeklyReportScreen() {
     return { key, day, status: calendarDots[key] ?? 'missed' };
   });
 
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.headerRow}>
-          <BarChart2 color={Colors.text.primary} size={28} />
-          <Text style={styles.title}>Rapport Hebdomadaire</Text>
+        <ScreenHeader title="Rapport Hebdomadaire" size="md" />
+
+        {/* Maqam — left accent rule, no fill, no shadow */}
+        <View style={styles.maqamCard}>
+          <Text style={styles.maqamName}>{currentMaqam.nameFr}</Text>
+          <Text style={styles.maqamAr}>{currentMaqam.nameAr}</Text>
+          <Text style={styles.maqamDesc}>{currentMaqam.description}</Text>
         </View>
 
-        {/* Maqam card */}
-        <View style={[styles.maqamCard, { borderLeftWidth: 3, borderLeftColor: currentMaqam.color }]}>
-          <Text style={styles.maqamIcon}>{currentMaqam.icon}</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.maqamName, { color: currentMaqam.color }]}>
-              {currentMaqam.nameFr}
-            </Text>
-            <Text style={styles.maqamAr}>{currentMaqam.nameAr}</Text>
-            <Text style={styles.maqamDesc}>{currentMaqam.description}</Text>
-          </View>
-        </View>
-
-        {/* Stats row */}
+        {/* Stats — one flush row framed by 2px rules, split by 1px verticals */}
         <View style={styles.statsRow}>
-          <StatBox label="Streak actuel" value={`${currentStreak}j`} color={Colors.gold} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-          <StatBox label="Plus long streak" value={`${longestStreak}j`} color={Colors.pillar.spiritual} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-          <StatBox label="Moyenne 7j" value={`${sevenDayAverage}/100`} color={Colors.pillar.knowledge} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+          <StatBox label="Streak actuel" value={`${currentStreak}j`} index={0} Colors={Colors} Typography={Typography} Spacing={Spacing} />
+          <StatBox label="Plus long streak" value={`${longestStreak}j`} index={1} Colors={Colors} Typography={Typography} Spacing={Spacing} />
+          <StatBox label="Moyenne 7j" value={`${sevenDayAverage}/100`} index={2} Colors={Colors} Typography={Typography} Spacing={Spacing} />
         </View>
 
         <Text style={styles.streakLabel}>{getStreakLabel(currentStreak)}</Text>
 
-        {/* 7-day calendar */}
-        <SectionCard icon={<CalendarRange color={Colors.text.secondary} size={18} />} title="Les 7 derniers jours" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius}>
-          <View style={styles.calendarRow}>
-            {last7.map(({ key, day, status }) => (
-              <View key={key} style={styles.calDay}>
-                <Text style={styles.calDayLabel}>{day}</Text>
-                <View style={[
-                  styles.calDot,
-                  status === 'complete' && styles.calDotComplete,
-                  status === 'partial'  && styles.calDotPartial,
-                  status === 'missed'   && styles.calDotMissed,
-                ]} />
-              </View>
+        {/* 7-day calendar — 28×28 squares */}
+        <Text style={styles.sectionKicker}>LES 7 DERNIERS JOURS</Text>
+        <View style={styles.hr} />
+        <View style={styles.calendarRow}>
+          {last7.map(({ key, day, status }) => (
+            <View key={key} style={styles.calDay}>
+              <Text style={styles.calDayLabel}>{day}</Text>
+              <View style={[
+                styles.calSquare,
+                status === 'complete' && styles.calSquareComplete,
+                status === 'partial'  && styles.calSquarePartial,
+              ]} />
+            </View>
+          ))}
+        </View>
+        <View style={styles.calLegend}>
+          <LegendItem variant="complete" label="Baraka complète" Colors={Colors} Typography={Typography} Spacing={Spacing} />
+          <LegendItem variant="partial"   label="Partiel"        Colors={Colors} Typography={Typography} Spacing={Spacing} />
+          <LegendItem variant="missed"    label="Non validé"     Colors={Colors} Typography={Typography} Spacing={Spacing} />
+        </View>
+
+        {/* Trends */}
+        <Text style={styles.sectionKicker}>
+          TENDANCES PAR PILIER
+          {trends.sampleSize >= 3 ? ` · ${trends.sampleSize}J` : ''}
+        </Text>
+        <View style={styles.hr} />
+        {trends.sampleSize < 3 ? (
+          <Text style={styles.emptyText}>
+            Reviens dans quelques jours — les tendances se construisent à partir de ton historique.
+          </Text>
+        ) : (
+          <>
+            {trends.pillars.map(p => (
+              <BarRow key={p.id} name={p.nameFr.replace('Pilier ', '').replace('du ', '')} pct={p.avgPct} Colors={Colors} Typography={Typography} Spacing={Spacing} />
             ))}
-          </View>
-          <View style={styles.calLegend}>
-            <LegendItem color={Colors.gold} label="Baraka Complète" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-            <LegendItem color={Colors.pillar.knowledge} label="Partiel" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-            <LegendItem color={Colors.border} label="Non validé" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-          </View>
-        </SectionCard>
 
-        {/* Trends — built from history already collected day-to-day */}
-        <SectionCard
-          icon={<TrendingDown color={Colors.text.secondary} size={18} />}
-          title="Tendances par pilier"
-          subtitle={trends.sampleSize >= 3 ? `Moyenne sur ${trends.sampleSize} jour${trends.sampleSize > 1 ? 's' : ''}` : undefined}
-          Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius}
-        >
-          {trends.sampleSize < 3 ? (
-            <Text style={styles.trendsEmptyText}>
-              Reviens dans quelques jours — les tendances se construisent à partir de ton historique.
-            </Text>
-          ) : (
-            <>
-              {trends.pillars.map(p => (
-                <View key={p.id} style={styles.pillarRow}>
-                  <Text style={styles.pillarName}>{p.nameFr}</Text>
-                  <View style={styles.weightBar}>
-                    <View style={[styles.weightFill, { width: `${p.avgPct}%` as any, backgroundColor: p.color }]} />
-                  </View>
-                  <Text style={[styles.weightPct, { color: p.color }]}>{p.avgPct}%</Text>
-                </View>
-              ))}
+            {trends.weakestPillar && (
+              <View style={styles.insightRow}>
+                <TrendingDown color={Colors.warning} size={18} strokeWidth={1.8} />
+                <Text style={styles.insightText}>
+                  Pilier le plus fragile : <Text style={styles.insightStrong}>{trends.weakestPillar.nameFr}</Text> ({trends.weakestPillar.avgPct}%)
+                </Text>
+              </View>
+            )}
 
-              {(trends.weakestPillar || trends.bestWeekday) && <View style={styles.sectionDivider} />}
-
-              {trends.weakestPillar && (
-                <View style={styles.insightRow}>
-                  <TrendingDown color={Colors.warning} size={16} />
-                  <Text style={styles.insightText}>
-                    Pilier le plus fragile : <Text style={{ fontWeight: 'bold', color: Colors.warning }}>{trends.weakestPillar.nameFr}</Text> ({trends.weakestPillar.avgPct}%)
-                  </Text>
-                </View>
-              )}
-
-              {trends.bestWeekday && (
-                <View style={styles.insightRow}>
-                  <Star color={Colors.gold} size={16} />
-                  <Text style={styles.insightText}>
-                    Meilleur jour : <Text style={{ fontWeight: 'bold', color: Colors.gold }}>{trends.bestWeekday.label}</Text> ({trends.bestWeekday.avgPct}%)
-                    {trends.worstWeekday && (
-                      <> — le plus dur : <Text style={{ fontWeight: 'bold' }}>{trends.worstWeekday.label}</Text> ({trends.worstWeekday.avgPct}%)</>
-                    )}
-                  </Text>
-                </View>
-              )}
-            </>
-          )}
-        </SectionCard>
+            {trends.bestWeekday && (
+              <View style={styles.insightRow}>
+                <Star color={Colors.gold} size={16} strokeWidth={1.6} />
+                <Text style={styles.insightText}>
+                  Meilleur jour : <Text style={styles.insightStrong}>{trends.bestWeekday.label}</Text> ({trends.bestWeekday.avgPct}%)
+                  {trends.worstWeekday && (
+                    <> — le plus dur : <Text style={styles.insightStrong}>{trends.worstWeekday.label}</Text> ({trends.worstWeekday.avgPct}%)</>
+                  )}
+                </Text>
+              </View>
+            )}
+          </>
+        )}
 
         {/* Next Maqam progress */}
         {nextMaqam && (
-          <View style={styles.nextMaqamCard}>
-            <Text style={styles.nextMaqamTitle}>Prochain rang — {nextMaqam.nameFr} {nextMaqam.icon}</Text>
-            <View style={styles.progressTrack}>
-              <View style={[styles.progressFill, {
-                width: `${progressToNext}%` as any,
-                backgroundColor: nextMaqam.color,
-              }]} />
+          <>
+            <Text style={styles.sectionKicker}>PROCHAIN RANG — {nextMaqam.nameFr}</Text>
+            <View style={styles.hr} />
+            <View style={styles.nextMaqamTrack}>
+              <View style={[styles.nextMaqamFill, { width: `${progressToNext}%` as any }]} />
             </View>
             <Text style={styles.nextMaqamPct}>{progressToNext}% accompli</Text>
             <Text style={styles.nextMaqamReqs}>
-              Requis : score moyen ≥ {nextMaqam.minAvgScore} • Streak ≥ {nextMaqam.minStreak}j
+              Requis : score moyen ≥ {nextMaqam.minAvgScore} · Streak ≥ {nextMaqam.minStreak}j
             </Text>
-          </View>
+          </>
         )}
 
         {/* Unlocked content */}
         {currentMaqam.unlockedContent.length > 0 && (
-          <SectionCard icon={<BookOpen color={Colors.text.secondary} size={18} />} title="Contenu débloqué" subtitle="Appuyez pour lire" Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius}>
+          <>
+            <Text style={styles.sectionKicker}>CONTENU DÉBLOQUÉ</Text>
+            <View style={styles.hr} />
             {currentMaqam.unlockedContent.map((item, i) => (
               <Pressable
                 key={i}
-                style={[styles.contentItem, i === currentMaqam.unlockedContent.length - 1 && styles.contentItemLast]}
+                style={({ pressed }) => [styles.contentItem, pressed && styles.pressed]}
                 onPress={() => setSelectedGuide({ title: item, content: GUIDE_DETAILS[item] ?? 'Guide d\'accompagnement disponible dans votre Maqam.' })}
               >
-                <Star color={Colors.gold} size={16} />
+                <Star color={Colors.gold} size={16} strokeWidth={1.6} />
                 <Text style={styles.contentText}>{item}</Text>
               </Pressable>
             ))}
-          </SectionCard>
+          </>
         )}
 
-        {/* Modal Guide Detail */}
+        {/* Pillar weighting */}
+        <Text style={styles.sectionKicker}>PONDÉRATION DES PILIERS</Text>
+        <View style={styles.hr} />
+        {Object.values(PILLARS).map(p => (
+          <BarRow
+            key={p.id}
+            name={p.nameFr.replace('Pilier ', '').replace('du ', '')}
+            pct={Math.round(p.weight * 100)}
+            Colors={Colors} Typography={Typography} Spacing={Spacing}
+          />
+        ))}
+
+        {/* Modal Guide Detail — flat top-accent sheet */}
         {selectedGuide && (
           <Modal
             transparent
@@ -196,227 +190,285 @@ export function WeeklyReportScreen() {
             visible={!!selectedGuide}
             onRequestClose={() => setSelectedGuide(null)}
           >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
+            <Pressable style={styles.modalOverlay} onPress={() => setSelectedGuide(null)}>
+              <Pressable style={styles.modalContent} onPress={e => e.stopPropagation()}>
                 <Text style={styles.modalTitle}>{selectedGuide.title}</Text>
                 <ScrollView style={styles.modalScroll}>
                   <Text style={styles.modalBody}>{selectedGuide.content}</Text>
                 </ScrollView>
-                <Pressable style={styles.modalCloseBtn} onPress={() => setSelectedGuide(null)}>
+                <Pressable
+                  style={({ pressed }) => [styles.modalCloseBtn, pressed && styles.pressed]}
+                  onPress={() => setSelectedGuide(null)}
+                >
                   <Text style={styles.modalCloseText}>Fermer</Text>
                 </Pressable>
-              </View>
-            </View>
+              </Pressable>
+            </Pressable>
           </Modal>
         )}
-
-        {/* Pillars summary */}
-        <SectionCard
-          icon={<Target color={Colors.text.secondary} size={18} />}
-          title="Pondération des Piliers"
-          subtitle="Poids fixe de chaque pilier dans le score quotidien"
-          Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius}
-        >
-          {(Object.values(PILLARS)).map(p => {
-            const Icon = p.icon;
-            return (
-              <View key={p.id} style={styles.pillarRow}>
-                <View style={styles.pillarIconWrapper}>
-                  <Icon color={p.color} size={16} />
-                </View>
-                <Text style={styles.pillarName}>{p.nameFr}</Text>
-                <View style={styles.weightBar}>
-                  <View style={[styles.weightFill, {
-                    width: `${p.weight * 100}%` as any,
-                    backgroundColor: p.color,
-                  }]} />
-                </View>
-                <Text style={[styles.weightPct, { color: p.color }]}>{Math.round(p.weight * 100)}%</Text>
-              </View>
-            );
-          })}
-        </SectionCard>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function StatBox({ label, value, color, Colors, Typography, Spacing, Radius }: {
-  label: string; value: string; color: string; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+function StatBox({ label, value, index, Colors, Typography, Spacing }: {
+  label: string; value: string; index: number; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
-    <View style={styles.statBox}>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
+    <View style={[styles.statBox, index > 0 && styles.statBoxDivided]}>
+      <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
 }
 
-function SectionCard({ icon, title, subtitle, children, Colors, Typography, Spacing, Radius }: {
-  icon: React.ReactNode; title: string; subtitle?: string; children: React.ReactNode; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+function BarRow({ name, pct, Colors, Typography, Spacing }: {
+  name: string; pct: number; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
-    <View style={styles.sectionCard}>
-      <View style={styles.sectionCardHeader}>
-        {icon}
-        <Text style={styles.sectionCardTitle}>{title}</Text>
+    <View style={styles.barRow}>
+      <Text style={styles.barName}>{name}</Text>
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, { width: `${pct}%` as any }]} />
       </View>
-      {subtitle && <Text style={styles.sectionCardSubtitle}>{subtitle}</Text>}
-      {children}
+      <Text style={styles.barPct}>{pct}%</Text>
     </View>
   );
 }
 
-function LegendItem({ color, label, Colors, Typography, Spacing, Radius }: {
-  color: string; label: string; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+function LegendItem({ variant, label, Colors, Typography, Spacing }: {
+  variant: 'complete' | 'partial' | 'missed'; label: string; Colors: ThemeColors;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
     <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { backgroundColor: color }]} />
+      <View style={[
+        styles.legendSwatch,
+        variant === 'complete' && styles.legendSwatchComplete,
+        variant === 'partial'  && styles.legendSwatchPartial,
+      ]} />
       <Text style={styles.legendText}>{label}</Text>
     </View>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
-  content: { padding: Spacing.md, paddingBottom: 100 },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+  content: { paddingHorizontal: Spacing.md + 4, paddingTop: Spacing.sm, paddingBottom: 120 },
+
+  pressed: { opacity: 0.55 },
+
+  sectionKicker: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginTop: 28,
+    marginBottom: 10,
   },
-  title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.text.primary },
+  hr: { height: 2, backgroundColor: Colors.border, marginBottom: 14 },
 
   maqamCard: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: Colors.bg.card, borderRadius: Radius.lg,
-    padding: Spacing.md, marginBottom: Spacing.lg,
-    ...cardShadow(Colors),
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.gold,
+    paddingLeft: 14,
+    paddingVertical: Spacing.xs,
+    marginBottom: 18,
   },
-  maqamIcon: { fontSize: 40 },
-  maqamName: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy },
-  maqamAr: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
-  maqamDesc: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginTop: 4, lineHeight: 18 },
+  maqamName: {
+    fontSize: Typography.sizes.lg + 2,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
+  maqamAr: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 2,
+  },
+  maqamDesc: {
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 6,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
+  },
 
-  statsRow: { flexDirection: 'row', gap: Spacing.sm, marginBottom: Spacing.sm },
-  statBox: {
-    flex: 1, backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, alignItems: 'center',
-    ...cardShadow(Colors),
+  statsRow: {
+    flexDirection: 'row',
+    borderTopWidth: 2,
+    borderTopColor: Colors.border,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.border,
+    paddingVertical: Spacing.md,
+    marginBottom: 10,
   },
-  statValue: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy },
-  statLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, textAlign: 'center' },
+  statBox: { flex: 1, alignItems: 'center' },
+  statBoxDivided: { borderLeftWidth: 1, borderLeftColor: Colors.border },
+  statValue: {
+    fontSize: Typography.sizes.lg + 2,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
+  statLabel: {
+    fontSize: Typography.sizes.xs - 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: Spacing.xs,
+    textAlign: 'center',
+  },
 
   streakLabel: {
-    fontSize: Typography.sizes.sm, color: Colors.gold,
-    textAlign: 'center', marginBottom: Spacing.lg,
-  },
-
-  sectionCard: {
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    ...cardShadow(Colors),
-  },
-  sectionCardHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.xs,
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    fontStyle: 'italic',
+    textAlign: 'center',
     marginBottom: Spacing.sm,
   },
-  sectionCardTitle: {
-    fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold,
+
+  calendarRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  calDay: { alignItems: 'center', flex: 1 },
+  calDayLabel: {
+    fontSize: Typography.sizes.xs - 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  // Squares, not circles: solid accent = complete, accent-tint outline =
+  // partial, outline only = missed.
+  calSquare: {
+    width: 28, height: 28,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  calSquareComplete: { backgroundColor: Colors.gold, borderColor: Colors.gold },
+  calSquarePartial:  { backgroundColor: Colors.accentTint, borderColor: Colors.gold },
+
+  calLegend: { flexDirection: 'row', gap: 14, flexWrap: 'wrap', marginBottom: Spacing.xs },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  legendSwatch: {
+    width: 8, height: 8,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  legendSwatchComplete: { backgroundColor: Colors.gold, borderColor: Colors.gold },
+  legendSwatchPartial:  { backgroundColor: Colors.accentTint, borderColor: Colors.gold },
+  legendText: {
+    fontSize: Typography.sizes.xs - 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+
+  emptyText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    lineHeight: Typography.sizes.sm * 1.5,
+  },
+
+  // 5px flat rules, accent fill, square ends.
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
+  barName: {
+    width: 92,
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+  barTrack: { flex: 1, height: 5, backgroundColor: Colors.border },
+  barFill: { height: '100%', backgroundColor: Colors.gold },
+  barPct: {
+    width: 34,
+    textAlign: 'right',
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
-  sectionCardSubtitle: {
-    fontSize: Typography.sizes.xs, color: Colors.text.muted,
-    marginTop: -Spacing.xs, marginBottom: Spacing.sm,
+
+  insightRow: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm, marginBottom: Spacing.sm },
+  insightText: {
+    flex: 1,
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
   },
-  sectionDivider: {
-    height: 1, backgroundColor: Colors.border,
-    marginVertical: Spacing.sm,
-  },
-  insightRow: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
+  insightStrong: { fontFamily: Typography.fonts.heavy, color: Colors.text.primary },
+
+  nextMaqamTrack: { height: 6, backgroundColor: Colors.border, marginBottom: Spacing.sm },
+  nextMaqamFill: { height: '100%', backgroundColor: Colors.gold },
+  nextMaqamPct: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
     marginBottom: Spacing.xs,
   },
-
-  calendarRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: Spacing.sm },
-  calDay: { alignItems: 'center', gap: Spacing.xs, flex: 1 },
-  calDayLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, textTransform: 'capitalize' },
-  calDot: { width: 28, height: 28, borderRadius: 14, backgroundColor: Colors.border },
-  calDotComplete: { backgroundColor: Colors.gold },
-  calDotPartial:  { backgroundColor: Colors.pillar.knowledge },
-  calDotMissed:   { backgroundColor: Colors.border },
-  calLegend: { flexDirection: 'row', gap: Spacing.md, flexWrap: 'wrap' },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  legendDot: { width: 8, height: 8, borderRadius: 4 },
-  legendText: { fontSize: Typography.sizes.xs, color: Colors.text.secondary },
-
-  trendsEmptyText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20, fontStyle: 'italic' },
-  insightText: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20 },
-
-  nextMaqamCard: {
-    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, marginBottom: Spacing.lg, gap: Spacing.sm,
-    ...cardShadow(Colors),
+  nextMaqamReqs: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    fontStyle: 'italic',
   },
-  nextMaqamTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary },
-  progressTrack: { height: 8, backgroundColor: Colors.border, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4 },
-  nextMaqamPct: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
-  nextMaqamReqs: { fontSize: Typography.sizes.xs, color: Colors.text.muted, fontStyle: 'italic' },
 
   contentItem: {
     flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    paddingVertical: Spacing.sm,
+    paddingVertical: 12,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
-  contentItemLast: { borderBottomWidth: 0 },
-  contentText: { flex: 1, fontSize: Typography.sizes.sm, color: Colors.text.primary, fontWeight: Typography.weights.semibold },
+  contentText: {
+    flex: 1,
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
 
   modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(0,0,0,0.85)',
-    justifyContent: 'center', alignItems: 'center', padding: Spacing.lg,
+    flex: 1,
+    backgroundColor: Colors.bg.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
   },
   modalContent: {
-    backgroundColor: Colors.bg.card, borderRadius: Radius.lg,
-    padding: Spacing.lg, width: '100%', maxHeight: '80%',
-    borderTopWidth: 3, borderTopColor: Colors.gold,
-    ...cardShadow(Colors),
+    backgroundColor: Colors.bg.primary,
+    borderTopWidth: 2,
+    borderTopColor: Colors.gold,
+    padding: Spacing.lg,
+    width: '100%',
+    maxHeight: '70%',
   },
   modalTitle: {
-    fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold,
-    color: Colors.gold, marginBottom: Spacing.md, textAlign: 'center',
+    fontSize: Typography.sizes.md + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+    marginBottom: Spacing.md,
   },
   modalScroll: { marginBottom: Spacing.md },
   modalBody: {
-    fontSize: Typography.sizes.sm, color: Colors.text.primary,
-    lineHeight: 22,
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.primary,
+    lineHeight: Typography.sizes.sm * 1.6,
   },
   modalCloseBtn: {
-    backgroundColor: Colors.gold, borderRadius: Radius.md,
-    paddingVertical: Spacing.sm, alignItems: 'center',
+    backgroundColor: Colors.gold,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.md,
+    alignSelf: 'flex-start',
   },
   modalCloseText: {
-    fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold,
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.bg.primary,
   },
-
-  pillarRow: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    marginBottom: Spacing.sm,
-  },
-  pillarIconWrapper: { width: 24, alignItems: 'center' },
-  pillarName: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, width: 120 },
-  weightBar: { flex: 1, height: 6, backgroundColor: Colors.border, borderRadius: 3, overflow: 'hidden' },
-  weightFill: { height: '100%', borderRadius: 3 },
-  weightPct: { fontSize: Typography.sizes.sm, fontWeight: Typography.weights.bold, width: 36, textAlign: 'right' },
 });

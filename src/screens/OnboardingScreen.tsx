@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable,
-  SafeAreaView, Animated,
+  View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { useScaledTheme, cardShadow, Colors as StaticColors, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import { useAppStore, type AppMode } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { Moon, Leaf, Shield, Sparkles, MapPin, Bell, Zap } from 'lucide-react-native';
@@ -17,9 +16,9 @@ interface ModeOption {
   title: string;
   subtitle: string;
   habits: string[];
-  color: string;
 }
 
+// Mono-accent: modes are distinguished by icon + title, not colour.
 const MODES: ModeOption[] = [
   {
     id: 'beginner',
@@ -33,7 +32,6 @@ const MODES: ModeOption[] = [
       '1 interaction sociale réelle',
       'Coucher avant 23h30',
     ],
-    color: StaticColors.pillar.knowledge,
   },
   {
     id: 'intermediate',
@@ -47,7 +45,6 @@ const MODES: ModeOption[] = [
       'Savoir + Social + Sommeil',
       'Witr et Adhkâr du soir',
     ],
-    color: StaticColors.pillar.spiritual,
   },
   {
     id: 'advanced',
@@ -61,7 +58,6 @@ const MODES: ModeOption[] = [
       'Mode Nuit Globale (Qiyam al-Layl)',
       'Sommeil fractionné prophétique',
     ],
-    color: '#F5C842', // gold
   },
 ];
 
@@ -72,8 +68,8 @@ export function OnboardingScreen() {
   const [locGranted, setLocGranted] = useState(false);
   const [notifGranted, setNotifGranted] = useState(false);
 
-  const { Colors, Typography, Spacing, Radius, scale } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius, scale), [Colors, Typography, Spacing, Radius, scale]);
+  const { Colors, Typography, Spacing, scale } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, scale), [Colors, Typography, Spacing, scale]);
 
   const handleRequestLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -94,6 +90,8 @@ export function OnboardingScreen() {
     completeOnboarding(selectedMode);
   };
 
+  const selectedModeObj = MODES.find(m => m.id === selectedMode)!;
+
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content} bounces={false}>
@@ -101,11 +99,11 @@ export function OnboardingScreen() {
         {/* ── STEP: WELCOME ─────────────────────────────── */}
         {step === 'welcome' && (
           <View style={styles.stepContainer}>
-            <View style={{ alignItems: 'center', marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
-              <Moon color={Colors.gold} size={64} strokeWidth={1} />
+            <View style={styles.brandIconWrap}>
+              <Moon color={Colors.gold} size={46} strokeWidth={1.2} />
             </View>
-            <Text style={styles.heroTitle}>Aqal al-Qalil</Text>
-            <Text style={styles.heroAr}>أقل القليل</Text>
+            <Text style={styles.brandTitle}>Aqal al-Qalil</Text>
+            <Text style={styles.brandArabic}>أقل القليل</Text>
             <Text style={styles.heroSubtitle}>
               La productivité du croyant.{'\n'}
               5 piliers. 24 heures. Une constance.
@@ -119,7 +117,7 @@ export function OnboardingScreen() {
               <Text style={styles.principleRef}>— Sahih Bukhari & Muslim</Text>
             </View>
 
-            <Pressable style={styles.primaryBtn} onPress={() => setStep('mode')}>
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={() => setStep('mode')}>
               <Text style={styles.primaryBtnText}>Commencer →</Text>
             </Pressable>
           </View>
@@ -133,47 +131,40 @@ export function OnboardingScreen() {
               Tu pourras changer à tout moment dans les réglages.
             </Text>
 
-            {MODES.map(mode => (
-              <Pressable
-                key={mode.id}
-                style={[
-                  styles.modeCard,
-                  selectedMode === mode.id && { borderLeftWidth: 3, borderLeftColor: mode.color },
-                ]}
-                onPress={() => setSelectedMode(mode.id)}
-              >
-                <View style={styles.modeHeader}>
-                  <mode.IconComponent color={mode.color} size={28} />
-                  <View style={{ flex: 1, marginLeft: Spacing.sm }}>
-                    <Text style={[styles.modeTitle, selectedMode === mode.id && { color: mode.color }]}>
-                      {mode.title}
-                    </Text>
-                    <Text style={styles.modeSubtitle}>{mode.subtitle}</Text>
+            {MODES.map(mode => {
+              const active = selectedMode === mode.id;
+              return (
+                <Pressable
+                  key={mode.id}
+                  style={({ pressed }) => [styles.modeRow, pressed && styles.pressed]}
+                  onPress={() => setSelectedMode(mode.id)}
+                >
+                  <View style={styles.modeHeader}>
+                    <mode.IconComponent color={active ? Colors.gold : Colors.text.primary} size={24} strokeWidth={1.6} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.modeTitle, active && styles.modeTitleActive]}>
+                        {mode.title}
+                      </Text>
+                      <Text style={styles.modeSubtitle}>{mode.subtitle}</Text>
+                    </View>
+                    {/* Native-style radio dot — stays circular. */}
+                    <View style={[styles.radioOuter, active && styles.radioOuterActive]}>
+                      {active && <View style={styles.radioInner} />}
+                    </View>
                   </View>
-                  <View style={[
-                    styles.radioOuter,
-                    selectedMode === mode.id && { borderColor: mode.color },
-                  ]}>
-                    {selectedMode === mode.id && (
-                      <View style={[styles.radioInner, { backgroundColor: mode.color }]} />
-                    )}
-                  </View>
-                </View>
 
-                {selectedMode === mode.id && (
-                  <View style={styles.habitsList}>
-                    {mode.habits.map((h, i) => (
-                      <Text key={i} style={styles.habitItem}>✓ {h}</Text>
-                    ))}
-                  </View>
-                )}
-              </Pressable>
-            ))}
+                  {active && (
+                    <View style={styles.habitsList}>
+                      {mode.habits.map((h, i) => (
+                        <Text key={i} style={styles.habitItem}>— {h}</Text>
+                      ))}
+                    </View>
+                  )}
+                </Pressable>
+              );
+            })}
 
-            <Pressable
-              style={[styles.primaryBtn, { backgroundColor: MODES.find(m => m.id === selectedMode)!.color }]}
-              onPress={() => setStep('permissions')}
-            >
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={() => setStep('permissions')}>
               <Text style={styles.primaryBtnText}>Continuer →</Text>
             </Pressable>
           </View>
@@ -193,11 +184,7 @@ export function OnboardingScreen() {
               description="Calcule les horaires de prière précis selon ta position."
               granted={locGranted}
               onRequest={handleRequestLocation}
-              Colors={Colors}
-              Typography={Typography}
-              Spacing={Spacing}
-              Radius={Radius}
-              scale={scale}
+              Colors={Colors} Typography={Typography} Spacing={Spacing} scale={scale}
             />
             <PermissionRow
               IconComponent={Bell}
@@ -205,21 +192,15 @@ export function OnboardingScreen() {
               description="Rappels de prières, Moment d'Or, et incitations bienveillantes."
               granted={notifGranted}
               onRequest={handleRequestNotifications}
-              Colors={Colors}
-              Typography={Typography}
-              Spacing={Spacing}
-              Radius={Radius}
-              scale={scale}
+              Colors={Colors} Typography={Typography} Spacing={Spacing} scale={scale}
             />
 
-            <View style={styles.skipNote}>
-              <Text style={styles.skipNoteText}>
-                Ces autorisations sont recommandées mais pas obligatoires.
-                Tu peux les activer plus tard dans les réglages.
-              </Text>
-            </View>
+            <Text style={styles.skipNoteText}>
+              Ces autorisations sont recommandées mais pas obligatoires.
+              Tu peux les activer plus tard dans les réglages.
+            </Text>
 
-            <Pressable style={styles.primaryBtn} onPress={() => setStep('ready')}>
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={() => setStep('ready')}>
               <Text style={styles.primaryBtnText}>
                 {locGranted && notifGranted ? 'Tout est prêt →' : 'Passer →'}
               </Text>
@@ -230,10 +211,10 @@ export function OnboardingScreen() {
         {/* ── STEP: READY ───────────────────────────────── */}
         {step === 'ready' && (
           <View style={styles.stepContainer}>
-            <View style={{ alignItems: 'center', marginTop: Spacing.xxl, marginBottom: Spacing.md }}>
-              <Zap color={Colors.gold} size={64} strokeWidth={1} />
+            <View style={styles.brandIconWrap}>
+              <Zap color={Colors.gold} size={46} strokeWidth={1.2} />
             </View>
-            <Text style={styles.heroTitle}>Prêt.</Text>
+            <Text style={styles.brandTitle}>Prêt.</Text>
             <Text style={styles.readyBody}>
               Ta première journée commence maintenant.{'\n\n'}
               Le Strict Minimum n'est pas un plafond — c'est le sol.
@@ -241,33 +222,21 @@ export function OnboardingScreen() {
             </Text>
 
             <View style={styles.summaryBox}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.xs, justifyContent: 'center' }}>
-                {React.createElement(MODES.find(m => m.id === selectedMode)!.IconComponent, { color: Colors.gold, size: 24 })}
-                <Text style={styles.summaryTitle}>
-                  {MODES.find(m => m.id === selectedMode)!.title}
-                </Text>
-              </View>
-              <Text style={styles.summarySubtitle}>
-                {MODES.find(m => m.id === selectedMode)!.subtitle}
-              </Text>
+              <Text style={styles.summaryTitle}>{selectedModeObj.title}</Text>
+              <Text style={styles.summarySubtitle}>{selectedModeObj.subtitle}</Text>
             </View>
 
-            <Pressable style={[styles.primaryBtn, { backgroundColor: Colors.gold }]} onPress={handleFinish}>
-              <Text style={[styles.primaryBtnText, { color: Colors.bg.primary }]}>
-                Bismillah — Commencer
-              </Text>
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={handleFinish}>
+              <Text style={styles.primaryBtnText}>Bismillah — Commencer</Text>
             </Pressable>
           </View>
         )}
       </ScrollView>
 
-      {/* Step indicator */}
+      {/* Step indicator — square bars, the active one wider */}
       <View style={styles.stepDots}>
         {(['welcome', 'mode', 'permissions', 'ready'] as Step[]).map(s => (
-          <View
-            key={s}
-            style={[styles.dot, step === s && styles.dotActive]}
-          />
+          <View key={s} style={[styles.dot, step === s && styles.dotActive]} />
         ))}
       </View>
     </SafeAreaView>
@@ -275,23 +244,23 @@ export function OnboardingScreen() {
 }
 
 
-function PermissionRow({ IconComponent, title, description, granted, onRequest, Colors, Typography, Spacing, Radius, scale }: {
+function PermissionRow({ IconComponent, title, description, granted, onRequest, Colors, Typography, Spacing, scale }: {
   IconComponent: any; title: string; description: string;
   granted: boolean; onRequest: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape; scale: number;
+  Typography: TypographyShape; Spacing: SpacingShape; scale: number;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius, scale), [Colors, Typography, Spacing, Radius, scale]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, scale), [Colors, Typography, Spacing, scale]);
   return (
     <View style={styles.permRow}>
-      <IconComponent color={Colors.text.primary} size={26} />
-      <View style={{ flex: 1, marginLeft: Spacing.sm }}>
+      <IconComponent color={Colors.text.primary} size={22} strokeWidth={1.7} />
+      <View style={{ flex: 1 }}>
         <Text style={styles.permTitle}>{title}</Text>
         <Text style={styles.permDesc}>{description}</Text>
       </View>
       {granted ? (
         <Text style={styles.permGranted}>✓ Accordé</Text>
       ) : (
-        <Pressable style={styles.permBtn} onPress={onRequest}>
+        <Pressable style={({ pressed }) => [styles.permBtn, pressed && styles.pressed]} onPress={onRequest}>
           <Text style={styles.permBtnText}>Autoriser</Text>
         </Pressable>
       )}
@@ -299,132 +268,195 @@ function PermissionRow({ IconComponent, title, description, granted, onRequest, 
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape, scale: number) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, scale: number) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
-  content: { flexGrow: 1, padding: Spacing.lg, paddingBottom: 80 },
+  content: { flexGrow: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm, paddingBottom: 60 },
 
-  stepContainer: { flex: 1, gap: Spacing.md },
+  pressed: { opacity: 0.55 },
 
-  heroTitle: {
-    fontSize: Math.round(40 * scale), fontWeight: Typography.weights.heavy,
-    color: Colors.text.primary, textAlign: 'center',
+  stepContainer: { flex: 1, justifyContent: 'center' },
+
+  brandIconWrap: { alignItems: 'center', marginBottom: 18 },
+  brandTitle: {
+    fontSize: Math.round(34 * scale),
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+    textAlign: 'center',
   },
-  heroAr: {
-    fontSize: Typography.sizes.xxl, color: Colors.gold,
-    textAlign: 'center', marginTop: -Spacing.xs,
+  brandArabic: {
+    fontSize: Typography.sizes.lg + 2,
+    color: Colors.gold,
+    textAlign: 'center',
+    marginTop: 2,
+    marginBottom: 14,
   },
   heroSubtitle: {
-    fontSize: Typography.sizes.lg, color: Colors.text.secondary,
-    textAlign: 'center', lineHeight: 26, marginTop: Spacing.sm,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: Typography.sizes.md * 1.5,
+    marginBottom: 22,
   },
+
+  // Flat surface + 2px left accent rule.
   principleBox: {
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    borderLeftWidth: 3,
+    borderLeftWidth: 2,
     borderLeftColor: Colors.gold,
-    marginTop: Spacing.sm,
-    ...cardShadow(Colors),
+    padding: Spacing.md,
   },
   principleText: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.primary,
     fontStyle: 'italic',
-    lineHeight: 22,
+    lineHeight: (Typography.sizes.sm + 1) * 1.5,
   },
   principleRef: {
     fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
-    marginTop: Spacing.xs,
+    marginTop: Spacing.sm,
   },
 
   stepTitle: {
-    fontSize: Typography.sizes.xxl,
-    fontWeight: Typography.weights.heavy,
+    fontSize: Typography.sizes.xxl - 2,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
-    marginTop: Spacing.lg,
+    marginTop: 10,
   },
   stepSubtitle: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
-    lineHeight: 22,
+    lineHeight: (Typography.sizes.sm + 1) * 1.4,
+    marginTop: 6,
+    marginBottom: 18,
   },
 
-  modeCard: {
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+  modeRow: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingVertical: Spacing.md,
   },
-  modeHeader: { flexDirection: 'row', alignItems: 'center' },
+  modeHeader: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   modeTitle: {
-    fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold,
+    fontSize: Typography.sizes.md + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
-  modeSubtitle: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
+  modeTitleActive: { color: Colors.gold },
+  modeSubtitle: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 2,
+  },
   radioOuter: {
-    width: 22, height: 22, borderRadius: 11,
+    width: 20, height: 20, borderRadius: 999,
     borderWidth: 2, borderColor: Colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  radioInner: { width: 10, height: 10, borderRadius: 5 },
-  habitsList: { marginTop: Spacing.md, gap: Spacing.xs, paddingLeft: Spacing.sm },
-  habitItem: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20 },
-
-  primaryBtn: {
-    backgroundColor: Colors.pillar.spiritual,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.md + 2,
-    alignItems: 'center',
-    marginTop: Spacing.sm,
-  },
-  primaryBtnText: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.bold,
-    color: Colors.white,
+  radioOuterActive: { borderColor: Colors.gold },
+  radioInner: { width: 9, height: 9, borderRadius: 999, backgroundColor: Colors.gold },
+  habitsList: { marginTop: 12, paddingLeft: 36, gap: 5 },
+  habitItem: {
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.4,
   },
 
   permRow: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
-    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+    paddingVertical: Spacing.md,
   },
-  permTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
-  permDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 16 },
-  permGranted: { fontSize: Typography.sizes.sm, color: Colors.success, fontWeight: Typography.weights.bold },
+  permTitle: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  permDesc: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 2,
+    lineHeight: (Typography.sizes.xs + 1) * 1.4,
+  },
+  permGranted: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
   permBtn: {
-    backgroundColor: Colors.pillar.spiritual + '33',
-    borderRadius: Radius.sm, borderWidth: 1,
-    borderColor: Colors.pillar.spiritual,
-    paddingVertical: Spacing.xs, paddingHorizontal: Spacing.sm,
+    borderWidth: 1, borderColor: Colors.gold,
+    backgroundColor: 'transparent',
+    paddingVertical: Spacing.sm, paddingHorizontal: 12,
   },
-  permBtnText: { fontSize: Typography.sizes.xs, color: Colors.pillar.spiritual, fontWeight: Typography.weights.bold },
-  skipNote: {
-    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+  permBtnText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
   },
-  skipNoteText: { fontSize: Typography.sizes.xs, color: Colors.text.muted, lineHeight: 18 },
+  skipNoteText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    lineHeight: (Typography.sizes.xs + 1) * 1.5,
+    marginTop: Spacing.md,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+    paddingTop: 14,
+  },
 
   readyBody: {
-    fontSize: Typography.sizes.md, color: Colors.text.secondary,
-    lineHeight: 24, textAlign: 'center', marginTop: Spacing.md,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: Typography.sizes.md * 1.6,
+    textAlign: 'center',
+    marginBottom: 20,
   },
   summaryBox: {
-    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, alignItems: 'center', gap: Spacing.xs,
-    borderTopWidth: 3, borderTopColor: Colors.gold,
-    ...cardShadow(Colors),
+    backgroundColor: Colors.bg.card,
+    borderTopWidth: 2,
+    borderTopColor: Colors.gold,
+    padding: Spacing.md,
+    alignItems: 'center',
   },
-  summaryTitle: { fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold, color: Colors.gold },
-  summarySubtitle: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, textAlign: 'center' },
+  summaryTitle: {
+    fontSize: Typography.sizes.md + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
+  summarySubtitle: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
+  },
+
+  // Full-width solid accent block, label flush left.
+  primaryBtn: {
+    backgroundColor: Colors.gold,
+    width: '100%',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: 18,
+    marginTop: Spacing.md,
+  },
+  primaryBtnText: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
+    textAlign: 'left',
+  },
 
   stepDots: {
     position: 'absolute', bottom: 20, left: 0, right: 0,
     flexDirection: 'row', justifyContent: 'center', gap: 6,
   },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: Colors.border },
-  dotActive: { backgroundColor: Colors.gold, width: 20 },
+  dot: { width: 6, height: 6, backgroundColor: Colors.border },
+  dotActive: { backgroundColor: Colors.gold, width: 18 },
 });

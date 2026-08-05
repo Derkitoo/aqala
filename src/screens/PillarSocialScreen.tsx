@@ -3,18 +3,16 @@ import {
   View, Text, StyleSheet, ScrollView, Pressable,
   TextInput, SafeAreaView, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useScaledTheme, cardShadow, type ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, type ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import {
-  SOCIAL_CATEGORIES, SOCIAL_GUIDE_INTRO, pickSocialSuggestions,
+  PILLARS, SOCIAL_CATEGORIES, SOCIAL_GUIDE_INTRO, pickSocialSuggestions,
   type SocialCategory, type SocialSuggestion,
 } from '../constants/pillars';
 import { computeSocialBalance } from '../engine/trends';
 import { FocusTimer } from '../components/FocusTimer';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { useDayStore } from '../store/useDayStore';
-import {
-  Users, Heart, MessageCircle, ChevronRight, CheckCircle, Handshake,
-  Shuffle, Lightbulb, CalendarRange,
-} from 'lucide-react-native';
+import { Heart, MessageCircle, Handshake, Shuffle, Check } from 'lucide-react-native';
 
 type Phase = 'overview' | 'select' | 'guide' | 'timer' | 'note' | 'done';
 
@@ -42,8 +40,8 @@ export function PillarSocialScreen() {
   const [duration, setDuration] = useState(0);
   const [note, setNote] = useState(s.noteText ?? '');
 
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   const balance = useMemo(() => computeSocialBalance(today, history), [today, history]);
 
@@ -79,19 +77,19 @@ export function PillarSocialScreen() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.title}>👥 Pilier Social</Text>
-          <Text style={styles.subtitle}>العمل الاجتماعي — Al-'Amal al-Ijtima'i</Text>
+          <ScreenHeader
+            kicker={`PILIER · ${PILLARS.social.numeral}`}
+            title="Pilier Social"
+            subtitle="العمل الاجتماعي — Al-'Amal al-Ijtima'i"
+          />
 
-          {/* Rule box — always visible */}
+          {/* Rule block — always visible, left accent rule */}
           <View style={styles.ruleBox}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm }}>
-              <Handshake size={20} color={Colors.pillar.social} />
-              <Text style={styles.ruleTitleText}>Règle d'or du Lien Social</Text>
-            </View>
+            <Text style={styles.ruleTitleText}>Règle d'or du Lien Social</Text>
             <Text style={styles.ruleBody}>
               "Celui qui ne remercie pas les gens ne remercie pas Allah." (Tirmidhi)
             </Text>
-            <Text style={[styles.ruleBody, { marginTop: Spacing.sm, fontWeight: 'bold' }]}>
+            <Text style={styles.ruleBodyStrong}>
               Ta présence physique est la seule unité de mesure valable.
             </Text>
           </View>
@@ -99,39 +97,42 @@ export function PillarSocialScreen() {
           {/* Overview */}
           {phase === 'overview' && (
             <>
-              <SocialBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
-              <Pressable style={styles.startBtn} onPress={() => setPhase('select')}>
-                <Text style={styles.startBtnText}>Commencer l'interaction réelle</Text>
-                <Text style={styles.startBtnSub}>20 minutes minimum • Face-à-face uniquement</Text>
+              <SocialBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} />
+              <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={() => setPhase('select')}>
+                <Text style={styles.primaryBtnText}>Commencer l'interaction réelle</Text>
+                <Text style={styles.primaryBtnSub}>20 minutes minimum • Face-à-face uniquement</Text>
               </Pressable>
             </>
           )}
 
-          {/* Category select */}
+          {/* Category select — segmented buttons */}
           {phase === 'select' && (
             <>
-              <Text style={styles.phaseLabel}>Avec qui ? Dans quel cadre ?</Text>
-              {(Object.keys(SOCIAL_CATEGORIES) as SocialCategory[]).map(cat => {
-                const { label, description } = SOCIAL_CATEGORIES[cat];
-                const TypeIcon = CATEGORY_ICONS[cat];
-
-                return (
-                  <Pressable
-                    key={cat}
-                    style={styles.catCard}
-                    onPress={() => handleCategorySelect(cat)}
-                  >
-                    <View style={styles.catIconBadge}>
-                      <TypeIcon size={22} color={Colors.pillar.social} />
-                    </View>
-                    <View style={{ flex: 1, marginLeft: Spacing.sm }}>
-                      <Text style={styles.catLabel}>{label}</Text>
-                      <Text style={styles.catDesc}>{description}</Text>
-                    </View>
-                    <ChevronRight size={20} color={Colors.text.muted} />
-                  </Pressable>
-                );
-              })}
+              <Text style={styles.introText}>Avec qui ? Dans quel cadre ?</Text>
+              <View style={styles.segRow}>
+                {(Object.keys(SOCIAL_CATEGORIES) as SocialCategory[]).map(cat => {
+                  const active = selectedCategory === cat;
+                  const TypeIcon = CATEGORY_ICONS[cat];
+                  return (
+                    <Pressable
+                      key={cat}
+                      style={({ pressed }) => [styles.seg, active && styles.segActive, pressed && styles.pressed]}
+                      onPress={() => handleCategorySelect(cat)}
+                    >
+                      <TypeIcon size={14} strokeWidth={1.8} color={active ? Colors.bg.primary : Colors.text.primary} />
+                      <Text style={[styles.segText, active && styles.segTextActive]}>
+                        {SOCIAL_CATEGORIES[cat].label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              {(Object.keys(SOCIAL_CATEGORIES) as SocialCategory[]).map(cat => (
+                <Text key={cat} style={styles.catDescRow}>
+                  <Text style={styles.catDescName}>{SOCIAL_CATEGORIES[cat].label}</Text>
+                  {' — '}{SOCIAL_CATEGORIES[cat].description}
+                </Text>
+              ))}
             </>
           )}
 
@@ -141,21 +142,15 @@ export function PillarSocialScreen() {
               category={selectedCategory}
               onStart={handleStartTimer}
               onBack={() => setPhase('select')}
-              Colors={Colors}
-              Typography={Typography}
-              Spacing={Spacing}
-              Radius={Radius}
+              Colors={Colors} Typography={Typography} Spacing={Spacing}
             />
           )}
 
           {/* Timer */}
           {phase === 'timer' && selectedCategory && (
             <>
-              <View style={styles.categoryBadge}>
-                <Users size={16} color={Colors.pillar.social} />
-                <Text style={styles.categoryBadgeText}>{SOCIAL_CATEGORIES[selectedCategory].label}</Text>
-              </View>
-              <Text style={styles.timerNote}>
+              <Text style={styles.categoryTag}>{SOCIAL_CATEGORIES[selectedCategory].label}</Text>
+              <Text style={styles.introText}>
                 Pose le téléphone maintenant. Reviens valider quand tu as terminé.
               </Text>
               <FocusTimer
@@ -169,9 +164,10 @@ export function PillarSocialScreen() {
 
           {/* Note */}
           {phase === 'note' && (
-            <View style={styles.notePhase}>
-              <Text style={styles.phaseLabel}>Avec qui ? Qu'as-tu fait ?</Text>
-              <Text style={styles.noteHint}>Une ligne — pour ancrer la mémoire de ce moment.</Text>
+            <View>
+              <Text style={styles.sectionKickerTop}>AVEC QUI ? QU'AS-TU FAIT ?</Text>
+              <View style={styles.hr} />
+              <Text style={styles.introText}>Une ligne — pour ancrer la mémoire de ce moment.</Text>
               <TextInput
                 style={styles.noteInput}
                 placeholder="Ex : Assis avec ma mère, lui ai cuisiné le repas..."
@@ -184,27 +180,27 @@ export function PillarSocialScreen() {
                 onSubmitEditing={handleSubmit}
               />
               <Pressable
-                style={[styles.submitBtn, !note.trim() && { opacity: 0.4 }]}
+                style={({ pressed }) => [styles.primaryBtn, !note.trim() && styles.disabled, pressed && styles.pressed]}
                 onPress={handleSubmit}
                 disabled={!note.trim()}
               >
-                <Text style={styles.submitBtnText}>Valider l'interaction ✓</Text>
+                <Text style={styles.primaryBtnText}>Valider l'interaction ✓</Text>
               </Pressable>
             </View>
           )}
 
           {/* Done */}
           {phase === 'done' && (
-            <View style={styles.doneCard}>
-              <CheckCircle size={48} color={Colors.success} />
-              <Text style={styles.doneTitle}>Interaction validée</Text>
+            <View style={styles.doneBlock}>
+              <View style={styles.doneHeaderRow}>
+                <Check size={18} color={Colors.gold} strokeWidth={2.4} />
+                <Text style={styles.doneTitle}>Interaction validée</Text>
+              </View>
               <Text style={styles.doneSub}>
                 {SOCIAL_CATEGORIES[s.category ?? 'family'].label} •{' '}
                 {Math.round(s.interactionDurationSeconds / 60)} min
               </Text>
-              <View style={styles.doneNoteBox}>
-                <Text style={styles.doneNoteText}>"{s.noteText}"</Text>
-              </View>
+              <Text style={styles.doneNoteText}>"{s.noteText}"</Text>
               <Text style={styles.doneQuote}>
                 "Le meilleur des hommes est celui qui est le plus utile aux autres."
               </Text>
@@ -216,17 +212,14 @@ export function PillarSocialScreen() {
   );
 }
 
-function SocialBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
+function SocialBalanceCard({ balance, Colors, Typography, Spacing }: {
   balance: ReturnType<typeof computeSocialBalance>; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
     <View style={styles.balanceCard}>
-      <View style={styles.balanceHeaderRow}>
-        <CalendarRange size={16} color={Colors.text.secondary} />
-        <Text style={styles.balanceTitle}>Cette semaine</Text>
-      </View>
+      <Text style={styles.balanceKicker}>CETTE SEMAINE</Text>
       <View style={styles.balanceRow}>
         {balance.entries.map(e => (
           <View key={e.category} style={styles.balanceItem}>
@@ -237,45 +230,42 @@ function SocialBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
       </View>
       {balance.neglectedCategory && (
         <Text style={styles.balanceNudge}>
-          Tu n'as pas encore fait de <Text style={{ fontWeight: 'bold' }}>{balance.neglectedCategory.label}</Text> cette semaine.
+          Tu n'as pas encore fait de <Text style={styles.balanceNudgeStrong}>{balance.neglectedCategory.label}</Text> cette semaine.
         </Text>
       )}
     </View>
   );
 }
 
-function SocialGuide({ category, onStart, onBack, Colors, Typography, Spacing, Radius }: {
+function SocialGuide({ category, onStart, onBack, Colors, Typography, Spacing }: {
   category: SocialCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   const [suggestions, setSuggestions] = useState<SocialSuggestion[]>(() => pickSocialSuggestions(category));
-  const TypeIcon = CATEGORY_ICONS[category];
 
   return (
     <View>
-      <View style={styles.categoryBadge}>
-        <TypeIcon size={16} color={Colors.pillar.social} />
-        <Text style={styles.categoryBadgeText}>{SOCIAL_CATEGORIES[category].label}</Text>
-      </View>
+      <Text style={styles.categoryTag}>{SOCIAL_CATEGORIES[category].label}</Text>
 
-      <Text style={styles.guideIntro}>{SOCIAL_GUIDE_INTRO[category]}</Text>
+      <Text style={styles.introText}>{SOCIAL_GUIDE_INTRO[category]}</Text>
 
       <View style={styles.guideHeaderRow}>
-        <Text style={styles.phaseLabel}>Quelques pistes</Text>
-        <Pressable style={styles.shuffleBtn} onPress={() => setSuggestions(pickSocialSuggestions(category))}>
-          <Shuffle size={14} color={Colors.pillar.social} />
+        <Text style={styles.sectionKickerFlush}>PISTES SUGGÉRÉES</Text>
+        <Pressable
+          style={({ pressed }) => [styles.shuffleBtn, pressed && styles.pressed]}
+          onPress={() => setSuggestions(pickSocialSuggestions(category))}
+        >
+          <Shuffle size={14} color={Colors.gold} strokeWidth={1.8} />
           <Text style={styles.shuffleBtnText}>Autres pistes</Text>
         </Pressable>
       </View>
+      <View style={styles.hr} />
 
       {suggestions.map((sug, i) => (
-        <View key={i} style={styles.suggestionCard}>
-          <Lightbulb size={20} color={Colors.gold} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.suggestionTitle}>{sug.title}</Text>
-            <Text style={styles.suggestionDesc}>{sug.description}</Text>
-          </View>
+        <View key={i} style={styles.suggestionRow}>
+          <Text style={styles.suggestionTitle}>{sug.title}</Text>
+          <Text style={styles.suggestionDesc}>{sug.description}</Text>
         </View>
       ))}
 
@@ -283,148 +273,269 @@ function SocialGuide({ category, onStart, onBack, Colors, Typography, Spacing, R
         Libre à toi de suivre ton propre sujet — ces pistes sont là pour t'aider à démarrer.
       </Text>
 
-      <View style={styles.guideActions}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backText}>← Retour</Text>
-        </Pressable>
-        <Pressable style={styles.guideStartBtn} onPress={onStart}>
-          <Text style={styles.guideStartBtnText}>C'est parti — Lancer le chronomètre</Text>
-        </Pressable>
-      </View>
+      <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={onStart}>
+        <Text style={styles.primaryBtnText}>C'est parti — Lancer le chronomètre</Text>
+      </Pressable>
+      <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]} onPress={onBack}>
+        <Text style={styles.backText}>← Retour</Text>
+      </Pressable>
     </View>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
-  content: { padding: Spacing.md, paddingBottom: 100 },
-  title: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.pillar.social, marginBottom: 4 },
-  subtitle: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginBottom: Spacing.lg },
+  content: { paddingHorizontal: Spacing.md + 4, paddingTop: Spacing.sm, paddingBottom: 120 },
+
+  pressed: { opacity: 0.55 },
+  disabled: { opacity: 0.35 },
+
+  sectionKickerTop: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  sectionKickerFlush: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+  },
+  hr: { height: 2, backgroundColor: Colors.border, marginBottom: 14 },
 
   ruleBox: {
-    backgroundColor: Colors.pillar.social + '12',
-    borderRadius: Radius.lg,
+    backgroundColor: Colors.bg.card,
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.gold,
     padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    ...cardShadow(Colors),
+    marginBottom: 6,
   },
-  ruleTitleText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.text.primary, marginBottom: Spacing.sm },
-  ruleBody: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, lineHeight: 20 },
+  ruleTitleText: {
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
+  },
+  ruleBody: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: Typography.sizes.sm * 1.5,
+    fontStyle: 'italic',
+  },
+  ruleBodyStrong: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+    lineHeight: Typography.sizes.sm * 1.5,
+    marginTop: Spacing.sm,
+  },
 
   balanceCard: {
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    ...cardShadow(Colors),
+    marginTop: 6,
+    marginBottom: Spacing.xs,
   },
-  balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
-  balanceTitle: {
-    fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold,
-    color: Colors.text.secondary, textTransform: 'uppercase', letterSpacing: 1,
-  },
-  balanceRow: { flexDirection: 'row', justifyContent: 'space-around' },
-  balanceItem: { alignItems: 'center' },
-  balanceCount: { fontSize: Typography.sizes.xxl, fontWeight: Typography.weights.heavy, color: Colors.pillar.social },
-  balanceLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
-  balanceNudge: {
-    fontSize: Typography.sizes.xs, color: Colors.text.muted,
-    marginTop: Spacing.sm, fontStyle: 'italic', textAlign: 'center',
-  },
-
-  startBtn: {
-    backgroundColor: Colors.pillar.social,
-    borderRadius: Radius.lg,
-    padding: Spacing.lg,
-    alignItems: 'center',
-    marginBottom: Spacing.lg,
-  },
-  startBtnText: { fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold, color: Colors.white },
-  startBtnSub: { fontSize: Typography.sizes.xs, color: Colors.white + 'aa', marginTop: 4 },
-
-  phaseLabel: { fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold, color: Colors.text.primary, marginBottom: Spacing.md },
-  catCard: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.pillar.social + '0d', borderRadius: Radius.lg,
-    padding: Spacing.md, marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
-  },
-  catIconBadge: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: Colors.pillar.social + '22',
-    alignItems: 'center', justifyContent: 'center',
-  },
-  catLabel: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
-  catDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
-  arrow: { fontSize: Typography.sizes.xl, color: Colors.text.muted },
-
-  categoryBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: Spacing.sm,
-    backgroundColor: Colors.pillar.social + '22', borderRadius: Radius.full,
-    paddingVertical: Spacing.xs, paddingHorizontal: Spacing.md,
-    alignSelf: 'flex-start', marginBottom: Spacing.md,
-  },
-  categoryBadgeIcon: { fontSize: 16 },
-  categoryBadgeText: { fontSize: Typography.sizes.sm, color: Colors.pillar.social, fontWeight: Typography.weights.semibold },
-
-  guideIntro: {
-    fontSize: Typography.sizes.sm,
+  balanceKicker: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.secondary,
-    lineHeight: 20,
-    marginBottom: Spacing.md,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginBottom: 10,
   },
+  balanceRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  balanceItem: { alignItems: 'center' },
+  balanceCount: {
+    fontSize: Typography.sizes.lg + 2,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
+  balanceLabel: {
+    fontSize: Typography.sizes.xs - 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 2,
+  },
+  balanceNudge: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    marginTop: Spacing.sm,
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    lineHeight: Typography.sizes.xs * 1.5,
+  },
+  balanceNudgeStrong: { fontFamily: Typography.fonts.heavy },
+
+  introText: {
+    fontSize: Typography.sizes.sm + 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.sm + 0.5) * 1.55,
+    marginBottom: 18,
+  },
+
+  segRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap', marginBottom: 14 },
+  seg: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+  },
+  segActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
+  segText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  segTextActive: { color: Colors.bg.primary },
+
+  catDescRow: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 10,
+    lineHeight: (Typography.sizes.xs + 1) * 1.5,
+  },
+  catDescName: { fontFamily: Typography.fonts.heavy, color: Colors.text.primary },
+
+  categoryTag: {
+    alignSelf: 'flex-start',
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
+    backgroundColor: Colors.gold,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
+  },
+
   guideHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginTop: 28,
+    marginBottom: 10,
   },
   shuffleBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  shuffleBtnText: { fontSize: Typography.sizes.xs, color: Colors.pillar.social, fontWeight: Typography.weights.semibold },
-  suggestionCard: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
-    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+  shuffleBtnText: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
   },
-  suggestionTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
-  suggestionDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 17 },
-  guideActions: { gap: Spacing.sm, marginTop: Spacing.md },
-  backBtn: { alignSelf: 'center', paddingVertical: Spacing.sm },
-  backText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
-  guideStartBtn: {
-    backgroundColor: Colors.pillar.social, borderRadius: Radius.md,
-    paddingVertical: Spacing.md, alignItems: 'center',
-  },
-  guideStartBtnText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.white },
 
-  timerNote: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginBottom: Spacing.md, fontStyle: 'italic' },
+  suggestionRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 14,
+  },
+  suggestionTitle: {
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  suggestionDesc: {
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: Spacing.xs,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
+  },
 
   rule: {
     fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
-    textAlign: 'center',
-    marginTop: Spacing.sm,
     fontStyle: 'italic',
+    marginTop: Spacing.md,
+    lineHeight: Typography.sizes.xs * 1.5,
   },
 
-  notePhase: { gap: Spacing.md },
-  noteHint: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
   noteInput: {
-    backgroundColor: 'transparent', borderRadius: Radius.md,
-    padding: Spacing.md, fontSize: Typography.sizes.md, color: Colors.text.primary,
-    borderWidth: 1, borderColor: Colors.border, minHeight: 60,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.md,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.primary,
+    minHeight: 56,
   },
-  submitBtn: {
-    backgroundColor: Colors.pillar.social, borderRadius: Radius.md,
-    paddingVertical: Spacing.md, alignItems: 'center',
-  },
-  submitBtnText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.bg.primary },
 
-  doneCard: { alignItems: 'center', gap: Spacing.sm, backgroundColor: Colors.bg.card, borderRadius: Radius.lg, padding: Spacing.xl, ...cardShadow(Colors) },
-  doneTitle: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy, color: Colors.success },
-  doneSub: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
-  doneNoteBox: { backgroundColor: Colors.border, borderRadius: Radius.md, padding: Spacing.md, width: '100%' },
-  doneNoteText: { fontSize: Typography.sizes.md, color: Colors.text.primary, fontStyle: 'italic' },
-  doneQuote: { fontSize: Typography.sizes.xs, color: Colors.gold, textAlign: 'center', fontStyle: 'italic', marginTop: Spacing.sm },
+  primaryBtn: {
+    backgroundColor: Colors.gold,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: 18,
+    marginTop: Spacing.md,
+  },
+  primaryBtnText: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
+  },
+  primaryBtnSub: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.bg.primary,
+    opacity: 0.7,
+    marginTop: Spacing.xs,
+  },
+  backBtn: { paddingVertical: Spacing.md, alignItems: 'center' },
+  backText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+
+  doneBlock: {
+    borderTopWidth: 2,
+    borderTopColor: Colors.gold,
+    paddingTop: Spacing.md,
+    marginTop: Spacing.sm,
+  },
+  doneHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  doneTitle: {
+    fontSize: Typography.sizes.lg,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
+  doneSub: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: Spacing.xs,
+  },
+  doneNoteText: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.primary,
+    fontStyle: 'italic',
+    lineHeight: Typography.sizes.md * 1.5,
+    marginTop: Spacing.md,
+  },
+  doneQuote: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    fontStyle: 'italic',
+    marginTop: Spacing.md,
+    paddingTop: Spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    lineHeight: Typography.sizes.xs * 1.5,
+  },
 });

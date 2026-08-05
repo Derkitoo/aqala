@@ -173,21 +173,26 @@ export function RootNavigator() {
               }}
             />
 
-            {/* Pillar screens */}
+            {/* Pillar screens.
+                headerShown: false — each of these screens renders its own
+                <ScreenHeader/> (square back button + accent kicker + title),
+                which is the header the design reference specifies. Keeping the
+                native header as well would stack two titles on every screen.
+                Routes and params are unchanged. */}
             <Stack.Screen name="PillarSpiritual" component={PillarSpiritualScreen}
-              options={{ title: 'Pilier Spirituel' }} />
+              options={{ title: 'Pilier Spirituel', headerShown: false }} />
             <Stack.Screen name="PillarKnowledge" component={PillarKnowledgeScreen}
-              options={{ title: 'Pilier du Savoir' }} />
+              options={{ title: 'Pilier du Savoir', headerShown: false }} />
             <Stack.Screen name="PillarPhysical"  component={PillarPhysicalScreen}
-              options={{ title: 'Pilier Physique' }} />
+              options={{ title: 'Pilier Physique', headerShown: false }} />
             <Stack.Screen name="PillarSocial"    component={PillarSocialScreen}
-              options={{ title: 'Pilier Social' }} />
+              options={{ title: 'Pilier Social', headerShown: false }} />
             <Stack.Screen name="PillarSleep"     component={PillarSleepScreen}
-              options={{ title: 'Pilier Sommeil' }} />
+              options={{ title: 'Pilier Sommeil', headerShown: false }} />
             <Stack.Screen name="WeeklyReport"    component={WeeklyReportScreen}
-              options={{ title: 'Rapport Hebdomadaire' }} />
+              options={{ title: 'Rapport Hebdomadaire', headerShown: false }} />
             <Stack.Screen name="Settings"        component={SettingsScreen}
-              options={{ title: 'Paramètres' }} />
+              options={{ title: 'Paramètres', headerShown: false }} />
           </>
         )}
       </Stack.Navigator>

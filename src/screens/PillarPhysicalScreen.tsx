@@ -1,16 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, SafeAreaView } from 'react-native';
-import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import {
-  ACTIVITY_TYPES, ACTIVITY_GUIDE_INTRO, pickActivitySuggestions, QAYLULAH_TIPS,
+  PILLARS, ACTIVITY_TYPES, ACTIVITY_GUIDE_INTRO, pickActivitySuggestions, QAYLULAH_TIPS,
   type ActivityType, type ActivitySuggestion,
 } from '../constants/pillars';
 import { computePhysicalBalance } from '../engine/trends';
 import { FocusTimer } from '../components/FocusTimer';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { useDayStore } from '../store/useDayStore';
 import {
-  Activity, Moon, ChevronRight, AlertCircle, Dumbbell, Zap, Footprints,
-  Shuffle, Lightbulb, CalendarRange,
+  Activity, Moon, ChevronRight, Dumbbell, Zap, Footprints, Shuffle, Check,
 } from 'lucide-react-native';
 
 type Phase = 'overview' | 'activity_select' | 'activity_guide' | 'activity_timer' | 'qaylulah_guide' | 'qaylulah_timer';
@@ -43,8 +43,8 @@ export function PillarPhysicalScreen() {
   const activityDone = p.activityCompletedAt !== null;
   const qaylulahDone = p.qaylulahCompletedAt !== null;
 
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   const balance = useMemo(() => computePhysicalBalance(today, history), [today, history]);
 
@@ -78,23 +78,26 @@ export function PillarPhysicalScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>🏃 Pilier Physique</Text>
-        <Text style={styles.subtitle}>الأمانة الجسدية — Entretien du corps</Text>
+        <ScreenHeader
+          kicker={`PILIER · ${PILLARS.physical.numeral}`}
+          title="Pilier Physique"
+          subtitle="الأمانة الجسدية — Entretien du corps"
+        />
 
         {/* Overview */}
         {phase === 'overview' && (
           <>
             <View style={styles.hadithBox}>
-              <Text style={styles.hadithText}>
-                "Ton corps a un droit sur toi."
-              </Text>
+              <Text style={styles.hadithText}>"Ton corps a un droit sur toi."</Text>
               <Text style={styles.hadithRef}>— Sahih Bukhari</Text>
             </View>
 
-            <PhysicalBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} Radius={Radius} />
+            <PhysicalBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} />
 
-            {/* Activity block */}
-            <SectionCard
+            <Text style={styles.sectionKicker}>OBJECTIFS DU JOUR</Text>
+            <View style={styles.hr} />
+
+            <TaskRow
               IconComponent={Activity}
               title="Activité physique"
               subtitle={activityDone
@@ -104,14 +107,10 @@ export function PillarPhysicalScreen() {
               done={activityDone}
               points="10 pts"
               onPress={() => setPhase('activity_select')}
-              Colors={Colors}
-            Typography={Typography}
-            Spacing={Spacing}
-            Radius={Radius}
+              Colors={Colors} Typography={Typography} Spacing={Spacing}
             />
 
-            {/* Qaylulah block */}
-            <SectionCard
+            <TaskRow
               IconComponent={Moon}
               title="Qaylulah (Micro-Sieste)"
               subtitle={qaylulahDone
@@ -121,48 +120,40 @@ export function PillarPhysicalScreen() {
               done={qaylulahDone}
               points="5–7 pts"
               onPress={() => setPhase('qaylulah_guide')}
-              Colors={Colors}
-            Typography={Typography}
-            Spacing={Spacing}
-            Radius={Radius}
+              Colors={Colors} Typography={Typography} Spacing={Spacing}
             />
 
-            {/* Tips */}
-            <View style={styles.tipsBox}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm }}>
-                <AlertCircle size={16} color={Colors.text.primary} />
-                <Text style={styles.tipsTitle}>Rappels</Text>
-              </View>
-              <Text style={styles.tip}>• Fenêtre idéale : avant Maghrib (lumière naturelle)</Text>
-              <Text style={styles.tip}>• Qaylulah avant 14h = bonus Baraka (+2 pts)</Text>
-              <Text style={styles.tip}>• Même 20 min de marche compte — commence petit</Text>
-            </View>
+            <Text style={styles.sectionKicker}>RAPPELS</Text>
+            <View style={styles.hr} />
+            <Text style={styles.tip}>— Fenêtre idéale : avant Maghrib (lumière naturelle)</Text>
+            <Text style={styles.tip}>— Qaylulah avant 14h = bonus Baraka (+2 pts)</Text>
+            <Text style={styles.tip}>— Même 20 min de marche compte — commence petit</Text>
           </>
         )}
 
-        {/* Activity select */}
+        {/* Activity select — segmented buttons */}
         {phase === 'activity_select' && (
           <>
-            <Text style={styles.phaseLabel}>Quel type d'activité ?</Text>
-            {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map(type => {
-              const { label } = ACTIVITY_TYPES[type];
-              const TypeIcon = ACTIVITY_ICONS[type];
-
-              return (
-                <Pressable
-                  key={type}
-                  style={styles.activityCard}
-                  onPress={() => handleActivitySelect(type)}
-                >
-                  <View style={styles.activityIconBadge}>
-                    <TypeIcon size={22} color={Colors.pillar.physical} />
-                  </View>
-                  <Text style={styles.activityLabel}>{label}</Text>
-                  <ChevronRight size={20} color={Colors.text.muted} />
-                </Pressable>
-              );
-            })}
-            <Pressable onPress={() => setPhase('overview')} style={styles.backBtn}>
+            <Text style={styles.introText}>Quel type d'activité ?</Text>
+            <View style={styles.segRow}>
+              {(Object.keys(ACTIVITY_TYPES) as ActivityType[]).map(type => {
+                const active = selectedActivity === type;
+                const TypeIcon = ACTIVITY_ICONS[type];
+                return (
+                  <Pressable
+                    key={type}
+                    style={({ pressed }) => [styles.seg, active && styles.segActive, pressed && styles.pressed]}
+                    onPress={() => handleActivitySelect(type)}
+                  >
+                    <TypeIcon size={14} strokeWidth={1.8} color={active ? Colors.bg.primary : Colors.text.primary} />
+                    <Text style={[styles.segText, active && styles.segTextActive]}>
+                      {ACTIVITY_TYPES[type].label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]} onPress={() => setPhase('overview')}>
               <Text style={styles.backText}>← Retour</Text>
             </Pressable>
           </>
@@ -174,20 +165,14 @@ export function PillarPhysicalScreen() {
             type={selectedActivity}
             onStart={handleStartActivity}
             onBack={() => setPhase('activity_select')}
-            Colors={Colors}
-            Typography={Typography}
-            Spacing={Spacing}
-            Radius={Radius}
+            Colors={Colors} Typography={Typography} Spacing={Spacing}
           />
         )}
 
         {/* Activity timer */}
         {phase === 'activity_timer' && selectedActivity && (
           <>
-            <View style={styles.activityBadge}>
-              <Activity size={16} color={Colors.pillar.physical} />
-              <Text style={styles.activityBadgeText}>{ACTIVITY_TYPES[selectedActivity].label}</Text>
-            </View>
+            <Text style={styles.categoryTag}>{ACTIVITY_TYPES[selectedActivity].label}</Text>
             <FocusTimer
               mode="activity"
               initialElapsedSeconds={computeInitialElapsed(p.activityStartedAt)}
@@ -203,35 +188,30 @@ export function PillarPhysicalScreen() {
         {/* Qaylulah guide */}
         {phase === 'qaylulah_guide' && (
           <View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: Spacing.md }}>
-              <Moon size={24} color={Colors.text.primary} />
-              <Text style={styles.phaseLabel}>Qaylulah</Text>
+            <Text style={styles.sectionKickerTop}>QAYLULAH</Text>
+            <View style={styles.hr} />
+            <View style={styles.qaylulahBox}>
+              <Text style={styles.qaylulahTime}>
+                20 min <Text style={styles.qaylulahMax}>(30 min max)</Text>
+              </Text>
+              {QAYLULAH_TIPS.map((tip, i) => (
+                <Text key={i} style={styles.tipRow}>— {tip}</Text>
+              ))}
             </View>
-            {QAYLULAH_TIPS.map((tip, i) => (
-              <View key={i} style={styles.suggestionCard}>
-                <Lightbulb size={20} color={Colors.gold} />
-                <Text style={styles.suggestionDesc}>{tip}</Text>
-              </View>
-            ))}
-            <View style={styles.guideActions}>
-              <Pressable style={styles.backBtn} onPress={() => setPhase('overview')}>
-                <Text style={styles.backText}>← Retour</Text>
-              </Pressable>
-              <Pressable style={styles.guideStartBtn} onPress={handleStartQaylulah}>
-                <Text style={styles.guideStartBtnText}>C'est parti — Lancer la Qaylulah</Text>
-              </Pressable>
-            </View>
+            <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={handleStartQaylulah}>
+              <Text style={styles.primaryBtnText}>C'est parti — Lancer la Qaylulah</Text>
+            </Pressable>
+            <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]} onPress={() => setPhase('overview')}>
+              <Text style={styles.backText}>← Retour</Text>
+            </Pressable>
           </View>
         )}
 
         {/* Qaylulah timer */}
         {phase === 'qaylulah_timer' && (
           <>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: Spacing.sm }}>
-              <Moon size={24} color={Colors.text.primary} />
-              <Text style={styles.phaseLabel}>Qaylulah</Text>
-            </View>
-            <Text style={styles.phaseSubLabel}>
+            <Text style={styles.categoryTag}>Qaylulah</Text>
+            <Text style={styles.introText}>
               Compte à rebours de 20 minutes. Alarme douce à la fin.
             </Text>
             <FocusTimer
@@ -251,17 +231,14 @@ export function PillarPhysicalScreen() {
   );
 }
 
-function PhysicalBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
+function PhysicalBalanceCard({ balance, Colors, Typography, Spacing }: {
   balance: ReturnType<typeof computePhysicalBalance>; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
     <View style={styles.balanceCard}>
-      <View style={styles.balanceHeaderRow}>
-        <CalendarRange size={16} color={Colors.text.secondary} />
-        <Text style={styles.balanceTitle}>Cette semaine</Text>
-      </View>
+      <Text style={styles.balanceKicker}>CETTE SEMAINE</Text>
       <View style={styles.balanceRow}>
         {balance.activityEntries.map(e => (
           <View key={e.type} style={styles.balanceItem}>
@@ -278,38 +255,35 @@ function PhysicalBalanceCard({ balance, Colors, Typography, Spacing, Radius }: {
   );
 }
 
-function ActivityGuide({ type, onStart, onBack, Colors, Typography, Spacing, Radius }: {
+function ActivityGuide({ type, onStart, onBack, Colors, Typography, Spacing }: {
   type: ActivityType; onStart: () => void; onBack: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   const [suggestions, setSuggestions] = useState<ActivitySuggestion[]>(() => pickActivitySuggestions(type));
-  const TypeIcon = ACTIVITY_ICONS[type];
 
   return (
     <View>
-      <View style={styles.activityBadge}>
-        <TypeIcon size={16} color={Colors.pillar.physical} />
-        <Text style={styles.activityBadgeText}>{ACTIVITY_TYPES[type].label}</Text>
-      </View>
+      <Text style={styles.categoryTag}>{ACTIVITY_TYPES[type].label}</Text>
 
-      <Text style={styles.guideIntro}>{ACTIVITY_GUIDE_INTRO[type]}</Text>
+      <Text style={styles.introText}>{ACTIVITY_GUIDE_INTRO[type]}</Text>
 
       <View style={styles.guideHeaderRow}>
-        <Text style={styles.phaseLabel}>Quelques pistes</Text>
-        <Pressable style={styles.shuffleBtn} onPress={() => setSuggestions(pickActivitySuggestions(type))}>
-          <Shuffle size={14} color={Colors.pillar.physical} />
+        <Text style={styles.sectionKickerFlush}>PISTES SUGGÉRÉES</Text>
+        <Pressable
+          style={({ pressed }) => [styles.shuffleBtn, pressed && styles.pressed]}
+          onPress={() => setSuggestions(pickActivitySuggestions(type))}
+        >
+          <Shuffle size={14} color={Colors.gold} strokeWidth={1.8} />
           <Text style={styles.shuffleBtnText}>Autres pistes</Text>
         </Pressable>
       </View>
+      <View style={styles.hr} />
 
       {suggestions.map((sug, i) => (
-        <View key={i} style={styles.suggestionCard}>
-          <Lightbulb size={20} color={Colors.gold} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.suggestionTitle}>{sug.title}</Text>
-            <Text style={styles.suggestionDesc}>{sug.description}</Text>
-          </View>
+        <View key={i} style={styles.suggestionRow}>
+          <Text style={styles.suggestionTitle}>{sug.title}</Text>
+          <Text style={styles.suggestionDesc}>{sug.description}</Text>
         </View>
       ))}
 
@@ -317,195 +291,275 @@ function ActivityGuide({ type, onStart, onBack, Colors, Typography, Spacing, Rad
         Libre à toi de suivre ton propre sujet — ces pistes sont là pour t'aider à démarrer.
       </Text>
 
-      <View style={styles.guideActions}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backText}>← Retour</Text>
-        </Pressable>
-        <Pressable style={styles.guideStartBtn} onPress={onStart}>
-          <Text style={styles.guideStartBtnText}>C'est parti — Lancer le chronomètre</Text>
-        </Pressable>
-      </View>
+      <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={onStart}>
+        <Text style={styles.primaryBtnText}>C'est parti — Lancer le chronomètre</Text>
+      </Pressable>
+      <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]} onPress={onBack}>
+        <Text style={styles.backText}>← Retour</Text>
+      </Pressable>
     </View>
   );
 }
 
-function SectionCard({ IconComponent, title, subtitle, done, points, onPress, Colors, Typography, Spacing, Radius }: {
+function TaskRow({ IconComponent, title, subtitle, done, points, onPress, Colors, Typography, Spacing }: {
   IconComponent: any; title: string; subtitle: string;
   done: boolean; points: string; onPress: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   return (
     <Pressable
-      style={[styles.sectionCard, done && styles.sectionCardDone]}
+      style={({ pressed }) => [styles.taskRow, pressed && !done && styles.pressed]}
       onPress={onPress}
       disabled={done}
     >
-      <IconComponent color={done ? Colors.success : Colors.text.primary} size={26} />
-      <View style={{ flex: 1, marginLeft: Spacing.sm }}>
-        <Text style={[styles.sectionTitle2, done && { color: Colors.success }]}>{title}</Text>
-        <Text style={styles.sectionSubtitle}>{subtitle}</Text>
+      <IconComponent color={done ? Colors.gold : Colors.text.primary} size={18} strokeWidth={1.7} />
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.taskTitle, done && styles.taskTitleDone]}>{title}</Text>
+        <Text style={styles.taskSubtitle}>{subtitle}</Text>
       </View>
       <Text style={styles.pointsBadge}>{points}</Text>
-      {!done && <ChevronRight size={20} color={Colors.text.muted} />}
+      {done
+        ? <Check size={14} color={Colors.gold} strokeWidth={2.4} />
+        : <ChevronRight size={14} color={Colors.text.secondary} strokeWidth={2} />}
     </Pressable>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
-  content: { padding: Spacing.md, paddingBottom: 100 },
-  title: {
-    fontSize: Typography.sizes.xxl,
-    fontWeight: Typography.weights.heavy,
-    color: Colors.pillar.physical,
-    marginBottom: 4,
-  },
-  subtitle: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginBottom: Spacing.lg },
+  content: { paddingHorizontal: Spacing.md + 4, paddingTop: Spacing.sm, paddingBottom: 120 },
 
+  pressed: { opacity: 0.55 },
+
+  sectionKicker: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginTop: 28,
+    marginBottom: 10,
+  },
+  sectionKickerTop: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginBottom: 10,
+  },
+  sectionKickerFlush: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+  },
+  hr: { height: 2, backgroundColor: Colors.border, marginBottom: 14 },
+
+  // Left accent rule, no fill — the Modernist "quote block".
   hadithBox: {
-    backgroundColor: Colors.pillar.physical + '12',
-    borderRadius: Radius.lg,
+    backgroundColor: Colors.bg.card,
+    borderLeftWidth: 2,
+    borderLeftColor: Colors.gold,
     padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    ...cardShadow(Colors),
+    marginBottom: 6,
   },
   hadithText: {
-    fontSize: Typography.sizes.md,
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.primary,
     fontStyle: 'italic',
-    lineHeight: 22,
+    lineHeight: (Typography.sizes.sm + 1) * 1.5,
   },
-  hadithRef: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 4 },
+  hadithRef: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    marginTop: Spacing.sm,
+  },
 
   balanceCard: {
     backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginBottom: Spacing.lg,
-    ...cardShadow(Colors),
+    marginTop: 6,
   },
-  balanceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
-  balanceTitle: {
-    fontSize: Typography.sizes.xs, fontWeight: Typography.weights.bold,
-    color: Colors.text.secondary, textTransform: 'uppercase', letterSpacing: 1,
+  balanceKicker: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginBottom: 10,
   },
-  balanceRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  balanceRow: { flexDirection: 'row', justifyContent: 'space-between' },
   balanceItem: { alignItems: 'center' },
-  balanceCount: { fontSize: Typography.sizes.xl, fontWeight: Typography.weights.heavy, color: Colors.pillar.physical },
-  balanceLabel: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2 },
-
-  sectionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    backgroundColor: Colors.pillar.physical + '0d',
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+  balanceCount: {
+    fontSize: Typography.sizes.lg + 2,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
   },
-  sectionCardDone: { backgroundColor: Colors.success + '0d' },
-  sectionTitle2: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
-  },
-  sectionSubtitle: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginTop: 2 },
-  pointsBadge: { fontSize: Typography.sizes.xs, color: Colors.gold },
-  arrow: { fontSize: Typography.sizes.xl, color: Colors.text.muted },
-
-  tipsBox: {
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginTop: Spacing.md,
-    ...cardShadow(Colors),
-  },
-  tipsTitle: {
-    fontSize: Typography.sizes.sm,
-    fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
-  },
-  tip: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, marginBottom: 4, lineHeight: 18 },
-
-  phaseLabel: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
-    marginBottom: Spacing.sm,
-  },
-  phaseSubLabel: {
-    fontSize: Typography.sizes.sm,
+  balanceLabel: {
+    fontSize: Typography.sizes.xs - 0.5,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
-    marginBottom: Spacing.md,
+    marginTop: 2,
   },
-  activityCard: {
+
+  taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.pillar.physical + '0d',
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 13,
   },
-  activityIconBadge: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: Colors.pillar.physical + '22',
-    alignItems: 'center', justifyContent: 'center',
-    marginRight: Spacing.sm,
+  taskTitle: {
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
   },
-  activityLabel: { flex: 1, fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
-  activityBadge: {
+  taskTitleDone: { color: Colors.gold },
+  taskSubtitle: {
+    fontSize: Typography.sizes.xs + 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: 2,
+  },
+  pointsBadge: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.gold,
+  },
+
+  tip: {
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
+    marginBottom: 6,
+  },
+
+  introText: {
+    fontSize: Typography.sizes.sm + 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.sm + 0.5) * 1.55,
+    marginBottom: 18,
+  },
+
+  segRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap', marginBottom: Spacing.xs },
+  seg: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.pillar.physical + '22',
-    borderRadius: Radius.full,
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.md,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+  },
+  segActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
+  segText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  segTextActive: { color: Colors.bg.primary },
+
+  categoryTag: {
     alignSelf: 'flex-start',
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
+    backgroundColor: Colors.gold,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     marginBottom: Spacing.md,
+    overflow: 'hidden',
   },
-  activityBadgeIcon: { fontSize: 16 },
-  activityBadgeText: { fontSize: Typography.sizes.sm, color: Colors.pillar.physical, fontWeight: Typography.weights.semibold },
-  backBtn: { alignSelf: 'center', paddingVertical: Spacing.sm },
-  backText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
 
-  guideIntro: {
-    fontSize: Typography.sizes.sm,
-    color: Colors.text.secondary,
-    lineHeight: 20,
-    marginBottom: Spacing.md,
+  qaylulahBox: {
+    backgroundColor: Colors.bg.card,
+    padding: Spacing.md,
+    marginBottom: Spacing.xs,
   },
+  qaylulahTime: {
+    fontSize: Typography.sizes.lg + 2,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+    marginBottom: 10,
+  },
+  qaylulahMax: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+  tipRow: {
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
+    marginBottom: 6,
+  },
+
   guideHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginTop: 28,
+    marginBottom: 10,
   },
   shuffleBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  shuffleBtnText: { fontSize: Typography.sizes.xs, color: Colors.pillar.physical, fontWeight: Typography.weights.semibold },
-  suggestionCard: {
-    flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm,
-    backgroundColor: Colors.bg.card, borderRadius: Radius.md,
-    padding: Spacing.md, marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+  shuffleBtnText: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
   },
-  suggestionTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
-  suggestionDesc: { flex: 1, fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 17 },
-  guideActions: { gap: Spacing.sm, marginTop: Spacing.md },
-  guideStartBtn: {
-    backgroundColor: Colors.pillar.physical, borderRadius: Radius.md,
-    paddingVertical: Spacing.md, alignItems: 'center',
+
+  suggestionRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 14,
   },
-  guideStartBtnText: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.bold, color: Colors.white },
+  suggestionTitle: {
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  suggestionDesc: {
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: Spacing.xs,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
+  },
 
   rule: {
     fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
-    textAlign: 'center',
-    marginTop: Spacing.sm,
     fontStyle: 'italic',
+    marginTop: Spacing.md,
+    lineHeight: Typography.sizes.xs * 1.5,
+  },
+
+  primaryBtn: {
+    backgroundColor: Colors.gold,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: 18,
+    marginTop: Spacing.md,
+  },
+  primaryBtnText: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
+  },
+  backBtn: { paddingVertical: Spacing.md, alignItems: 'center' },
+  backText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
   },
 });

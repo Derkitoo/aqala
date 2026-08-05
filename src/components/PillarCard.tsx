@@ -1,11 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { ChevronRight, CheckCircle } from 'lucide-react-native';
-import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { ChevronRight, Check } from 'lucide-react-native';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import type { PillarDefinition } from '../constants/pillars';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface Props {
   pillar: PillarDefinition;
@@ -15,144 +12,112 @@ interface Props {
   compact?: boolean;
 }
 
+/**
+ * A pillar as a flush modular-grid row, not a card:
+ *
+ *   01  ♥  Pilier Spirituel / الروحانية        18/35  ›
+ *   ────────────────────────────────────────────────── 2px accent progress
+ *
+ * No background fill, no radius, no shadow — rows are separated by a 1px rule.
+ * The progress rule is accent-only: there is no per-pillar colour and no
+ * second "at minimum" colour.
+ */
 export function PillarCard({ pillar, pointsEarned, completed, onPress, compact = false }: Props) {
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   const fillPct = Math.min((pointsEarned / pillar.maxPoints) * 100, 100);
-  const isAtMinimum = pointsEarned >= pillar.maxPoints * 0.5;
-
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.97, { damping: 12, stiffness: 400 });
-  };
-  const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 12, stiffness: 400 });
-  };
-
   const Icon = pillar.icon;
 
   return (
-    <AnimatedPressable
-      style={[
-        styles.card,
-        compact && styles.cardCompact,
-        animatedStyle,
-      ]}
-      onPressIn={onPress ? handlePressIn : undefined}
-      onPressOut={onPress ? handlePressOut : undefined}
+    <Pressable
+      style={({ pressed }) => [styles.row, compact && styles.rowCompact, pressed && styles.rowPressed]}
       onPress={onPress}
       disabled={!onPress}
     >
-      {/* Header row */}
-      <View style={styles.headerRow}>
-        <View style={[styles.iconBadge, { backgroundColor: pillar.color + '22' }]}>
-          <Icon color={pillar.color} size={22} strokeWidth={2.5} />
-        </View>
-        <View style={styles.headerText}>
+      <View style={styles.topRow}>
+        <Text style={styles.numeral}>{pillar.numeral}</Text>
+        <Icon color={Colors.text.primary} size={20} strokeWidth={1.6} />
+        <View style={styles.names}>
           <Text style={styles.nameFr}>{pillar.nameFr}</Text>
-          {!compact && (
-            <Text style={styles.nameAr}>{pillar.nameAr}</Text>
-          )}
+          {!compact && <Text style={styles.nameAr}>{pillar.nameAr}</Text>}
         </View>
-        <View style={styles.scoreContainer}>
-          <Text style={[styles.score, completed && { color: Colors.success }]}>
-            {pointsEarned}
-          </Text>
+        <View style={styles.scoreWrap}>
+          <Text style={styles.score}>{pointsEarned}</Text>
           <Text style={styles.scoreMax}>/{pillar.maxPoints}</Text>
         </View>
-        {completed && <CheckCircle color={Colors.success} size={18} style={{ marginLeft: Spacing.xs }} />}
-        {onPress && !completed && <ChevronRight color={Colors.text.muted} size={20} style={{ marginLeft: Spacing.xs }} />}
+        {completed
+          ? <Check color={Colors.gold} size={14} strokeWidth={2.4} />
+          : onPress ? <ChevronRight color={Colors.text.secondary} size={14} strokeWidth={2} /> : null}
       </View>
 
-      {/* Progress bar */}
       {!compact && (
-        <View style={styles.progressTrack}>
-          <View
-            style={[
-              styles.progressFill,
-              {
-                width: `${fillPct}%` as any,
-                backgroundColor: isAtMinimum ? Colors.success : pillar.color,
-              },
-            ]}
-          />
+        <View style={styles.barTrack}>
+          <View style={[styles.barFill, { width: `${fillPct}%` as any }]} />
         </View>
       )}
-    </AnimatedPressable>
+    </Pressable>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
-  card: {
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
+  row: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 14,
   },
-  cardCompact: {
-    padding: Spacing.sm,
-    marginBottom: Spacing.xs,
+  rowCompact: {
+    paddingVertical: Spacing.sm,
   },
-  headerRow: {
+  rowPressed: {
+    opacity: 0.55,
+  },
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: 12,
   },
-  iconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    // headerRow centers against the full nameFr+nameAr block, which pulls
-    // the badge below the pillar name specifically (it only has one line).
-    // Anchoring the badge to the top instead lines its center up with
-    // nameFr's line, not the midpoint between both lines.
-    alignSelf: 'flex-start',
+  numeral: {
+    width: 16,
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.muted,
   },
-  headerText: {
+  names: {
     flex: 1,
   },
   nameFr: {
     fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.bold,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
   nameAr: {
     fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.medium,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
     marginTop: 1,
   },
-  scoreContainer: {
+  scoreWrap: {
     flexDirection: 'row',
     alignItems: 'baseline',
   },
   score: {
-    fontSize: Typography.sizes.xl,
+    fontSize: Typography.sizes.md + 2,
     fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
   scoreMax: {
-    fontSize: Typography.sizes.sm,
-    fontFamily: Typography.fonts.medium,
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
   },
-  progressTrack: {
-    marginTop: Spacing.sm,
-    height: 4,
+  barTrack: {
+    height: 2,
     backgroundColor: Colors.border,
-    borderRadius: 2,
-    overflow: 'hidden',
+    marginTop: 10,
   },
-  progressFill: {
+  barFill: {
     height: '100%',
-    borderRadius: 2,
+    backgroundColor: Colors.gold,
   },
 });

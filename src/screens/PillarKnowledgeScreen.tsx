@@ -3,15 +3,15 @@ import {
   View, Text, StyleSheet, ScrollView, TextInput,
   SafeAreaView, KeyboardAvoidingView, Platform, Pressable
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useScaledTheme, cardShadow, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
 import {
-  KNOWLEDGE_CATEGORIES, KNOWLEDGE_GUIDE_INTRO, pickKnowledgeSuggestions,
+  PILLARS, KNOWLEDGE_CATEGORIES, KNOWLEDGE_GUIDE_INTRO, pickKnowledgeSuggestions,
   type KnowledgeCategory, type KnowledgeSuggestion,
 } from '../constants/pillars';
 import { FocusTimer } from '../components/FocusTimer';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { useDayStore } from '../store/useDayStore';
-import { BookOpen, CheckCircle, ChevronRight, Info, Shuffle, Lightbulb } from 'lucide-react-native';
+import { Check, Shuffle } from 'lucide-react-native';
 
 type Phase = 'select' | 'guide' | 'focus' | 'note' | 'done';
 
@@ -35,8 +35,8 @@ export function PillarKnowledgeScreen() {
     }
   }, [k.sessionCompletedAt, k.noteText]);
 
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
 
   const handleCategorySelect = (cat: KnowledgeCategory) => {
     setSelectedCategory(cat);
@@ -67,31 +67,39 @@ export function PillarKnowledgeScreen() {
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.title}>📖 Pilier du Savoir</Text>
-          <Text style={styles.subtitle}>طلب العلم — Talab al-'Ilm</Text>
+          <ScreenHeader
+            kicker={`PILIER · ${PILLARS.knowledge.numeral}`}
+            title="Pilier du Savoir"
+            subtitle="طلب العلم — Talab al-'Ilm"
+          />
 
-          {/* PHASE: Select category */}
+          {/* PHASE: Select category — segmented buttons, not cards */}
           {phase === 'select' && (
             <View>
-              <Text style={styles.phaseLabel}>Quel type de savoir aujourd'hui ?</Text>
-              {(Object.keys(KNOWLEDGE_CATEGORIES) as KnowledgeCategory[]).map(cat => {
-                const { label, bonusPoints } = KNOWLEDGE_CATEGORIES[cat];
-                return (
-                  <CategoryCard
-                    key={cat}
-                    icon={<BookOpen size={28} color={Colors.text.primary} />}
-                    label={label}
-                    bonus={bonusPoints > 0 ? `+${bonusPoints} pts bonus` : undefined}
-                    onPress={() => handleCategorySelect(cat)}
-                    Colors={Colors}
-                    Typography={Typography}
-                    Spacing={Spacing}
-                    Radius={Radius}
-                  />
-                );
-              })}
+              <Text style={styles.introText}>Quel type de savoir aujourd'hui ?</Text>
+              <View style={styles.segRow}>
+                {(Object.keys(KNOWLEDGE_CATEGORIES) as KnowledgeCategory[]).map(cat => {
+                  const active = selectedCategory === cat;
+                  return (
+                    <Pressable
+                      key={cat}
+                      style={({ pressed }) => [styles.seg, active && styles.segActive, pressed && styles.pressed]}
+                      onPress={() => handleCategorySelect(cat)}
+                    >
+                      <Text style={[styles.segText, active && styles.segTextActive]}>
+                        {KNOWLEDGE_CATEGORIES[cat].label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              {(Object.keys(KNOWLEDGE_CATEGORIES) as KnowledgeCategory[]).some(c => KNOWLEDGE_CATEGORIES[c].bonusPoints > 0) && (
+                <Text style={styles.bonusNote}>
+                  Savoir de la Révélation : +{KNOWLEDGE_CATEGORIES.revelation.bonusPoints} pts bonus
+                </Text>
+              )}
               <Text style={styles.rule}>
-                <Info size={14} color={Colors.text.muted} style={{marginRight: 4}} /> Minimum : 15 minutes • Une ligne de résumé obligatoire
+                Minimum : 15 minutes • Une ligne de résumé obligatoire
               </Text>
             </View>
           )}
@@ -105,17 +113,13 @@ export function PillarKnowledgeScreen() {
               Colors={Colors}
               Typography={Typography}
               Spacing={Spacing}
-              Radius={Radius}
             />
           )}
 
           {/* PHASE: Focus timer */}
           {phase === 'focus' && selectedCategory && (
             <View>
-              <View style={styles.categoryBadge}>
-                <BookOpen size={16} color={Colors.pillar.knowledge} />
-                <Text style={styles.categoryBadgeText}>{KNOWLEDGE_CATEGORIES[selectedCategory].label}</Text>
-              </View>
+              <Text style={styles.categoryTag}>{KNOWLEDGE_CATEGORIES[selectedCategory].label}</Text>
               <FocusTimer
                 mode="focus"
                 onComplete={handleSessionComplete}
@@ -126,9 +130,10 @@ export function PillarKnowledgeScreen() {
 
           {/* PHASE: Write note */}
           {phase === 'note' && (
-            <View style={styles.notePhase}>
-              <Text style={styles.phaseLabel}>Qu'as-tu appris ?</Text>
-              <Text style={styles.noteInstruction}>
+            <View>
+              <Text style={styles.sectionKicker}>QU'AS-TU APPRIS ?</Text>
+              <View style={styles.hr} />
+              <Text style={styles.introText}>
                 Écris une seule ligne. Sois concis — la synthèse, c'est déjà du savoir.
               </Text>
               <TextInput
@@ -144,30 +149,29 @@ export function PillarKnowledgeScreen() {
                 onSubmitEditing={handleNoteSubmit}
               />
               <Text style={styles.noteCounter}>{note.length}/200</Text>
-              <View style={styles.noteSubmitRow}>
-                <Text style={styles.noteHint}>• Durée : {Math.round(sessionDuration / 60)} min</Text>
-                <CategoryButton
-                  label="Valider ✓"
-                  onPress={handleNoteSubmit}
-                  disabled={!note.trim()}
-                  styles={styles}
-                />
-              </View>
+              <Text style={styles.noteHint}>Durée : {Math.round(sessionDuration / 60)} min</Text>
+              <Pressable
+                style={({ pressed }) => [styles.primaryBtn, !note.trim() && styles.disabled, pressed && styles.pressed]}
+                onPress={handleNoteSubmit}
+                disabled={!note.trim()}
+              >
+                <Text style={styles.primaryBtnText}>Valider ✓</Text>
+              </Pressable>
             </View>
           )}
 
           {/* PHASE: Done */}
           {phase === 'done' && (
-            <View style={styles.doneCard}>
-              <CheckCircle size={48} color={Colors.success} />
-              <Text style={styles.doneTitle}>Session validée</Text>
+            <View style={styles.doneBlock}>
+              <View style={styles.doneHeaderRow}>
+                <Check size={18} color={Colors.gold} strokeWidth={2.4} />
+                <Text style={styles.doneTitle}>Session validée</Text>
+              </View>
               <Text style={styles.doneSession}>
                 {Math.round(k.sessionDurationSeconds / 60)} min • {KNOWLEDGE_CATEGORIES[k.category ?? 'estikhlaf'].label}
               </Text>
-              <View style={styles.doneNoteBox}>
-                <Text style={styles.doneNoteLabel}>Ta leçon du jour :</Text>
-                <Text style={styles.doneNoteText}>"{k.noteText}"</Text>
-              </View>
+              <Text style={styles.doneNoteLabel}>TA LEÇON DU JOUR</Text>
+              <Text style={styles.doneNoteText}>"{k.noteText}"</Text>
             </View>
           )}
         </ScrollView>
@@ -176,54 +180,35 @@ export function PillarKnowledgeScreen() {
   );
 }
 
-function CategoryCard({ icon, label, bonus, onPress, Colors, Typography, Spacing, Radius }: {
-  icon: React.ReactNode; label: string; bonus?: string; onPress: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
-}) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
-  return (
-    <Pressable style={styles.catCard} onPress={onPress}>
-      {icon}
-      <View style={{ flex: 1 }}>
-        <Text style={styles.catLabel}>{label}</Text>
-        {bonus && <Text style={styles.catBonus}>{bonus}</Text>}
-      </View>
-      <ChevronRight size={24} color={Colors.text.muted} />
-    </Pressable>
-  );
-}
-
-function KnowledgeGuide({ category, onStart, onBack, Colors, Typography, Spacing, Radius }: {
+function KnowledgeGuide({ category, onStart, onBack, Colors, Typography, Spacing }: {
   category: KnowledgeCategory; onStart: () => void; onBack: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
   const [suggestions, setSuggestions] = useState<KnowledgeSuggestion[]>(() => pickKnowledgeSuggestions(category));
 
   return (
     <View>
-      <View style={styles.categoryBadge}>
-        <BookOpen size={16} color={Colors.pillar.knowledge} />
-        <Text style={styles.categoryBadgeText}>{KNOWLEDGE_CATEGORIES[category].label}</Text>
-      </View>
+      <Text style={styles.categoryTag}>{KNOWLEDGE_CATEGORIES[category].label}</Text>
 
-      <Text style={styles.guideIntro}>{KNOWLEDGE_GUIDE_INTRO[category]}</Text>
+      <Text style={styles.introText}>{KNOWLEDGE_GUIDE_INTRO[category]}</Text>
 
       <View style={styles.guideHeaderRow}>
-        <Text style={styles.phaseLabel}>Quelques pistes</Text>
-        <Pressable style={styles.shuffleBtn} onPress={() => setSuggestions(pickKnowledgeSuggestions(category))}>
-          <Shuffle size={14} color={Colors.pillar.knowledge} />
+        <Text style={styles.sectionKickerFlush}>PISTES SUGGÉRÉES</Text>
+        <Pressable
+          style={({ pressed }) => [styles.shuffleBtn, pressed && styles.pressed]}
+          onPress={() => setSuggestions(pickKnowledgeSuggestions(category))}
+        >
+          <Shuffle size={14} color={Colors.gold} strokeWidth={1.8} />
           <Text style={styles.shuffleBtnText}>Autres pistes</Text>
         </Pressable>
       </View>
+      <View style={styles.hr} />
 
       {suggestions.map((s, i) => (
-        <View key={i} style={styles.suggestionCard}>
-          <Lightbulb size={20} color={Colors.gold} />
-          <View style={{ flex: 1 }}>
-            <Text style={styles.suggestionTitle}>{s.title}</Text>
-            <Text style={styles.suggestionDesc}>{s.description}</Text>
-          </View>
+        <View key={i} style={styles.suggestionRow}>
+          <Text style={styles.suggestionTitle}>{s.title}</Text>
+          <Text style={styles.suggestionDesc}>{s.description}</Text>
         </View>
       ))}
 
@@ -231,219 +216,199 @@ function KnowledgeGuide({ category, onStart, onBack, Colors, Typography, Spacing
         Libre à toi de suivre ton propre sujet — ces pistes sont là pour t'aider à démarrer.
       </Text>
 
-      <View style={styles.guideActions}>
-        <Pressable style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backText}>← Retour</Text>
-        </Pressable>
-        <CategoryButton label="C'est parti — Lancer le chronomètre" onPress={onStart} styles={styles} />
-      </View>
+      <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={onStart}>
+        <Text style={styles.primaryBtnText}>C'est parti — Lancer le chronomètre</Text>
+      </Pressable>
+      <Pressable style={({ pressed }) => [styles.backBtn, pressed && styles.pressed]} onPress={onBack}>
+        <Text style={styles.backText}>← Retour</Text>
+      </Pressable>
     </View>
   );
 }
 
-function CategoryButton({ label, onPress, disabled, styles }: {
-  label: string; onPress: () => void; disabled?: boolean; styles: any;
-}) {
-  return (
-    <Pressable
-      style={[styles.submitBtn, disabled && { opacity: 0.4 }]}
-      onPress={onPress}
-      disabled={disabled}
-    >
-      <Text style={styles.submitBtnText}>{label}</Text>
-    </Pressable>
-  );
-}
-
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
-  content: { padding: Spacing.md, paddingBottom: 100 },
+  content: { paddingHorizontal: Spacing.md + 4, paddingTop: Spacing.sm, paddingBottom: 120 },
 
-  title: {
-    fontSize: Typography.sizes.xxl,
-    fontWeight: Typography.weights.heavy,
-    color: Colors.pillar.knowledge,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: Typography.sizes.sm,
-    color: Colors.text.secondary,
-    marginBottom: Spacing.lg,
-  },
-  phaseLabel: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.bold,
-    color: Colors.text.primary,
-    marginBottom: Spacing.md,
-  },
+  pressed: { opacity: 0.55 },
+  disabled: { opacity: 0.35 },
 
-  catCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.md,
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
-  },
-  catLabel: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.semibold,
-    color: Colors.text.primary,
-  },
-  catBonus: { fontSize: Typography.sizes.xs, color: Colors.gold, marginTop: 2 },
-
-  rule: {
+  sectionKicker: {
     fontSize: Typography.sizes.xs,
-    color: Colors.text.muted,
-    textAlign: 'center',
-    marginTop: Spacing.md,
-    fontStyle: 'italic',
-  },
-
-  categoryBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-    backgroundColor: Colors.pillar.knowledge + '22',
-    borderRadius: Radius.full,
-    paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    alignSelf: 'flex-start',
-    marginBottom: Spacing.md,
-  },
-  categoryBadgeText: {
-    fontSize: Typography.sizes.sm,
-    color: Colors.pillar.knowledge,
-    fontWeight: Typography.weights.semibold,
-  },
-
-  guideIntro: {
-    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.secondary,
-    lineHeight: 20,
-    marginBottom: Spacing.md,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+    marginTop: 28,
+    marginBottom: 10,
   },
+  sectionKickerFlush: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.secondary,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    textTransform: 'uppercase',
+  },
+  hr: { height: 2, backgroundColor: Colors.border, marginBottom: 14 },
+
+  introText: {
+    fontSize: Typography.sizes.sm + 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    lineHeight: (Typography.sizes.sm + 0.5) * 1.55,
+    marginBottom: 18,
+  },
+
+  // Segmented buttons: 1px border, solid accent fill + inverse text when active.
+  segRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap', marginBottom: Spacing.xs },
+  seg: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+  },
+  segActive: { borderColor: Colors.gold, backgroundColor: Colors.gold },
+  segText: {
+    fontSize: Typography.sizes.xs + 1,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.text.primary,
+  },
+  segTextActive: { color: Colors.bg.primary },
+
+  // Square solid-accent tag — replaces the old rounded tinted pill badge.
+  categoryTag: {
+    alignSelf: 'flex-start',
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
+    backgroundColor: Colors.gold,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginBottom: Spacing.md,
+    overflow: 'hidden',
+  },
+  bonusNote: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.gold,
+    marginTop: Spacing.sm,
+  },
+
   guideHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Spacing.sm,
+    marginTop: 28,
+    marginBottom: 10,
   },
-  shuffleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
+  shuffleBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   shuffleBtnText: {
     fontSize: Typography.sizes.xs,
-    color: Colors.pillar.knowledge,
-    fontWeight: Typography.weights.semibold,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
   },
-  suggestionCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    ...cardShadow(Colors),
+
+  suggestionRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 14,
   },
   suggestionTitle: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.semibold,
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
   },
   suggestionDesc: {
-    fontSize: Typography.sizes.xs,
+    fontSize: Typography.sizes.xs + 1.5,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.secondary,
-    marginTop: 2,
-    lineHeight: 17,
+    marginTop: Spacing.xs,
+    lineHeight: (Typography.sizes.xs + 1.5) * 1.5,
   },
-  guideActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: Spacing.md,
-  },
-  backBtn: { paddingVertical: Spacing.sm, paddingHorizontal: Spacing.xs },
-  backText: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
 
-  notePhase: { marginTop: Spacing.md },
-  noteInstruction: {
-    fontSize: Typography.sizes.sm,
-    color: Colors.text.secondary,
-    marginBottom: Spacing.md,
-    lineHeight: 20,
+  rule: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    fontStyle: 'italic',
+    marginTop: Spacing.md,
+    lineHeight: Typography.sizes.xs * 1.5,
   },
+
   noteInput: {
     backgroundColor: 'transparent',
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    fontSize: Typography.sizes.md,
-    color: Colors.text.primary,
     borderWidth: 1,
     borderColor: Colors.border,
-    minHeight: 60,
+    padding: Spacing.md,
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.primary,
+    minHeight: 56,
   },
   noteCounter: {
     textAlign: 'right',
     fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
-    marginTop: 4,
+    marginTop: Spacing.xs,
   },
-  noteSubmitRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Spacing.md,
-  },
-  noteHint: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
-  submitBtn: {
-    backgroundColor: Colors.pillar.knowledge,
-    borderRadius: Radius.md,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.lg,
-  },
-  submitBtnText: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.bold,
-    color: Colors.bg.primary,
+  noteHint: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: Spacing.sm,
   },
 
-  doneCard: {
-    alignItems: 'center',
-    backgroundColor: Colors.bg.card,
-    borderRadius: Radius.lg,
-    padding: Spacing.xl,
-    gap: Spacing.sm,
-    marginTop: Spacing.lg,
-    ...cardShadow(Colors),
+  primaryBtn: {
+    backgroundColor: Colors.gold,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: 18,
+    marginTop: Spacing.md,
   },
-  doneTitle: {
-    fontSize: Typography.sizes.xl,
-    fontWeight: Typography.weights.heavy,
-    color: Colors.success,
+  primaryBtnText: {
+    fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.bg.primary,
   },
-  doneSession: { fontSize: Typography.sizes.sm, color: Colors.text.secondary },
-  doneNoteBox: {
-    backgroundColor: Colors.border,
-    borderRadius: Radius.md,
-    padding: Spacing.md,
-    width: '100%',
+  backBtn: { paddingVertical: Spacing.md, alignItems: 'center' },
+  backText: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+
+  doneBlock: {
+    borderTopWidth: 2,
+    borderTopColor: Colors.gold,
+    paddingTop: Spacing.md,
     marginTop: Spacing.sm,
+  },
+  doneHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  doneTitle: {
+    fontSize: Typography.sizes.lg,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
+  },
+  doneSession: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+    marginTop: Spacing.xs,
   },
   doneNoteLabel: {
     fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.secondary,
-    marginBottom: 4,
+    letterSpacing: Typography.sizes.xs * 0.12,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xs,
   },
   doneNoteText: {
     fontSize: Typography.sizes.md,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.primary,
     fontStyle: 'italic',
-    lineHeight: 22,
+    lineHeight: Typography.sizes.md * 1.5,
   },
 });

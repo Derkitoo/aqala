@@ -16,43 +16,45 @@ interface TimerConfig {
   completionMessage: string;
 }
 
+// Mono-accent: every mode uses the single accent — the icon and label already
+// tell the modes apart, so there is no per-pillar colour left to vary.
 const getTimerConfigs = (Colors: ThemeColors): Record<TimerMode, TimerConfig> => ({
   focus: {
     label: 'Session Focus',
-    icon: (c) => <Book size={48} color={c} />,
-    color: Colors.pillar.knowledge,
+    icon: (c) => <Book size={44} color={c} strokeWidth={1.4} />,
+    color: Colors.gold,
     minSeconds: 15 * 60,
     maxSeconds: null,
     completionMessage: 'Minimum atteint — écris ta ligne !',
   },
   qaylulah: {
     label: 'Qaylulah',
-    icon: (c) => <Moon size={48} color={c} />,
-    color: Colors.pillar.physical,
+    icon: (c) => <Moon size={44} color={c} strokeWidth={1.4} />,
+    color: Colors.gold,
     minSeconds: 20 * 60,
     maxSeconds: 30 * 60,
     completionMessage: 'Qaylulah accomplie — réveille-toi',
   },
   activity: {
     label: 'Activité physique',
-    icon: (c) => <Activity size={48} color={c} />,
-    color: Colors.pillar.physical,
+    icon: (c) => <Activity size={44} color={c} strokeWidth={1.4} />,
+    color: Colors.gold,
     minSeconds: 20 * 60,
     maxSeconds: null,
     completionMessage: 'Objectif atteint — Alhamdulillah !',
   },
   social: {
     label: 'Interaction réelle',
-    icon: (c) => <Users size={48} color={c} />,
-    color: Colors.pillar.social,
+    icon: (c) => <Users size={44} color={c} strokeWidth={1.4} />,
+    color: Colors.gold,
     minSeconds: 20 * 60,
     maxSeconds: null,
     completionMessage: '20 minutes de présence accomplie',
   },
   tarwih: {
     label: 'Tarwih',
-    icon: (c) => <Wind size={48} color={c} />,
-    color: Colors.pillar.sleep,
+    icon: (c) => <Wind size={44} color={c} strokeWidth={1.4} />,
+    color: Colors.gold,
     minSeconds: 20 * 60,
     maxSeconds: null,
     completionMessage: 'Âme ressourcée — bonne nuit',
@@ -143,10 +145,7 @@ export function FocusTimer({ mode, onComplete, onCancel, autoStart = false, init
         <View
           style={[
             styles.fill,
-            {
-              width: `${Math.min((elapsed / config.minSeconds) * 100, 100)}%` as any,
-              backgroundColor: minReached ? Colors.success : config.color,
-            },
+            { width: `${Math.min((elapsed / config.minSeconds) * 100, 100)}%` as any },
           ]}
         />
       </View>
@@ -200,7 +199,7 @@ function ActionButton({
       style={[
         styles.actionBtn,
         secondary
-          ? { borderColor: color, borderWidth: 1.5, backgroundColor: 'transparent' }
+          ? { borderColor: color, borderWidth: 1, backgroundColor: 'transparent' }
           : { backgroundColor: color },
       ]}
       onPress={onPress}
@@ -217,63 +216,62 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     gap: Spacing.md,
   },
   label: {
-    fontSize: Typography.sizes.lg,
-    fontWeight: Typography.weights.semibold,
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.heavy,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: Typography.sizes.xs * 0.12,
   },
   time: {
-    fontSize: Math.round(64 * scale),
-    fontWeight: Typography.weights.heavy,
+    fontSize: Math.round(56 * scale),
+    fontFamily: Typography.fonts.heavy,
     color: Colors.text.primary,
-    letterSpacing: -1,
     fontVariant: ['tabular-nums'],
   },
   countdownLabel: {
     fontSize: Typography.sizes.xs,
-    color: Colors.success,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.gold,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: Typography.sizes.xs * 0.12,
     marginTop: -Spacing.sm,
   },
   track: {
-    width: '80%',
-    height: 6,
+    width: '100%',
+    height: 5,
     backgroundColor: Colors.border,
-    borderRadius: 3,
-    overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 3,
+    backgroundColor: Colors.gold,
   },
   milestone: {
     fontSize: Typography.sizes.sm,
-    color: Colors.success,
-    fontWeight: Typography.weights.semibold,
+    fontFamily: Typography.fonts.heavy,
+    color: Colors.gold,
   },
   controls: {
     flexDirection: 'row',
     gap: Spacing.sm,
     marginTop: Spacing.sm,
+    width: '100%',
   },
   actionBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: Radius.md,
-    minWidth: 130,
+    flex: 1,
+    paddingVertical: 13,
+    paddingHorizontal: Spacing.md,
     alignItems: 'center',
   },
   actionBtnText: {
-    fontSize: Typography.sizes.md,
-    fontWeight: Typography.weights.bold,
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.heavy,
     color: Colors.bg.primary,
   },
   cancelBtn: {
     marginTop: Spacing.sm,
   },
   cancelText: {
-    fontSize: Typography.sizes.sm,
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
   },
 });
