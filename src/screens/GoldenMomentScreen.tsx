@@ -248,8 +248,8 @@ const EVENING_ADHKAR: Dhikr[] = [
 
 function FadingDhikrCarousel({ items }: { items: Dhikr[] }) {
   const [index, setIndex] = useState(0);
-  const { Colors, Typography, Spacing } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
+  const { Colors, Typography, Spacing, scale } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, scale), [Colors, Typography, Spacing, scale]);
 
   useEffect(() => {
     setIndex(0);
@@ -328,7 +328,7 @@ export function GoldenMomentScreen() {
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, scale: number) => StyleSheet.create({
   carouselContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -340,7 +340,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     width: '100%',
   },
   dhikrTextArabic: {
-    fontSize: 32,
+    fontSize: Math.round(32 * scale),
     color: Colors.gold,
     textAlign: 'center',
     lineHeight: 48,

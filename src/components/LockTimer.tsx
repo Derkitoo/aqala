@@ -27,8 +27,8 @@ export function LockTimer({
   title = "Moment d'Or",
   subtitle = 'Le téléphone attend. Toi, tu restes là.',
 }: Props) {
-  const { Colors, Typography, Spacing } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
+  const { Colors, Typography, Spacing, scale } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, scale), [Colors, Typography, Spacing, scale]);
 
   // prevent screen sleep during Golden Moment (native only)
   if (Platform.OS !== 'web') {
@@ -114,52 +114,51 @@ export function LockTimer({
         </Pressable>
       )}
 
-      {/* Emergency cancel (hidden, requires 3-second hold) */}
+      {/* Emergency exit — tap once to arm, tap again within 3s to confirm.
+          A press-and-hold gesture was here before, but on real touchscreens
+          any tiny finger movement during the hold cancels the RN Pressable
+          responder, so it silently never reached 100% — a tap-twice pattern
+          has no such failure mode. */}
       {!completed && onCancel && (
-        <EmergencyCancel onCancel={onCancel} Colors={Colors} Typography={Typography} Spacing={Spacing} />
+        <EmergencyCancel onCancel={onCancel} Colors={Colors} Typography={Typography} Spacing={Spacing} scale={scale} />
       )}
     </View>
   );
 }
 
-function EmergencyCancel({ onCancel, Colors, Typography, Spacing }: { onCancel: () => void; Colors: ThemeColors; Typography: TypographyShape; Spacing: SpacingShape }) {
-  const [holdProgress, setHoldProgress] = useState(0);
-  const holdInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
+function EmergencyCancel({ onCancel, Colors, Typography, Spacing, scale }: { onCancel: () => void; Colors: ThemeColors; Typography: TypographyShape; Spacing: SpacingShape; scale: number }) {
+  const [confirming, setConfirming] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, scale), [Colors, Typography, Spacing, scale]);
 
-  const startHold = useCallback(() => {
-    holdInterval.current = setInterval(() => {
-      setHoldProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(holdInterval.current!);
-          onCancel();
-          return 100;
-        }
-        return prev + 3.33; // fills in ~3 seconds
-      });
-    }, 100);
-  }, [onCancel]);
-
-  const endHold = useCallback(() => {
-    if (holdInterval.current) clearInterval(holdInterval.current);
-    setHoldProgress(0);
+  useEffect(() => () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
+
+  const handlePress = useCallback(() => {
+    if (confirming) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      onCancel();
+      return;
+    }
+    setConfirming(true);
+    timeoutRef.current = setTimeout(() => setConfirming(false), 3000);
+  }, [confirming, onCancel]);
 
   return (
     <Pressable
-      style={styles.emergencyButton}
-      onPressIn={startHold}
-      onPressOut={endHold}
+      style={[styles.emergencyButton, confirming && styles.emergencyButtonConfirming]}
+      onPress={handlePress}
+      hitSlop={12}
     >
-      <View style={[styles.emergencyFill, { width: `${holdProgress}%` as any }]} />
-      <Text style={styles.emergencyText}>
-        {holdProgress > 0 ? 'Maintenir pour quitter...' : 'Urgence'}
+      <Text style={[styles.emergencyText, confirming && styles.emergencyTextConfirming]}>
+        {confirming ? 'Appuie encore pour quitter' : 'Urgence — Quitter'}
       </Text>
     </Pressable>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, scale: number) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: Colors.bg.primary,
@@ -187,7 +186,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     gap: Spacing.xs,
   },
   countdownText: {
-    fontSize: 72,
+    fontSize: Math.round(72 * scale),
     fontWeight: Typography.weights.heavy,
     color: Colors.text.primary,
     letterSpacing: -2,
@@ -230,25 +229,21 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   },
   emergencyButton: {
     marginTop: Spacing.sm,
-    paddingVertical: Spacing.sm,
+    paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    overflow: 'hidden',
-    position: 'relative',
-    minWidth: 120,
+    minWidth: 160,
     alignItems: 'center',
   },
-  emergencyFill: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: Colors.danger + '33',
+  emergencyButtonConfirming: {
+    backgroundColor: Colors.danger + '22',
   },
   emergencyText: {
     fontSize: Typography.sizes.xs,
     color: Colors.text.muted,
+  },
+  emergencyTextConfirming: {
+    color: Colors.danger,
+    fontWeight: Typography.weights.bold,
   },
 });

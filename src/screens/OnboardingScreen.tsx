@@ -4,7 +4,7 @@ import {
   SafeAreaView, Animated,
 } from 'react-native';
 import * as Location from 'expo-location';
-import { useScaledTheme, Colors as StaticColors, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, cardShadow, Colors as StaticColors, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { useAppStore, type AppMode } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { Moon, Leaf, Shield, Sparkles, MapPin, Bell, Zap } from 'lucide-react-native';
@@ -72,8 +72,8 @@ export function OnboardingScreen() {
   const [locGranted, setLocGranted] = useState(false);
   const [notifGranted, setNotifGranted] = useState(false);
 
-  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const { Colors, Typography, Spacing, Radius, scale } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius, scale), [Colors, Typography, Spacing, Radius, scale]);
 
   const handleRequestLocation = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -138,7 +138,7 @@ export function OnboardingScreen() {
                 key={mode.id}
                 style={[
                   styles.modeCard,
-                  selectedMode === mode.id && { borderColor: mode.color },
+                  selectedMode === mode.id && { borderLeftWidth: 3, borderLeftColor: mode.color },
                 ]}
                 onPress={() => setSelectedMode(mode.id)}
               >
@@ -197,6 +197,7 @@ export function OnboardingScreen() {
               Typography={Typography}
               Spacing={Spacing}
               Radius={Radius}
+              scale={scale}
             />
             <PermissionRow
               IconComponent={Bell}
@@ -208,6 +209,7 @@ export function OnboardingScreen() {
               Typography={Typography}
               Spacing={Spacing}
               Radius={Radius}
+              scale={scale}
             />
 
             <View style={styles.skipNote}>
@@ -273,12 +275,12 @@ export function OnboardingScreen() {
 }
 
 
-function PermissionRow({ IconComponent, title, description, granted, onRequest, Colors, Typography, Spacing, Radius }: {
+function PermissionRow({ IconComponent, title, description, granted, onRequest, Colors, Typography, Spacing, Radius, scale }: {
   IconComponent: any; title: string; description: string;
   granted: boolean; onRequest: () => void; Colors: ThemeColors;
-  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape;
+  Typography: TypographyShape; Spacing: SpacingShape; Radius: RadiusShape; scale: number;
 }) {
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius, scale), [Colors, Typography, Spacing, Radius, scale]);
   return (
     <View style={styles.permRow}>
       <IconComponent color={Colors.text.primary} size={26} />
@@ -297,14 +299,14 @@ function PermissionRow({ IconComponent, title, description, granted, onRequest, 
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape, scale: number) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.bg.primary },
   content: { flexGrow: 1, padding: Spacing.lg, paddingBottom: 80 },
 
   stepContainer: { flex: 1, gap: Spacing.md },
 
   heroTitle: {
-    fontSize: 40, fontWeight: Typography.weights.heavy,
+    fontSize: Math.round(40 * scale), fontWeight: Typography.weights.heavy,
     color: Colors.text.primary, textAlign: 'center',
   },
   heroAr: {
@@ -322,6 +324,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     borderLeftWidth: 3,
     borderLeftColor: Colors.gold,
     marginTop: Spacing.sm,
+    ...cardShadow(Colors),
   },
   principleText: {
     fontSize: Typography.sizes.md,
@@ -351,9 +354,8 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     backgroundColor: Colors.bg.card,
     borderRadius: Radius.lg,
     padding: Spacing.md,
-    borderWidth: 1.5,
-    borderColor: Colors.border,
-    marginBottom: Spacing.xs,
+    marginBottom: Spacing.sm,
+    ...cardShadow(Colors),
   },
   modeHeader: { flexDirection: 'row', alignItems: 'center' },
   modeTitle: {
@@ -387,7 +389,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     flexDirection: 'row', alignItems: 'center', gap: Spacing.md,
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.sm,
-    borderWidth: 1, borderColor: Colors.border,
+    ...cardShadow(Colors),
   },
   permTitle: { fontSize: Typography.sizes.md, fontWeight: Typography.weights.semibold, color: Colors.text.primary },
   permDesc: { fontSize: Typography.sizes.xs, color: Colors.text.secondary, marginTop: 2, lineHeight: 16 },
@@ -402,6 +404,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   skipNote: {
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, marginBottom: Spacing.sm,
+    ...cardShadow(Colors),
   },
   skipNoteText: { fontSize: Typography.sizes.xs, color: Colors.text.muted, lineHeight: 18 },
 
@@ -412,7 +415,8 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   summaryBox: {
     backgroundColor: Colors.bg.card, borderRadius: Radius.md,
     padding: Spacing.md, alignItems: 'center', gap: Spacing.xs,
-    borderWidth: 1.5, borderColor: Colors.gold,
+    borderTopWidth: 3, borderTopColor: Colors.gold,
+    ...cardShadow(Colors),
   },
   summaryTitle: { fontSize: Typography.sizes.lg, fontWeight: Typography.weights.bold, color: Colors.gold },
   summarySubtitle: { fontSize: Typography.sizes.sm, color: Colors.text.secondary, textAlign: 'center' },
