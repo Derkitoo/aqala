@@ -36,7 +36,7 @@ export function PillarCard({ pillar, pointsEarned, completed, onPress, compact =
       disabled={!onPress}
     >
       <View style={styles.topRow}>
-        <Text style={styles.numeral}>{pillar.numeral}</Text>
+        <Text style={styles.numeral} numberOfLines={1}>{pillar.numeral}</Text>
         <Icon color={Colors.text.primary} size={20} strokeWidth={1.6} />
         <View style={styles.names}>
           <Text style={styles.nameFr}>{pillar.nameFr}</Text>
@@ -82,7 +82,13 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     gap: 12,
   },
   numeral: {
-    width: 16,
+    // No fixed `width`: at larger scale factors the two-digit numeral no
+    // longer fits a hardcoded 16px box and wraps onto two lines ("0" over
+    // "1") instead of shrinking the font — seen live on a wider phone.
+    // minWidth still keeps the numeral column roughly aligned row-to-row
+    // without capping how wide the text is allowed to be.
+    minWidth: 18,
+    flexShrink: 0,
     fontSize: Typography.sizes.xs,
     fontFamily: Typography.fonts.heavy,
     color: Colors.text.muted,
