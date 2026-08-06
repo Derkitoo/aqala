@@ -387,7 +387,10 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   taskRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // 'center' centres the two-line title+subtitle block against the
+    // single-line icon/switch/checkbox, pulling the title above them —
+    // same root cause fixed in PillarCard/PillarSpiritualScreen.
+    alignItems: 'flex-start',
     gap: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
