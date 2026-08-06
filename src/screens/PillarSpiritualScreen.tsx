@@ -266,7 +266,12 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
 
   prayerRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // 'center' centres the two-line prayerInfo block (name + status) against
+    // the single-line chip/button next to it, which pulls the prayer name
+    // itself several px above the button (verified: ~8px at default scale —
+    // same root cause fixed in PillarCard's topRow). flex-start lines up
+    // the name's own line with the button instead.
+    alignItems: 'flex-start',
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     paddingVertical: 13,

@@ -74,7 +74,11 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   },
   topRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // 'center' would centre the two-line `names` block against the
+    // single-line numeral/icon/score, pulling nameFr several px above
+    // them (verified: ~6.5px offset at default scale). flex-start lines
+    // every item up on the block's first line instead.
+    alignItems: 'flex-start',
     gap: 12,
   },
   numeral: {

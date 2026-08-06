@@ -194,7 +194,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: Spacing.md,
   },
   brandKicker: {
@@ -261,7 +261,7 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     color: Colors.text.secondary,
     letterSpacing: Typography.sizes.xs * 0.12,
     textTransform: 'uppercase',
-    marginTop: 28,
+    marginTop: Spacing.lg + Spacing.xs,
     marginBottom: 10,
   },
   rule: {
