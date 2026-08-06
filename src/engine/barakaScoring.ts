@@ -26,16 +26,25 @@ export function scoreSpiritualPillar(r: DayRecord['spiritual']): number {
   // Golden Moment fully completed (+6)
   if (r.goldenMomentCompleted) pts += 6;
 
+  // Rawatib Dhuhr (4 rak'ât avant + 2 après) (+3)
+  if (r.rawatibDhuhr) pts += 3;
+
   // Dhuhr, Asr, Maghrib (2 pts each)
   for (const p of ['dhuhr', 'asr', 'maghrib'] as const) {
     if (r.prayers[p] === 'onTime')    pts += 2;
     else if (r.prayers[p] === 'late') pts += 1;
   }
 
+  // Rawatib Maghrib (2 rak'ât après) (+2)
+  if (r.rawatibMaghrib) pts += 2;
+
   // Isha + Witr (4 pts)
   if (r.prayers.isha === 'onTime')    pts += 2;
   else if (r.prayers.isha === 'late') pts += 1;
   if (r.witrDone) pts += 2;
+
+  // Rawatib Isha (2 rak'ât après) (+2)
+  if (r.rawatibIsha) pts += 2;
 
   // Duha (bonus 3 pts)
   if (r.duhaDone) pts += 3;

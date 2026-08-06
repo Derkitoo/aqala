@@ -16,6 +16,9 @@ export interface DayRecord {
   spiritual: {
     prayers: Record<PrayerName, PrayerStatus>;
     rawatibFajr: boolean;
+    rawatibDhuhr: boolean;
+    rawatibMaghrib: boolean;
+    rawatibIsha: boolean;
     goldenMomentCompleted: boolean;
     goldenMomentStartedAt: string | null; // ISO timestamp
     duhaDone: boolean;
@@ -69,6 +72,9 @@ function createEmptyDay(date: string): DayRecord {
     spiritual: {
       prayers: { fajr: 'pending', dhuhr: 'pending', asr: 'pending', maghrib: 'pending', isha: 'pending' },
       rawatibFajr: false,
+      rawatibDhuhr: false,
+      rawatibMaghrib: false,
+      rawatibIsha: false,
       goldenMomentCompleted: false,
       goldenMomentStartedAt: null,
       duhaDone: false,
@@ -124,6 +130,9 @@ interface DayState {
   // Spiritual actions
   validatePrayer: (prayer: PrayerName, status: PrayerStatus) => void;
   setRawatibFajr: (done: boolean) => void;
+  setRawatibDhuhr: (done: boolean) => void;
+  setRawatibMaghrib: (done: boolean) => void;
+  setRawatibIsha: (done: boolean) => void;
   startGoldenMoment: () => void;
   completeGoldenMoment: () => void;
   setDuha: (done: boolean) => void;
@@ -191,6 +200,21 @@ export const useDayStore = create<DayState>()(
 
       setRawatibFajr: done => {
         set(s => ({ today: { ...s.today, spiritual: { ...s.today.spiritual, rawatibFajr: done } } }));
+        get().recomputeScore();
+      },
+
+      setRawatibDhuhr: done => {
+        set(s => ({ today: { ...s.today, spiritual: { ...s.today.spiritual, rawatibDhuhr: done } } }));
+        get().recomputeScore();
+      },
+
+      setRawatibMaghrib: done => {
+        set(s => ({ today: { ...s.today, spiritual: { ...s.today.spiritual, rawatibMaghrib: done } } }));
+        get().recomputeScore();
+      },
+
+      setRawatibIsha: done => {
+        set(s => ({ today: { ...s.today, spiritual: { ...s.today.spiritual, rawatibIsha: done } } }));
         get().recomputeScore();
       },
 

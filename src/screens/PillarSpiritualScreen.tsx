@@ -19,7 +19,11 @@ const getStatusLabels = (Colors: ThemeColors): Record<PrayerStatus, { label: str
 
 export function PillarSpiritualScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { today, history, validatePrayer, setRawatibFajr, setDuha, setWitr } = useDayStore();
+  const {
+    today, history, validatePrayer,
+    setRawatibFajr, setRawatibDhuhr, setRawatibMaghrib, setRawatibIsha,
+    setDuha, setWitr,
+  } = useDayStore();
   const s = today.spiritual;
 
   const { Colors, Typography, Spacing } = useScaledTheme();
@@ -94,6 +98,36 @@ export function PillarSpiritualScreen() {
           Spacing={Spacing}
         />
         <ToggleRow
+          label="Rawatib du Dhuhr (4+2 rak'ât)"
+          IconComponent={Sparkles}
+          value={s.rawatibDhuhr}
+          onToggle={v => setRawatibDhuhr(v)}
+          points="+3 pts"
+          Colors={Colors}
+          Typography={Typography}
+          Spacing={Spacing}
+        />
+        <ToggleRow
+          label="Rawatib du Maghrib (2 rak'ât)"
+          IconComponent={Sparkles}
+          value={s.rawatibMaghrib}
+          onToggle={v => setRawatibMaghrib(v)}
+          points="+2 pts"
+          Colors={Colors}
+          Typography={Typography}
+          Spacing={Spacing}
+        />
+        <ToggleRow
+          label="Rawatib de l'Isha (2 rak'ât)"
+          IconComponent={Sparkles}
+          value={s.rawatibIsha}
+          onToggle={v => setRawatibIsha(v)}
+          points="+2 pts"
+          Colors={Colors}
+          Typography={Typography}
+          Spacing={Spacing}
+        />
+        <ToggleRow
           label="Prière du Duha"
           IconComponent={Sun}
           value={s.duhaDone}
@@ -114,33 +148,47 @@ export function PillarSpiritualScreen() {
           Spacing={Spacing}
         />
 
-        {/* Golden Moment shortcut */}
-        {!s.goldenMomentCompleted && (
-          <Pressable
-            style={({ pressed }) => [styles.goldenBtn, pressed && styles.pressed]}
-            onPress={() => navigation.navigate('GoldenMoment', { type: 'morning' })}
-          >
-            <Text style={styles.goldenBtnText}>Lancer le Moment d'Or</Text>
-            <Text style={styles.goldenBtnSub}>Adhkâr du matin — 15 min verrouillé (+6 pts)</Text>
-          </Pressable>
-        )}
-        {s.goldenMomentCompleted && (
-          <Text style={styles.goldenDone}>✓ Moment d'Or accompli</Text>
-        )}
+        {/* Morning / evening Adhkar shortcuts — whichever matches the current
+            time of day leads, since that's the one actually relevant right
+            now (before, both always showed in the same morning-first order
+            regardless of the hour). */}
+        {(() => {
+          const isEveningNow = new Date().getHours() >= 12;
 
-        {/* Evening Adhkar shortcut */}
-        {!s.adhkarEveningDone && (
-          <Pressable
-            style={({ pressed }) => [styles.goldenBtn, styles.goldenBtnAlt, pressed && styles.pressed]}
-            onPress={() => navigation.navigate('GoldenMoment', { type: 'evening' })}
-          >
-            <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Soir</Text>
-            <Text style={styles.goldenBtnSub}>Récitation complète — 15 min verrouillé</Text>
-          </Pressable>
-        )}
-        {s.adhkarEveningDone && (
-          <Text style={styles.goldenDone}>✓ Adhkâr du soir accomplis</Text>
-        )}
+          const morningBlock = (
+            <React.Fragment key="morning">
+              {!s.goldenMomentCompleted ? (
+                <Pressable
+                  style={({ pressed }) => [styles.goldenBtn, isEveningNow && styles.goldenBtnAlt, pressed && styles.pressed]}
+                  onPress={() => navigation.navigate('GoldenMoment', { type: 'morning' })}
+                >
+                  <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Matin</Text>
+                  <Text style={styles.goldenBtnSub}>15 min verrouillé (+6 pts)</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.goldenDone}>✓ Adhkâr du matin accomplis</Text>
+              )}
+            </React.Fragment>
+          );
+
+          const eveningBlock = (
+            <React.Fragment key="evening">
+              {!s.adhkarEveningDone ? (
+                <Pressable
+                  style={({ pressed }) => [styles.goldenBtn, !isEveningNow && styles.goldenBtnAlt, pressed && styles.pressed]}
+                  onPress={() => navigation.navigate('GoldenMoment', { type: 'evening' })}
+                >
+                  <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Soir</Text>
+                  <Text style={styles.goldenBtnSub}>Récitation complète — 15 min verrouillé</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.goldenDone}>✓ Adhkâr du soir accomplis</Text>
+              )}
+            </React.Fragment>
+          );
+
+          return isEveningNow ? <>{eveningBlock}{morningBlock}</> : <>{morningBlock}{eveningBlock}</>;
+        })()}
       </ScrollView>
     </SafeAreaView>
   );
