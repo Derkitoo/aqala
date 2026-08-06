@@ -41,6 +41,48 @@ export function PillarSpiritualScreen() {
           subtitle="الصلاة نور — La Routine de la Baraka"
         />
 
+        {/* Morning / evening Adhkar shortcuts — placed first, at the top of
+            the screen, not buried below the prayers and toggles further
+            down. Whichever matches the current time of day leads with the
+            gold accent; the other one follows, muted. */}
+        {(() => {
+          const isEveningNow = new Date().getHours() >= 12;
+
+          const morningBlock = (
+            <React.Fragment key="morning">
+              {!s.goldenMomentCompleted ? (
+                <Pressable
+                  style={({ pressed }) => [styles.goldenBtn, isEveningNow && styles.goldenBtnAlt, pressed && styles.pressed]}
+                  onPress={() => navigation.navigate('GoldenMoment', { type: 'morning' })}
+                >
+                  <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Matin</Text>
+                  <Text style={styles.goldenBtnSub}>15 min verrouillé (+6 pts)</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.goldenDone}>✓ Adhkâr du matin accomplis</Text>
+              )}
+            </React.Fragment>
+          );
+
+          const eveningBlock = (
+            <React.Fragment key="evening">
+              {!s.adhkarEveningDone ? (
+                <Pressable
+                  style={({ pressed }) => [styles.goldenBtn, !isEveningNow && styles.goldenBtnAlt, pressed && styles.pressed]}
+                  onPress={() => navigation.navigate('GoldenMoment', { type: 'evening' })}
+                >
+                  <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Soir</Text>
+                  <Text style={styles.goldenBtnSub}>Récitation complète — 15 min verrouillé</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.goldenDone}>✓ Adhkâr du soir accomplis</Text>
+              )}
+            </React.Fragment>
+          );
+
+          return isEveningNow ? <>{eveningBlock}{morningBlock}</> : <>{morningBlock}{eveningBlock}</>;
+        })()}
+
         <SpiritualBalanceCard balance={balance} Colors={Colors} Typography={Typography} Spacing={Spacing} />
 
         {/* Prayers */}
@@ -147,48 +189,6 @@ export function PillarSpiritualScreen() {
           Typography={Typography}
           Spacing={Spacing}
         />
-
-        {/* Morning / evening Adhkar shortcuts — whichever matches the current
-            time of day leads, since that's the one actually relevant right
-            now (before, both always showed in the same morning-first order
-            regardless of the hour). */}
-        {(() => {
-          const isEveningNow = new Date().getHours() >= 12;
-
-          const morningBlock = (
-            <React.Fragment key="morning">
-              {!s.goldenMomentCompleted ? (
-                <Pressable
-                  style={({ pressed }) => [styles.goldenBtn, isEveningNow && styles.goldenBtnAlt, pressed && styles.pressed]}
-                  onPress={() => navigation.navigate('GoldenMoment', { type: 'morning' })}
-                >
-                  <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Matin</Text>
-                  <Text style={styles.goldenBtnSub}>15 min verrouillé (+6 pts)</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.goldenDone}>✓ Adhkâr du matin accomplis</Text>
-              )}
-            </React.Fragment>
-          );
-
-          const eveningBlock = (
-            <React.Fragment key="evening">
-              {!s.adhkarEveningDone ? (
-                <Pressable
-                  style={({ pressed }) => [styles.goldenBtn, !isEveningNow && styles.goldenBtnAlt, pressed && styles.pressed]}
-                  onPress={() => navigation.navigate('GoldenMoment', { type: 'evening' })}
-                >
-                  <Text style={styles.goldenBtnText}>Lancer les Adhkâr du Soir</Text>
-                  <Text style={styles.goldenBtnSub}>Récitation complète — 15 min verrouillé</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.goldenDone}>✓ Adhkâr du soir accomplis</Text>
-              )}
-            </React.Fragment>
-          );
-
-          return isEveningNow ? <>{eveningBlock}{morningBlock}</> : <>{morningBlock}{eveningBlock}</>;
-        })()}
       </ScrollView>
     </SafeAreaView>
   );
