@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { ChevronRight, Check } from 'lucide-react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
+import { useScaledTheme, usePillarColors, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import type { PillarDefinition } from '../constants/pillars';
 
 interface Props {
@@ -17,10 +17,11 @@ interface Props {
 export function PillarCard({ pillar, pointsEarned, completed, onPress, wide = false }: Props) {
   const { Colors, Typography, Spacing, Radius } = useScaledTheme();
   const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
+  const pillarColors = usePillarColors();
 
   const fillPct = Math.min((pointsEarned / pillar.maxPoints) * 100, 100);
   const Icon = pillar.icon;
-  const accent = pillar.color;
+  const accent = pillarColors[pillar.id];
 
   if (wide) {
     return (

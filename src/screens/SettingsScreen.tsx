@@ -4,8 +4,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
-import { useAppStore } from '../store/useAppStore';
+import { useScaledTheme, PILLAR_PALETTES, PILLAR_PALETTE_LABELS, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
+import { useAppStore, type PillarPaletteId } from '../store/useAppStore';
 import { requestNotificationPermission } from '../services/notifications';
 import { showConfirm, showAlert } from '../utils/confirm';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -36,6 +36,8 @@ export function SettingsScreen() {
     longitude,
     theme,
     setTheme,
+    pillarPalette,
+    setPillarPalette,
     setAppMode,
     setNightMode,
     setCalculationMethod,
@@ -110,6 +112,32 @@ export function SettingsScreen() {
             <Moon size={14} strokeWidth={1.8} color={theme === 'premium' ? Colors.bg.primary : Colors.text.primary} />
             <Text style={[styles.segText, theme === 'premium' && styles.segTextActive]}>Sombre</Text>
           </Pressable>
+        </View>
+
+        {/* Pillar colour palette */}
+        <Text style={styles.sectionKicker}>COULEURS DES PILIERS</Text>
+        <View style={styles.hr} />
+        <View style={styles.paletteWrap}>
+          {(Object.keys(PILLAR_PALETTES) as PillarPaletteId[]).map(id => {
+            const active = pillarPalette === id;
+            const colors = PILLAR_PALETTES[id];
+            return (
+              <Pressable
+                key={id}
+                style={({ pressed }) => [styles.paletteCard, active && styles.paletteCardActive, pressed && styles.pressed]}
+                onPress={() => setPillarPalette(id)}
+              >
+                <View style={styles.paletteDots}>
+                  {Object.values(colors).map((c, i) => (
+                    <View key={i} style={[styles.paletteDot, { backgroundColor: c }]} />
+                  ))}
+                </View>
+                <Text style={[styles.paletteLabel, active && styles.paletteLabelActive]}>
+                  {PILLAR_PALETTE_LABELS[id]}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Prayer calculation */}
@@ -287,6 +315,26 @@ const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing:
     color: Colors.text.primary,
   },
   segTextActive: { color: Colors.bg.primary },
+
+  paletteWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 18 },
+  paletteCard: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    gap: 6,
+  },
+  paletteCardActive: { borderColor: Colors.gold },
+  paletteDots: { flexDirection: 'row', gap: 3 },
+  paletteDot: { width: 10, height: 10, borderRadius: 999 },
+  paletteLabel: {
+    fontSize: Typography.sizes.xs,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.secondary,
+  },
+  paletteLabelActive: { color: Colors.gold, fontFamily: Typography.fonts.heavy },
 
   chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 18 },
   chip: {

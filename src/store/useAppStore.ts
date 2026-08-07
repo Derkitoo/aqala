@@ -6,6 +6,7 @@ export type AppMode = 'beginner' | 'intermediate' | 'advanced';
 export type NightMode = 'standard' | 'global'; // global = Qiyam al-Layl
 export type MadhabType = 'shafi' | 'hanafi';
 export type ThemeType = 'light' | 'premium';
+export type PillarPaletteId = 'classic' | 'ocean' | 'sunset' | 'forest';
 
 interface AppState {
   // Hydration flag — false until AsyncStorage has been read
@@ -31,6 +32,7 @@ interface AppState {
   isGoldenMomentActive: boolean;
   goldenMomentType: 'morning' | 'evening';
   theme: ThemeType;
+  pillarPalette: PillarPaletteId;
 
   // Actions
   completeOnboarding: (mode: AppMode) => void;
@@ -42,6 +44,7 @@ interface AppState {
   setMadhab: (madhab: MadhabType) => void;
   setGoldenMomentActive: (active: boolean, type?: 'morning' | 'evening') => void;
   setTheme: (theme: ThemeType) => void;
+  setPillarPalette: (palette: PillarPaletteId) => void;
   resetOnboarding: () => void;
 }
 
@@ -63,6 +66,7 @@ export const useAppStore = create<AppState>()(
       isGoldenMomentActive: false,
       goldenMomentType: 'morning',
       theme: 'premium',
+      pillarPalette: 'classic',
 
       completeOnboarding: mode =>
         set({ onboardingComplete: true, appMode: mode }),
@@ -82,6 +86,7 @@ export const useAppStore = create<AppState>()(
       setGoldenMomentActive: (active, type) =>
         set(s => ({ isGoldenMomentActive: active, goldenMomentType: type ?? s.goldenMomentType })),
       setTheme: theme => set({ theme }),
+      setPillarPalette: pillarPalette => set({ pillarPalette }),
       resetOnboarding: () => set({ onboardingComplete: false }),
     }),
     {

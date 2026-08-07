@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
+import { useAppStore, type PillarPaletteId } from '../store/useAppStore';
 
 // ─── Modernist palette ──────────────────────────────────────────────────────
 //
@@ -18,18 +18,67 @@ const ACCENT = '#ec3013';
 const ACCENT_HOVER_LIGHT = '#dd2b0f';
 const ACCENT_HOVER_DARK  = '#ff9783';
 
-// A named palette (not just five hardcoded hexes inline) so a future
-// "choose your palette" setting only has to swap this object out, rather
-// than hunting down every place a pillar colour is used. Chosen to read
-// clearly against both bg.card fills and stay distinct from the single red
-// ACCENT above, so pillar tiles don't all collapse into "the same colour".
-export const PILLAR_PALETTE = {
-  spiritual: '#E8A33D',
-  knowledge: '#3FA796',
-  physical: '#5B8DEF',
-  social: '#D46FB3',
-  sleep: '#8B7CD9',
-} as const;
+// Named palettes (not just five hardcoded hexes inline) so the "choose your
+// palette" Settings option only has to swap the active key, rather than
+// hunting down every place a pillar colour is used. Chosen to read clearly
+// against both bg.card fills and stay distinct from the single red ACCENT
+// above, so pillar tiles don't all collapse into "the same colour".
+type PillarColorMap = {
+  spiritual: string;
+  knowledge: string;
+  physical: string;
+  social: string;
+  sleep: string;
+};
+
+export const PILLAR_PALETTES: Record<PillarPaletteId, PillarColorMap> = {
+  classic: {
+    spiritual: '#E8A33D',
+    knowledge: '#3FA796',
+    physical: '#5B8DEF',
+    social: '#D46FB3',
+    sleep: '#8B7CD9',
+  },
+  ocean: {
+    spiritual: '#2E86AB',
+    knowledge: '#48C9B0',
+    physical: '#5DADE2',
+    social: '#3F6DC7',
+    sleep: '#5B6EE1',
+  },
+  sunset: {
+    spiritual: '#F4A261',
+    knowledge: '#E76F51',
+    physical: '#EE6C4D',
+    social: '#D45D79',
+    sleep: '#B5636B',
+  },
+  forest: {
+    spiritual: '#8FA86B',
+    knowledge: '#4F7942',
+    physical: '#B5A642',
+    social: '#C97B4A',
+    sleep: '#6B8E5A',
+  },
+};
+
+export const PILLAR_PALETTE_LABELS: Record<PillarPaletteId, string> = {
+  classic: 'Classique',
+  ocean: 'Océan',
+  sunset: 'Coucher de soleil',
+  forest: 'Forêt',
+};
+
+// Kept for existing static consumers (e.g. the default PILLARS.color fallback
+// in constants/pillars.ts) — the classic palette's values, unchanged.
+export const PILLAR_PALETTE = PILLAR_PALETTES.classic;
+
+/** Reactive pillar colour map — re-renders when the user changes the palette
+ * in Settings. Use this in components instead of the static `pillar.color`. */
+export function usePillarColors(): PillarColorMap {
+  const paletteId = useAppStore(s => s.pillarPalette);
+  return PILLAR_PALETTES[paletteId];
+}
 
 export const PremiumColors = {
   isDark: true,
