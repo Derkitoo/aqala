@@ -18,6 +18,19 @@ const ACCENT = '#ec3013';
 const ACCENT_HOVER_LIGHT = '#dd2b0f';
 const ACCENT_HOVER_DARK  = '#ff9783';
 
+// A named palette (not just five hardcoded hexes inline) so a future
+// "choose your palette" setting only has to swap this object out, rather
+// than hunting down every place a pillar colour is used. Chosen to read
+// clearly against both bg.card fills and stay distinct from the single red
+// ACCENT above, so pillar tiles don't all collapse into "the same colour".
+export const PILLAR_PALETTE = {
+  spiritual: '#E8A33D',
+  knowledge: '#3FA796',
+  physical: '#5B8DEF',
+  social: '#D46FB3',
+  sleep: '#8B7CD9',
+} as const;
+
 export const PremiumColors = {
   isDark: true,
   gold: ACCENT,              // the single accent

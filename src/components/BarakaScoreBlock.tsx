@@ -1,41 +1,45 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import { PILLARS, type PillarId } from '../constants/pillars';
 import type { BarakaScoreBreakdown } from '../engine/barakaScoring';
 
 interface Props {
   breakdown: BarakaScoreBreakdown;
+  maqamName: string;
+  onPressMaqam?: () => void;
 }
 
 const ORDER: PillarId[] = ['spiritual', 'knowledge', 'physical', 'social', 'sleep'];
 
 /**
- * The Baraka score as a flat block, framed by 2px rules top and bottom:
- * kicker → big numeral + /100 + multiplier → a 5-segment horizontal bar.
- *
- * Each segment is as wide as that pillar's weight in the score (35/25/15/15/10)
- * and fills to that pillar's completion %, so the bar reads as the score's
- * actual composition. Replaces the old animated SVG ring — same data, drawn as
- * rectangles.
+ * The Baraka score as a rounded card: kicker + rank in the header row, a big
+ * numeral, and a 5-segment bar sized to each pillar's weight and filled to
+ * its completion % — so the bar reads as the score's actual composition.
  */
-export function BarakaScoreBlock({ breakdown }: Props) {
-  const { Colors, Typography, Spacing, scale } = useScaledTheme();
+export function BarakaScoreBlock({ breakdown, maqamName, onPressMaqam }: Props) {
+  const { Colors, Typography, Spacing, Radius, scale } = useScaledTheme();
   const styles = React.useMemo(
-    () => createStyles(Colors, Typography, Spacing, scale),
-    [Colors, Typography, Spacing, scale],
+    () => createStyles(Colors, Typography, Spacing, Radius, scale),
+    [Colors, Typography, Spacing, Radius, scale],
   );
 
   return (
-    <View style={styles.block}>
-      <Text style={styles.kicker}>BARAKA</Text>
-
-      <View style={styles.scoreRow}>
-        <Text style={styles.score}>{breakdown.finalScore}</Text>
-        <Text style={styles.scoreMax}>/100</Text>
-        {breakdown.multiplier > 1 && (
-          <Text style={styles.multiplier}>×{breakdown.multiplier.toFixed(2)}</Text>
-        )}
+    <View style={styles.card}>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.kicker}>BARAKA DU JOUR</Text>
+          <View style={styles.scoreRow}>
+            <Text style={styles.score}>{breakdown.finalScore}</Text>
+            {breakdown.multiplier > 1 && (
+              <Text style={styles.multiplier}>×{breakdown.multiplier.toFixed(2)}</Text>
+            )}
+          </View>
+        </View>
+        <Pressable onPress={onPressMaqam} disabled={!onPressMaqam} style={styles.rankWrap}>
+          <Text style={styles.rankKicker}>RANG</Text>
+          <Text style={styles.rankName} numberOfLines={1}>{maqamName}</Text>
+        </Pressable>
       </View>
 
       <View style={styles.barTrack}>
@@ -49,82 +53,79 @@ export function BarakaScoreBlock({ breakdown }: Props) {
           );
         })}
       </View>
-
-      <View style={styles.legendRow}>
-        {ORDER.map(id => (
-          <Text key={id} style={[styles.legendLabel, { flex: PILLARS[id].weight * 100 }]}>
-            {PILLARS[id].short}
-          </Text>
-        ))}
-      </View>
     </View>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, scale: number) => StyleSheet.create({
-  block: {
-    borderTopWidth: 2,
-    borderTopColor: Colors.border,
-    borderBottomWidth: 2,
-    borderBottomColor: Colors.border,
-    paddingVertical: Spacing.lg - Spacing.xs,
-    marginBottom: Spacing.lg - Spacing.xs,
+// Deliberately breaks from the rest of the app's square "Modernist" system
+// (theme.ts's Radius.lg is 0 by design there) — this card needs its own
+// literal radius, not the shared (zeroed) token.
+const CARD_RADIUS = 20;
+
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape, scale: number) => StyleSheet.create({
+  card: {
+    backgroundColor: Colors.bg.card,
+    borderRadius: CARD_RADIUS,
+    padding: Spacing.md + 2,
+    marginBottom: Spacing.sm,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.md,
   },
   kicker: {
     fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.heavy,
-    color: Colors.gold,
-    letterSpacing: Typography.sizes.xs * 0.12,
-    textTransform: 'uppercase',
+    fontFamily: Typography.fonts.semibold,
+    color: Colors.text.muted,
+    letterSpacing: Typography.sizes.xs * 0.1,
   },
   scoreRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 6,
-    marginTop: Spacing.xs,
-    marginBottom: 14,
+    marginTop: 4,
   },
   score: {
-    fontSize: Math.round(56 * scale),
+    fontSize: Math.round(40 * scale),
     fontFamily: Typography.fonts.heavy,
-    color: Colors.text.primary,
-    lineHeight: Math.round(56 * scale),
-  },
-  scoreMax: {
-    fontSize: Typography.sizes.md + 1,
-    fontFamily: Typography.fonts.regular,
-    color: Colors.text.muted,
+    color: Colors.gold,
+    lineHeight: Math.round(40 * scale),
   },
   multiplier: {
     fontSize: Typography.sizes.xs + 1,
     fontFamily: Typography.fonts.heavy,
     color: Colors.gold,
-    marginLeft: 'auto',
+  },
+  rankWrap: {
+    alignItems: 'flex-end',
+  },
+  rankKicker: {
+    fontSize: Typography.sizes.xs - 1,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+  },
+  rankName: {
+    fontSize: Typography.sizes.sm,
+    fontFamily: Typography.fonts.semibold,
+    color: Colors.text.primary,
+    marginTop: 2,
   },
 
   barTrack: {
     flexDirection: 'row',
-    gap: 2,
-    height: 10,
+    gap: 3,
+    height: 6,
   },
   segment: {
+    borderRadius: 3,
     backgroundColor: Colors.border,
     overflow: 'hidden',
   },
   segmentFill: {
     height: '100%',
+    borderRadius: 3,
     backgroundColor: Colors.gold,
-  },
-
-  legendRow: {
-    flexDirection: 'row',
-    gap: 2,
-    marginTop: 6,
-  },
-  legendLabel: {
-    fontSize: 9 * scale,
-    fontFamily: Typography.fonts.heavy,
-    color: Colors.text.muted,
-    textAlign: 'center',
   },
 });

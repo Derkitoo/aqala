@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { ChevronRight, Check } from 'lucide-react-native';
-import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape } from '../constants/theme';
+import { useScaledTheme, ThemeColors, type TypographyShape, type SpacingShape, type RadiusShape } from '../constants/theme';
 import type { PillarDefinition } from '../constants/pillars';
 
 interface Props {
@@ -9,125 +9,132 @@ interface Props {
   pointsEarned: number;
   completed: boolean;
   onPress?: () => void;
-  compact?: boolean;
+  /** Spans the full row instead of sitting in the 2-column grid — used for
+   * the trailing 5th pillar so the grid reads as 2+2+1, not an awkward gap. */
+  wide?: boolean;
 }
 
-/**
- * A pillar as a flush modular-grid row, not a card:
- *
- *   01  ♥  Pilier Spirituel / الروحانية        18/35  ›
- *   ────────────────────────────────────────────────── 2px accent progress
- *
- * No background fill, no radius, no shadow — rows are separated by a 1px rule.
- * The progress rule is accent-only: there is no per-pillar colour and no
- * second "at minimum" colour.
- */
-export function PillarCard({ pillar, pointsEarned, completed, onPress, compact = false }: Props) {
-  const { Colors, Typography, Spacing } = useScaledTheme();
-  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing), [Colors, Typography, Spacing]);
+export function PillarCard({ pillar, pointsEarned, completed, onPress, wide = false }: Props) {
+  const { Colors, Typography, Spacing, Radius } = useScaledTheme();
+  const styles = React.useMemo(() => createStyles(Colors, Typography, Spacing, Radius), [Colors, Typography, Spacing, Radius]);
 
   const fillPct = Math.min((pointsEarned / pillar.maxPoints) * 100, 100);
   const Icon = pillar.icon;
+  const accent = pillar.color;
+
+  if (wide) {
+    return (
+      <Pressable
+        style={({ pressed }) => [styles.tile, styles.tileWide, pressed && styles.tilePressed]}
+        onPress={onPress}
+        disabled={!onPress}
+      >
+        <View style={[styles.iconBadge, { backgroundColor: accent + '1F' }]}>
+          <Icon color={accent} size={18} strokeWidth={1.8} />
+        </View>
+        <View style={styles.wideNames}>
+          <Text style={[styles.nameFr, styles.nameFrWide]} numberOfLines={1}>{pillar.nameFr}</Text>
+          <Text style={styles.nameAr} numberOfLines={1}>{pillar.nameAr}</Text>
+        </View>
+        <Text style={[styles.score, styles.scoreWide]}>{pointsEarned}<Text style={styles.scoreMax}>/{pillar.maxPoints}</Text></Text>
+        {completed
+          ? <Check color={Colors.gold} size={16} strokeWidth={2.4} />
+          : onPress ? <ChevronRight color={Colors.text.muted} size={16} strokeWidth={2} /> : null}
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.row, compact && styles.rowCompact, pressed && styles.rowPressed]}
+      style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
       onPress={onPress}
       disabled={!onPress}
     >
-      <View style={styles.topRow}>
-        <Text style={styles.numeral} numberOfLines={1}>{pillar.numeral}</Text>
-        <Icon color={Colors.text.primary} size={20} strokeWidth={1.6} />
-        <View style={styles.names}>
-          <Text style={styles.nameFr}>{pillar.nameFr}</Text>
-          {!compact && <Text style={styles.nameAr}>{pillar.nameAr}</Text>}
-        </View>
-        <View style={styles.scoreWrap}>
-          <Text style={styles.score}>{pointsEarned}</Text>
-          <Text style={styles.scoreMax}>/{pillar.maxPoints}</Text>
-        </View>
-        {completed
-          ? <Check color={Colors.gold} size={14} strokeWidth={2.4} />
-          : onPress ? <ChevronRight color={Colors.text.secondary} size={14} strokeWidth={2} /> : null}
+      <View style={[styles.iconBadge, { backgroundColor: accent + '1F' }]}>
+        <Icon color={accent} size={18} strokeWidth={1.8} />
       </View>
-
-      {!compact && (
-        <View style={styles.barTrack}>
-          <View style={[styles.barFill, { width: `${fillPct}%` as any }]} />
-        </View>
-      )}
+      <Text style={styles.nameFr} numberOfLines={1}>{pillar.nameFr}</Text>
+      <Text style={styles.score}>{pointsEarned}<Text style={styles.scoreMax}>/{pillar.maxPoints}</Text></Text>
+      <View style={styles.barTrack}>
+        <View style={[styles.barFill, { width: `${fillPct}%` as any, backgroundColor: accent }]} />
+      </View>
     </Pressable>
   );
 }
 
-const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape) => StyleSheet.create({
-  row: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    paddingVertical: 14,
+// This card grid deliberately breaks from the rest of the app's square
+// "Modernist" system (theme.ts's Radius.sm/md/lg are 0 by design there) —
+// it needs its own literal radius values, not the shared (zeroed) tokens.
+const TILE_RADIUS = 16;
+const BADGE_RADIUS = 10;
+
+const createStyles = (Colors: ThemeColors, Typography: TypographyShape, Spacing: SpacingShape, Radius: RadiusShape) => StyleSheet.create({
+  tile: {
+    flexBasis: '48%',
+    flexGrow: 1,
+    backgroundColor: Colors.bg.card,
+    borderRadius: TILE_RADIUS,
+    padding: Spacing.md - 2,
   },
-  rowCompact: {
-    paddingVertical: Spacing.sm,
-  },
-  rowPressed: {
-    opacity: 0.55,
-  },
-  topRow: {
+  tileWide: {
+    flexBasis: '100%',
     flexDirection: 'row',
-    // 'center' would centre the two-line `names` block against the
-    // single-line numeral/icon/score, pulling nameFr several px above
-    // them (verified: ~6.5px offset at default scale). flex-start lines
-    // every item up on the block's first line instead.
-    alignItems: 'flex-start',
-    gap: 12,
+    alignItems: 'center',
+    gap: Spacing.sm,
   },
-  numeral: {
-    // No fixed `width`: at larger scale factors the two-digit numeral no
-    // longer fits a hardcoded 16px box and wraps onto two lines ("0" over
-    // "1") instead of shrinking the font — seen live on a wider phone.
-    // minWidth still keeps the numeral column roughly aligned row-to-row
-    // without capping how wide the text is allowed to be.
-    minWidth: 18,
-    flexShrink: 0,
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.heavy,
-    color: Colors.text.muted,
+  tilePressed: {
+    opacity: 0.7,
   },
-  names: {
+  iconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: BADGE_RADIUS,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wideNames: {
     flex: 1,
+    marginLeft: Spacing.xs,
   },
   nameFr: {
-    fontSize: Typography.sizes.md,
-    fontFamily: Typography.fonts.heavy,
+    fontSize: Typography.sizes.sm + 0.5,
+    fontFamily: Typography.fonts.semibold,
     color: Colors.text.primary,
+    marginTop: 10,
+  },
+  nameFrWide: {
+    marginTop: 0,
   },
   nameAr: {
-    fontSize: Typography.sizes.xs,
+    fontSize: Typography.sizes.xs - 0.5,
     fontFamily: Typography.fonts.regular,
-    color: Colors.text.secondary,
+    color: Colors.text.muted,
     marginTop: 1,
   },
-  scoreWrap: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
   score: {
-    fontSize: Typography.sizes.md + 2,
-    fontFamily: Typography.fonts.heavy,
+    fontSize: Typography.sizes.xs + 0.5,
+    fontFamily: Typography.fonts.regular,
+    color: Colors.text.muted,
+    marginTop: 2,
+  },
+  scoreWide: {
+    fontSize: Typography.sizes.sm + 1,
+    fontFamily: Typography.fonts.semibold,
     color: Colors.text.primary,
+    marginTop: 0,
   },
   scoreMax: {
-    fontSize: Typography.sizes.xs,
-    fontFamily: Typography.fonts.regular,
     color: Colors.text.muted,
   },
   barTrack: {
-    height: 2,
+    height: 3,
+    borderRadius: 2,
     backgroundColor: Colors.border,
-    marginTop: 10,
+    marginTop: Spacing.sm,
+    overflow: 'hidden',
   },
   barFill: {
     height: '100%',
-    backgroundColor: Colors.gold,
+    borderRadius: 2,
   },
 });

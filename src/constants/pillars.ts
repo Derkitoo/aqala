@@ -1,4 +1,4 @@
-import { Colors } from './theme';
+import { PILLAR_PALETTE } from './theme';
 import { Heart, BookOpen, Activity, Users, Moon } from 'lucide-react-native';
 
 export type PillarId = 'spiritual' | 'knowledge' | 'physical' | 'social' | 'sleep';
@@ -12,11 +12,9 @@ export interface PillarDefinition {
   numeral: string;
   /** Two-letter tag used on the Baraka segment bar. */
   short: string;
-  /**
-   * Mono-accent system: every pillar resolves to the same accent. The field is
-   * kept (rather than deleted) because `engine/trends.ts` re-exports it, and
-   * the engine is out of scope for this visual pass.
-   */
+  /** Pillar's colour from PILLAR_PALETTE (theme.ts) — distinct per pillar, so
+   * KPI tiles/badges read at a glance instead of all sharing one grey/accent
+   * colour. Swapping palettes later only means editing PILLAR_PALETTE. */
   color: string;
   weight: number; // % of total Baraka score
   maxPoints: number;
@@ -30,7 +28,7 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     icon: Heart,
     numeral: '01',
     short: 'SP',
-    color: Colors.gold,
+    color: PILLAR_PALETTE.spiritual,
     weight: 0.35,
     maxPoints: 35,
   },
@@ -41,7 +39,7 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     icon: BookOpen,
     numeral: '02',
     short: 'SA',
-    color: Colors.gold,
+    color: PILLAR_PALETTE.knowledge,
     weight: 0.25,
     maxPoints: 25,
   },
@@ -52,7 +50,7 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     icon: Activity,
     numeral: '03',
     short: 'PH',
-    color: Colors.gold,
+    color: PILLAR_PALETTE.physical,
     weight: 0.15,
     maxPoints: 15,
   },
@@ -63,7 +61,7 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     icon: Users,
     numeral: '04',
     short: 'SO',
-    color: Colors.gold,
+    color: PILLAR_PALETTE.social,
     weight: 0.15,
     maxPoints: 15,
   },
@@ -74,7 +72,7 @@ export const PILLARS: Record<PillarId, PillarDefinition> = {
     icon: Moon,
     numeral: '05',
     short: 'SM',
-    color: Colors.gold,
+    color: PILLAR_PALETTE.sleep,
     weight: 0.10,
     maxPoints: 10,
   },
